@@ -10,12 +10,7 @@
     </header>
 
     <div class="filters">
-      <select v-model="filter.status" class="field !w-36" @change="search">
-        <option value="">전체 상태</option>
-        <option value="PENDING">대기</option>
-        <option value="PARTIAL">부분정산</option>
-        <option value="DONE">완료</option>
-      </select>
+      <SearchSelect class="!w-36" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="search" />
       <SearchSelect
         class="!w-52"
         v-model="filter.party_id"
@@ -121,6 +116,7 @@ const isVendor = computed(() => props.type === "VENDOR");
 const toast = useToast();
 
 const LIMIT = 15;
+const STATUS_OPTS = [{ value: "PENDING", label: "대기" }, { value: "PARTIAL", label: "부분정산" }, { value: "DONE", label: "완료" }];
 const rows = ref([]);
 const page = ref(1);
 const total = ref(0);

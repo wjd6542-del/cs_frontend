@@ -45,13 +45,7 @@
               <h3 class="r-name">{{ selected.name }}</h3>
             </div>
             <div class="r-tools">
-              <select v-model="filter.status" class="field !w-32" @change="reloadTickets">
-                <option value="">전체 상태</option>
-                <option value="OPEN">접수</option>
-                <option value="IN_PROGRESS">처리중</option>
-                <option value="RESOLVED">해결</option>
-                <option value="CLOSED">종료</option>
-              </select>
+              <SearchSelect class="!w-32" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="reloadTickets" />
               <button class="btn btn-primary" @click="openNew">+ 응대 등록</button>
             </div>
           </div>
@@ -89,9 +83,7 @@
           <BaseInput v-model="form.category" label="분류" placeholder="예: 정산문의, 오류신고" />
           <label class="fld">
             <span class="form-label">우선순위</span>
-            <select v-model.number="form.priority" class="field">
-              <option :value="0">보통</option><option :value="1">높음</option><option :value="2">긴급</option>
-            </select>
+            <SearchSelect v-model="form.priority" :options="PRIO_OPTS" />
           </label>
           <label class="fld col2">
             <span class="form-label">내용</span>
@@ -114,10 +106,7 @@
             <h4 class="ph">{{ detail.title }}</h4>
             <p class="dsub">{{ detail.vendor_name || detail.game_company_name }} · {{ detail.category || "분류없음" }}</p>
           </div>
-          <select v-model="detail.status" class="field !w-32" @change="changeStatus">
-            <option value="OPEN">접수</option><option value="IN_PROGRESS">처리중</option>
-            <option value="RESOLVED">해결</option><option value="CLOSED">종료</option>
-          </select>
+          <SearchSelect class="!w-32" v-model="detail.status" :options="STATUS_OPTS" @change="changeStatus" />
         </div>
 
         <div class="thread">
@@ -149,8 +138,17 @@ import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
+import SearchSelect from "@/components/base/SearchSelect.vue";
 import VendorTree from "@/components/base/VendorTree.vue";
 import { supportApi, gameCompanyApi } from "@/api/cs";
+
+const STATUS_OPTS = [
+  { value: "OPEN", label: "접수" },
+  { value: "IN_PROGRESS", label: "처리중" },
+  { value: "RESOLVED", label: "해결" },
+  { value: "CLOSED", label: "종료" },
+];
+const PRIO_OPTS = [{ value: 0, label: "보통" }, { value: 1, label: "높음" }, { value: 2, label: "긴급" }];
 
 const props = defineProps({ party: { type: String, default: "VENDOR" } });
 const isVendor = computed(() => props.party === "VENDOR");

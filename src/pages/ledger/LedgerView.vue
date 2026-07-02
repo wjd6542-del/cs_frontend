@@ -26,11 +26,7 @@
 
     <!-- 필터 -->
     <div class="filters">
-      <select v-model="filter.type" class="field !w-32" @change="search">
-        <option value="">전체 구분</option>
-        <option value="PAYMENT">지급</option>
-        <option value="COLLECTION">회수</option>
-      </select>
+      <SearchSelect class="!w-32" v-model="filter.type" :options="TYPE_OPTS" placeholder="전체 구분" @change="search" />
       <DateRange v-model:from="filter.date_from" v-model:to="filter.date_to" @change="search" />
     </div>
 
@@ -67,10 +63,7 @@
         <div class="grid">
           <label class="fld">
             <span class="form-label">구분</span>
-            <select v-model="form.type" class="field" @change="onTypeChange">
-              <option value="PAYMENT">지급 (게임사에 사용료)</option>
-              <option value="COLLECTION">회수 (업체에서 사용대금)</option>
-            </select>
+            <SearchSelect v-model="form.type" :options="TYPE_FORM_OPTS" @change="onTypeChange" />
           </label>
           <label class="fld">
             <span class="form-label">{{ form.type === 'PAYMENT' ? '게임사' : '업체' }}</span>
@@ -105,6 +98,8 @@ import SearchSelect from "@/components/base/SearchSelect.vue";
 import { ledgerApi, gameCompanyApi, vendorApi } from "@/api/cs";
 
 const LIMIT = 15;
+const TYPE_OPTS = [{ value: "PAYMENT", label: "지급" }, { value: "COLLECTION", label: "회수" }];
+const TYPE_FORM_OPTS = [{ value: "PAYMENT", label: "지급 (게임사에 사용료)" }, { value: "COLLECTION", label: "회수 (업체에서 사용대금)" }];
 const toast = useToast();
 const rows = ref([]);
 const page = ref(1);

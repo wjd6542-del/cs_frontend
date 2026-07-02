@@ -10,10 +10,7 @@
 
     <div class="filters">
       <input v-model="q" class="field !w-64" placeholder="질문·답변 검색" @keyup.enter="reload" />
-      <select v-model="cat" class="field !w-40" @change="reload">
-        <option value="">전체 분류</option>
-        <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-      </select>
+      <SearchSelect class="!w-40" v-model="cat" :options="catOptions" placeholder="전체 분류" @change="reload" />
     </div>
 
     <div v-if="!rows.length" class="empty">등록된 FAQ가 없습니다.</div>
@@ -65,6 +62,7 @@ import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
+import SearchSelect from "@/components/base/SearchSelect.vue";
 import { faqApi } from "@/api/cs";
 
 const LIMIT = 10;
@@ -77,6 +75,7 @@ const open = reactive({});
 const q = ref("");
 const cat = ref("");
 
+const catOptions = computed(() => categories.value.map((c) => ({ value: c, label: c })));
 const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / LIMIT)));
 const pagedRows = computed(() => rows.value.slice((page.value - 1) * LIMIT, page.value * LIMIT));
 watch(rows, () => { if (page.value > totalPages.value) page.value = 1; });
