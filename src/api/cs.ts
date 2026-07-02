@@ -13,6 +13,7 @@ export const gameCompanyApi = {
 // 업체
 export const vendorApi = {
   list: (body = {}) => api.post("/vendor/list", body).then((r) => r.data),
+  tree: () => api.post("/vendor/tree", {}).then((r) => r.data),
   options: () => api.post("/vendor/options", {}).then((r) => r.data),
   get: (id) => api.post("/vendor/get", { id }).then((r) => r.data),
   save: (body) => api.post("/vendor/save", body).then((r) => r.data),

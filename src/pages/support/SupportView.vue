@@ -5,52 +5,86 @@
         <p class="eyebrow">CS 관리</p>
         <h1 class="ttl">{{ isVendor ? "업체 응대" : "게임사 응대" }}</h1>
       </div>
-      <button class="btn btn-primary" @click="openNew()">+ 응대 등록</button>
     </header>
 
-    <div class="filters">
-      <select v-model="filter.status" class="field !w-36" @change="reload">
-        <option value="">전체 상태</option>
-        <option value="OPEN">접수</option>
-        <option value="IN_PROGRESS">처리중</option>
-        <option value="RESOLVED">해결</option>
-        <option value="CLOSED">종료</option>
-      </select>
-      <input v-model="filter.q" class="field !w-48" placeholder="제목 검색" @keyup.enter="reload" />
-    </div>
+    <div class="split">
+      <!-- 좌측: 업체 트리 / 게임사 리스트 -->
+      <aside class="left pcard">
+        <VendorTree v-if="isVendor" ref="treeRef" :selected-id="selected?.id" @select="onSelect" />
+        <div v-else class="glist">
+          <div class="gl-head">
+            <input v-model="gkw" class="field field-xs" placeholder="게임사 검색" />
+          </div>
+          <div class="gl-body">
+            <div v-if="!filteredGamecos.length" class="gl-empty">게임사가 없습니다.</div>
+            <div
+              v-for="g in filteredGamecos"
+              :key="g.id"
+              class="gl-row"
+              :class="{ on: g.id === selected?.id }"
+              @click="onSelect({ id: g.id, name: g.name })"
+            >
+              <span class="nm">{{ g.name }}</span>
+              <span class="code num">{{ g.code }}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
 
-    <div class="tablewrap">
-      <table class="tbl">
-        <thead>
-          <tr><th class="c">상태</th><th>{{ isVendor ? "업체" : "게임사" }}</th><th>제목</th><th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th></tr>
-        </thead>
-        <tbody>
-          <tr v-if="!rows.length"><td colspan="7" class="state">응대 건이 없습니다.</td></tr>
-          <tr v-for="t in rows" :key="t.id" class="row" @click="openDetail(t.id)">
-            <td class="c"><span class="tag" :class="t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
-            <td>{{ t.vendor_name || t.game_company_name || "-" }}</td>
-            <td class="nm">{{ t.title }}</td>
-            <td class="muted">{{ t.category || "-" }}</td>
-            <td class="c"><span class="pri" :class="'p' + t.priority">{{ priLabel(t.priority) }}</span></td>
-            <td class="c muted">{{ t.message_count }}</td>
-            <td class="muted xs">{{ d(t.created_at) }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <!-- 우측: 선택 대상 응대 -->
+      <section class="right">
+        <div v-if="!selected" class="ph-empty pcard">
+          <i class="fa-solid fa-hand-pointer"></i>
+          <p>{{ isVendor ? "좌측에서 업체를 선택하세요." : "좌측에서 게임사를 선택하세요." }}</p>
+        </div>
+
+        <template v-else>
+          <div class="r-head">
+            <div>
+              <span class="r-eye">{{ isVendor ? "업체" : "게임사" }}</span>
+              <h3 class="r-name">{{ selected.name }}</h3>
+            </div>
+            <div class="r-tools">
+              <select v-model="filter.status" class="field !w-32" @change="reloadTickets">
+                <option value="">전체 상태</option>
+                <option value="OPEN">접수</option>
+                <option value="IN_PROGRESS">처리중</option>
+                <option value="RESOLVED">해결</option>
+                <option value="CLOSED">종료</option>
+              </select>
+              <button class="btn btn-primary" @click="openNew">+ 응대 등록</button>
+            </div>
+          </div>
+
+          <div class="tablewrap pcard">
+            <table class="tbl">
+              <thead>
+                <tr><th class="c">상태</th><th>제목</th><th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th></tr>
+              </thead>
+              <tbody>
+                <tr v-if="!tickets.length"><td colspan="6" class="state">응대 건이 없습니다.</td></tr>
+                <tr v-for="t in tickets" :key="t.id" class="row" @click="openDetail(t.id)">
+                  <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
+                  <td class="nm">{{ t.title }}</td>
+                  <td class="muted">{{ t.category || "-" }}</td>
+                  <td class="c"><span class="pri" :class="'p' + t.priority">{{ priLabel(t.priority) }}</span></td>
+                  <td class="c muted">{{ t.message_count }}</td>
+                  <td class="muted xs num">{{ d(t.created_at) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reloadTickets" />
+        </template>
+      </section>
     </div>
 
     <!-- 신규 등록 -->
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
-        <h4 class="ph">응대 등록</h4>
+        <h4 class="ph">응대 등록 · {{ selected?.name }}</h4>
         <div class="grid">
-          <label class="fld col2">
-            <span class="form-label">{{ isVendor ? "업체" : "게임사" }}</span>
-            <select v-model="form.party_id" class="field">
-              <option :value="null" disabled>선택</option>
-              <option v-for="o in parties" :key="o.id" :value="o.id">{{ o.name }}</option>
-            </select>
-          </label>
           <BaseInput v-model="form.title" label="제목" class="col2" />
           <BaseInput v-model="form.category" label="분류" placeholder="예: 정산문의, 오류신고" />
           <label class="fld">
@@ -113,20 +147,35 @@
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useToast } from "vue-toastification";
 import BaseInput from "@/components/base/BaseInput.vue";
-import { supportApi, gameCompanyApi, vendorApi } from "@/api/cs";
+import Pager from "@/components/base/Pager.vue";
+import VendorTree from "@/components/base/VendorTree.vue";
+import { supportApi, gameCompanyApi } from "@/api/cs";
 
 const props = defineProps({ party: { type: String, default: "VENDOR" } });
 const isVendor = computed(() => props.party === "VENDOR");
 const toast = useToast();
 
-const rows = ref([]);
-const parties = ref([]);
-const filter = reactive({ status: "", q: "" });
+const LIMIT = 15;
+const selected = ref(null);
+const tickets = ref([]);
+const page = ref(1);
+const total = ref(0);
+const totalPages = ref(1);
+const filter = reactive({ status: "" });
+
+const treeRef = ref(null);
+const gamecos = ref([]);
+const gkw = ref("");
+const filteredGamecos = computed(() => {
+  const k = gkw.value.trim().toLowerCase();
+  if (!k) return gamecos.value;
+  return gamecos.value.filter((g) => g.name.toLowerCase().includes(k) || (g.code || "").toLowerCase().includes(k));
+});
 
 const showForm = ref(false);
 const saving = ref(false);
 const msg = ref("");
-const form = reactive({ party_id: null, title: "", category: "", priority: 0, content: "" });
+const form = reactive({ title: "", category: "", priority: 0, content: "" });
 
 const detail = ref(null);
 const sending = ref(false);
@@ -136,18 +185,32 @@ function d(v, withTime = false) { const s = String(v); return withTime ? s.slice
 function statusLabel(s) { return { OPEN: "접수", IN_PROGRESS: "처리중", RESOLVED: "해결", CLOSED: "종료" }[s] || s; }
 function priLabel(p) { return ["보통", "높음", "긴급"][p] || "보통"; }
 
-async function reload() {
-  const body = { party: props.party, limit: 200 };
+function onSelect(entity) {
+  selected.value = entity;
+  page.value = 1;
+  filter.status = "";
+  reloadTickets();
+}
+
+async function reloadTickets() {
+  if (!selected.value) { tickets.value = []; total.value = 0; totalPages.value = 1; return; }
+  const body = { party: props.party, page: page.value, limit: LIMIT };
+  body[isVendor.value ? "vendor_id" : "game_company_id"] = selected.value.id;
   if (filter.status) body.status = filter.status;
-  if (filter.q) body.q = filter.q;
   const res = await supportApi.list(body);
-  rows.value = res.rows || [];
+  tickets.value = res.rows || [];
+  total.value = res.total || 0;
+  totalPages.value = res.totalPages || 1;
 }
-async function loadParties() {
-  parties.value = isVendor.value ? await vendorApi.options() : await gameCompanyApi.options();
+
+async function loadLeft() {
+  selected.value = null;
+  tickets.value = [];
+  if (!isVendor.value) gamecos.value = await gameCompanyApi.options();
 }
+
 function openNew() {
-  Object.assign(form, { party_id: null, title: "", category: "", priority: 0, content: "" });
+  Object.assign(form, { title: "", category: "", priority: 0, content: "" });
   msg.value = ""; showForm.value = true;
 }
 async function submit() {
@@ -155,12 +218,12 @@ async function submit() {
   try {
     const t = await supportApi.save({
       party: props.party,
-      vendor_id: isVendor.value ? form.party_id : null,
-      game_company_id: isVendor.value ? null : form.party_id,
+      vendor_id: isVendor.value ? selected.value.id : null,
+      game_company_id: isVendor.value ? null : selected.value.id,
       title: form.title, category: form.category || null, priority: form.priority, status: "OPEN",
     });
     if (form.content.trim()) await supportApi.addMessage({ ticket_id: t.id, content: form.content, is_internal: false });
-    toast.success("등록되었습니다."); showForm.value = false; await reload();
+    toast.success("등록되었습니다."); showForm.value = false; await reloadTickets();
   } catch (e) { msg.value = e?.message || "저장 실패"; }
   finally { saving.value = false; }
 }
@@ -169,7 +232,7 @@ async function openDetail(id) {
   Object.assign(reply, { content: "", is_internal: false });
 }
 async function changeStatus() {
-  try { await supportApi.setStatus(detail.value.id, detail.value.status); toast.success("상태가 변경되었습니다."); await reload(); }
+  try { await supportApi.setStatus(detail.value.id, detail.value.status); toast.success("상태가 변경되었습니다."); await reloadTickets(); }
   catch (e) { toast.error(e?.message || "변경 실패"); }
 }
 async function sendMessage() {
@@ -178,60 +241,81 @@ async function sendMessage() {
     await supportApi.addMessage({ ticket_id: detail.value.id, content: reply.content, is_internal: reply.is_internal });
     detail.value = await supportApi.get(detail.value.id);
     Object.assign(reply, { content: "", is_internal: false });
-    await reload();
+    await reloadTickets();
   } catch (e) { toast.error(e?.message || "전송 실패"); }
   finally { sending.value = false; }
 }
 async function removeTicket() {
   if (!confirm("이 응대 건을 삭제할까요?")) return;
-  try { await supportApi.remove(detail.value.id); toast.success("삭제되었습니다."); detail.value = null; await reload(); }
+  try { await supportApi.remove(detail.value.id); toast.success("삭제되었습니다."); detail.value = null; await reloadTickets(); }
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }
 
-watch(() => props.party, async () => { filter.status = ""; filter.q = ""; detail.value = null; await Promise.all([reload(), loadParties()]); });
-onMounted(async () => { await Promise.all([reload(), loadParties()]); });
+watch(() => props.party, async () => { detail.value = null; gkw.value = ""; await loadLeft(); });
+onMounted(loadLeft);
 </script>
 
 <style scoped>
-.page { max-width: 1100px; margin: 0 auto; }
-.phead { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.1rem; }
-.eyebrow { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; color: var(--seal); text-transform: uppercase; }
-.ttl { font-size: 1.5rem; font-weight: 800; color: var(--ink); margin-top: 0.25rem; }
-.filters { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
+.page { max-width: 1200px; margin: 0 auto; }
+.phead { margin-bottom: 1rem; }
+.eyebrow { font-family: var(--font-pixel); font-size: 0.66rem; letter-spacing: 0.16em; color: var(--seal); }
+.ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
 
-.tablewrap { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.split { display: grid; grid-template-columns: 300px 1fr; gap: 1rem; align-items: start; }
+@media (max-width: 820px) { .split { grid-template-columns: 1fr; } }
+
+.left { height: 70vh; overflow: hidden; display: flex; flex-direction: column; }
+.glist { display: flex; flex-direction: column; height: 100%; }
+.gl-head { padding: 0.6rem; border-bottom: 2px solid var(--line); }
+.gl-body { flex: 1; overflow-y: auto; padding: 0.3rem; }
+.gl-empty { text-align: center; color: var(--ink-faint); padding: 1.4rem 0; font-size: 0.85rem; }
+.gl-row { display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.86rem; }
+.gl-row:hover { background: var(--surface-2); }
+.gl-row.on { background: #ede9ff; box-shadow: inset 0 0 0 2px var(--seal); }
+.gl-row .nm { flex: 1; font-weight: 600; color: var(--ink); }
+.gl-row .code { font-size: 0.66rem; color: var(--ink-faint); }
+
+.right { min-width: 0; }
+.ph-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; height: 40vh; color: var(--ink-faint); }
+.ph-empty i { font-size: 1.6rem; }
+
+.r-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
+.r-eye { font-family: var(--font-pixel); font-size: 0.62rem; color: var(--seal-deep); }
+.r-name { font-family: var(--font-pixel); font-size: 1.1rem; color: var(--ink); }
+.r-tools { display: flex; gap: 0.5rem; }
+
+.tablewrap { overflow: hidden; }
 .tbl { width: 100%; border-collapse: collapse; }
-.tbl th { text-align: left; padding: 0.6rem 0.8rem; background: var(--surface-2); border-bottom: 1px solid var(--line); font-weight: 600; font-size: 0.78rem; color: var(--ink-muted); }
-.tbl td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line); font-size: 0.88rem; color: var(--ink); }
+.tbl th { text-align: left; padding: 0.55rem 0.7rem; background: var(--surface-2); border-bottom: 2px solid var(--line-strong); font-family: var(--font-pixel); font-weight: 600; font-size: 0.72rem; color: var(--ink-muted); }
+.tbl td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line); font-size: 0.86rem; color: var(--ink); }
 .tbl tbody tr:last-child td { border-bottom: none; }
 .row { cursor: pointer; } .row:hover { background: var(--surface-2); }
-.c { text-align: center; } .nm { font-weight: 600; } .muted { color: var(--ink-muted); } .xs { font-size: 0.78rem; }
-.state { text-align: center; padding: 1.6rem 0; color: var(--ink-faint); }
-.tag { font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px; }
-.tag.open { color: #b45309; background: #fef3c7; }
-.tag.in_progress { color: #4f46e5; background: #e0e7ff; }
-.tag.resolved { color: #047857; background: #d1fae5; }
-.tag.closed { color: #64748b; background: #f1f5f9; }
-.pri { font-size: 0.72rem; font-weight: 700; }
-.pri.p0 { color: var(--ink-faint); } .pri.p1 { color: #b45309; } .pri.p2 { color: #dc2626; }
+.c { text-align: center; } .nm { font-weight: 600; } .muted { color: var(--ink-muted); } .xs { font-size: 0.74rem; }
+.state { text-align: center; padding: 1.4rem 0; color: var(--ink-faint); }
+.st-open { background: #fef3c7; color: #b45309; }
+.st-in_progress { background: #ede9ff; color: var(--seal-deep); }
+.st-resolved { background: var(--flow-in-bg); color: var(--flow-in); }
+.st-closed { background: var(--surface-2); color: var(--ink-muted); }
+.pri { font-family: var(--font-pixel); font-size: 0.66rem; }
+.pri.p0 { color: var(--ink-faint); } .pri.p1 { color: #b45309; } .pri.p2 { color: var(--danger); }
 
-.drawer { position: fixed; inset: 0; z-index: 210; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.panel { width: 520px; max-width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
+.drawer { position: fixed; inset: 0; z-index: 210; background: rgba(27,29,46,0.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.panel { width: 520px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
 .panel.lg { width: 640px; }
-.ph { font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+.ph { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .fld { display: block; } .col2 { grid-column: 1 / -1; }
 .dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .dsub { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.2rem; }
-.thread { max-height: 44vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding: 0.5rem; background: var(--surface-2); border-radius: 10px; margin-bottom: 0.9rem; }
+.thread { max-height: 44vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding: 0.5rem; background: var(--surface-2); border-radius: 3px; margin-bottom: 0.9rem; }
 .thread .empty { text-align: center; color: var(--ink-faint); padding: 1rem 0; font-size: 0.85rem; }
-.msgrow { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 0.6rem 0.8rem; }
+.msgrow { background: #fff; border: 2px solid var(--line); border-radius: 3px; padding: 0.6rem 0.8rem; }
 .msgrow.internal { background: #fffbeb; border-color: #fde68a; }
 .mmeta { font-size: 0.7rem; color: var(--ink-faint); margin-bottom: 0.3rem; display: flex; gap: 0.4rem; align-items: center; }
-.ibadge { font-size: 0.62rem; font-weight: 700; color: #b45309; background: #fef3c7; padding: 0.05rem 0.35rem; border-radius: 999px; }
+.ibadge { font-size: 0.62rem; font-weight: 700; color: #b45309; background: #fef3c7; padding: 0.05rem 0.35rem; border-radius: 3px; }
 .mbody { font-size: 0.88rem; color: var(--ink); white-space: pre-wrap; }
 .reply .chk { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: var(--ink-muted); margin-bottom: 0.4rem; }
-.msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; } .msg.err { color: #dc2626; }
+.msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; } .msg.err { color: var(--danger); }
 .acts { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
 @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
 </style>

@@ -10,13 +10,13 @@
     </header>
 
     <div class="filters">
-      <select v-model="filter.status" class="field !w-36" @change="reload">
+      <select v-model="filter.status" class="field !w-36" @change="search">
         <option value="">전체 상태</option>
         <option value="PENDING">대기</option>
         <option value="PARTIAL">부분정산</option>
         <option value="DONE">완료</option>
       </select>
-      <select v-model="filter.party_id" class="field !w-48" @change="reload">
+      <select v-model="filter.party_id" class="field !w-48" @change="search">
         <option value="">{{ isVendor ? "전체 업체" : "전체 게임사" }}</option>
         <option v-for="o in parties" :key="o.id" :value="o.id">{{ o.name }}</option>
       </select>
@@ -49,6 +49,8 @@
         </tbody>
       </table>
     </div>
+
+    <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reload" />
 
     <!-- 등록/수정 -->
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
@@ -106,13 +108,18 @@
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useToast } from "vue-toastification";
 import BaseInput from "@/components/base/BaseInput.vue";
+import Pager from "@/components/base/Pager.vue";
 import { settlementApi, gameCompanyApi, vendorApi } from "@/api/cs";
 
 const props = defineProps({ type: { type: String, default: "VENDOR" } });
 const isVendor = computed(() => props.type === "VENDOR");
 const toast = useToast();
 
+const LIMIT = 15;
 const rows = ref([]);
+const page = ref(1);
+const total = ref(0);
+const totalPages = ref(1);
 const parties = ref([]);
 const filter = reactive({ status: "", party_id: "" });
 
@@ -135,12 +142,15 @@ function d(v) { return String(v).slice(0, 10); }
 function statusLabel(s) { return { PENDING: "대기", PARTIAL: "부분정산", DONE: "완료" }[s] || s; }
 
 async function reload() {
-  const body = { type: props.type, limit: 200 };
+  const body = { type: props.type, page: page.value, limit: LIMIT };
   if (filter.status) body.status = filter.status;
   if (filter.party_id) body[isVendor.value ? "vendor_id" : "game_company_id"] = filter.party_id;
   const res = await settlementApi.list(body);
   rows.value = res.rows || [];
+  total.value = res.total || 0;
+  totalPages.value = res.totalPages || 1;
 }
+function search() { page.value = 1; reload(); }
 async function loadParties() {
   parties.value = isVendor.value ? await vendorApi.options() : await gameCompanyApi.options();
 }
@@ -188,7 +198,7 @@ async function remove(s) {
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }
 
-watch(() => props.type, async () => { filter.status = ""; filter.party_id = ""; await Promise.all([reload(), loadParties()]); });
+watch(() => props.type, async () => { filter.status = ""; filter.party_id = ""; page.value = 1; await Promise.all([reload(), loadParties()]); });
 onMounted(async () => { await Promise.all([reload(), loadParties()]); });
 </script>
 

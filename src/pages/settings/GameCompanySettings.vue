@@ -3,7 +3,7 @@
     <div class="head">
       <h3 class="h">게임사 <span class="c">{{ total }}</span></h3>
       <div class="tools">
-        <input v-model="q" class="field !w-48" placeholder="게임사·코드·담당자 검색" @keyup.enter="reload" />
+        <input v-model="q" class="field !w-48" placeholder="게임사·코드 검색" @keyup.enter="search" />
         <button class="btn btn-primary" @click="openNew">+ 게임사 추가</button>
       </div>
     </div>
@@ -11,15 +11,13 @@
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>게임사명</th><th>코드</th><th>담당자</th><th>연락처</th><th class="r">사용료율</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
+          <tr><th>게임사명</th><th>이메일</th><th class="r">요율</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="7" class="state">게임사가 없습니다.</td></tr>
+          <tr v-if="!rows.length"><td colspan="5" class="state">게임사가 없습니다.</td></tr>
           <tr v-for="g in rows" :key="g.id">
             <td class="nm">{{ g.name }}</td>
-            <td class="muted">{{ g.code || "-" }}</td>
-            <td>{{ g.contact_name || "-" }}</td>
-            <td class="muted">{{ g.contact_phone || "-" }}</td>
+            <td class="muted">{{ g.contact_email || "-" }}</td>
             <td class="r">{{ g.fee_rate != null ? g.fee_rate + "%" : "-" }}</td>
             <td class="c"><span class="st" :class="g.is_active ? 'on' : 'off'">{{ g.is_active ? "사용" : "중지" }}</span></td>
             <td class="c">
@@ -31,16 +29,15 @@
       </table>
     </div>
 
+    <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reload" />
+
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
         <h4 class="ph">{{ editing ? "게임사 수정" : "게임사 추가" }}</h4>
         <div class="grid">
           <BaseInput v-model="form.name" label="게임사명" />
-          <BaseInput v-model="form.code" label="코드" placeholder="예: GC001" />
-          <BaseInput v-model="form.contact_name" label="담당자" />
-          <BaseInput v-model="form.contact_phone" label="연락처" />
           <BaseInput v-model="form.contact_email" label="이메일" />
-          <BaseInput v-model="form.fee_rate" label="사용료율(%)" type="number" placeholder="예: 15" />
+          <BaseInput v-model="form.fee_rate" label="요율(%)" type="number" placeholder="예: 15" />
           <label class="fld col2">
             <span class="form-label">메모</span>
             <textarea v-model="form.memo" class="field-auto" rows="2"></textarea>
@@ -66,11 +63,15 @@
 import { ref, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import BaseInput from "@/components/base/BaseInput.vue";
+import Pager from "@/components/base/Pager.vue";
 import { gameCompanyApi } from "@/api/cs";
 
+const LIMIT = 15;
 const toast = useToast();
 const rows = ref([]);
 const total = ref(0);
+const totalPages = ref(1);
+const page = ref(1);
 const q = ref("");
 
 const showForm = ref(false);
@@ -80,10 +81,12 @@ const msg = ref("");
 const form = reactive({ id: null, name: "", code: "", contact_name: "", contact_phone: "", contact_email: "", fee_rate: "", memo: "", is_active: true });
 
 async function reload() {
-  const res = await gameCompanyApi.list({ q: q.value || undefined, limit: 100 });
+  const res = await gameCompanyApi.list({ q: q.value || undefined, page: page.value, limit: LIMIT });
   rows.value = res.rows || [];
   total.value = res.total ?? rows.value.length;
+  totalPages.value = res.totalPages || 1;
 }
+function search() { page.value = 1; reload(); }
 function openNew() {
   editing.value = false;
   Object.assign(form, { id: null, name: "", code: "", contact_name: "", contact_phone: "", contact_email: "", fee_rate: "", memo: "", is_active: true });

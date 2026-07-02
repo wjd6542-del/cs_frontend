@@ -3,7 +3,7 @@
     <div class="head">
       <h3 class="h">업체 <span class="c">{{ total }}</span></h3>
       <div class="tools">
-        <input v-model="q" class="field !w-48" placeholder="업체·코드·담당자 검색" @keyup.enter="reload" />
+        <input v-model="q" class="field !w-48" placeholder="업체·코드 검색" @keyup.enter="search" />
         <button class="btn btn-primary" @click="openNew">+ 업체 추가</button>
       </div>
     </div>
@@ -11,16 +11,12 @@
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>업체명</th><th>코드</th><th>담당자</th><th>연락처</th><th>이메일</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
+          <tr><th>업체명</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="7" class="state">업체가 없습니다.</td></tr>
+          <tr v-if="!rows.length"><td colspan="3" class="state">업체가 없습니다.</td></tr>
           <tr v-for="v in rows" :key="v.id">
             <td class="nm">{{ v.name }}</td>
-            <td class="muted">{{ v.code || "-" }}</td>
-            <td>{{ v.contact_name || "-" }}</td>
-            <td class="muted">{{ v.contact_phone || "-" }}</td>
-            <td class="muted">{{ v.contact_email || "-" }}</td>
             <td class="c"><span class="st" :class="v.is_active ? 'on' : 'off'">{{ v.is_active ? "사용" : "중지" }}</span></td>
             <td class="c">
               <button class="btn btn-xs" @click="openEdit(v)">수정</button>
@@ -31,15 +27,13 @@
       </table>
     </div>
 
+    <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reload" />
+
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
         <h4 class="ph">{{ editing ? "업체 수정" : "업체 추가" }}</h4>
         <div class="grid">
           <BaseInput v-model="form.name" label="업체명" />
-          <BaseInput v-model="form.code" label="코드" placeholder="예: V001" />
-          <BaseInput v-model="form.contact_name" label="담당자" />
-          <BaseInput v-model="form.contact_phone" label="연락처" />
-          <BaseInput v-model="form.contact_email" label="이메일" />
           <label class="fld col2">
             <span class="form-label">메모</span>
             <textarea v-model="form.memo" class="field-auto" rows="2"></textarea>
@@ -65,11 +59,15 @@
 import { ref, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import BaseInput from "@/components/base/BaseInput.vue";
+import Pager from "@/components/base/Pager.vue";
 import { vendorApi } from "@/api/cs";
 
+const LIMIT = 15;
 const toast = useToast();
 const rows = ref([]);
 const total = ref(0);
+const totalPages = ref(1);
+const page = ref(1);
 const q = ref("");
 
 const showForm = ref(false);
@@ -79,10 +77,12 @@ const msg = ref("");
 const form = reactive({ id: null, name: "", code: "", contact_name: "", contact_phone: "", contact_email: "", memo: "", is_active: true });
 
 async function reload() {
-  const res = await vendorApi.list({ q: q.value || undefined, limit: 100 });
+  const res = await vendorApi.list({ q: q.value || undefined, page: page.value, limit: LIMIT });
   rows.value = res.rows || [];
   total.value = res.total ?? rows.value.length;
+  totalPages.value = res.totalPages || 1;
 }
+function search() { page.value = 1; reload(); }
 function openNew() {
   editing.value = false;
   Object.assign(form, { id: null, name: "", code: "", contact_name: "", contact_phone: "", contact_email: "", memo: "", is_active: true });

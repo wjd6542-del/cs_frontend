@@ -26,14 +26,14 @@
 
     <!-- 필터 -->
     <div class="filters">
-      <select v-model="filter.type" class="field !w-32" @change="reload">
+      <select v-model="filter.type" class="field !w-32" @change="search">
         <option value="">전체 구분</option>
         <option value="PAYMENT">지급</option>
         <option value="COLLECTION">회수</option>
       </select>
-      <input v-model="filter.date_from" type="date" class="field !w-40" @change="reload" />
+      <input v-model="filter.date_from" type="date" class="field !w-40" @change="search" />
       <span class="tilde">~</span>
-      <input v-model="filter.date_to" type="date" class="field !w-40" @change="reload" />
+      <input v-model="filter.date_to" type="date" class="field !w-40" @change="search" />
     </div>
 
     <div class="tablewrap">
@@ -60,6 +60,8 @@
         </tbody>
       </table>
     </div>
+
+    <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reload" />
 
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
@@ -101,10 +103,15 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import BaseInput from "@/components/base/BaseInput.vue";
+import Pager from "@/components/base/Pager.vue";
 import { ledgerApi, gameCompanyApi, vendorApi } from "@/api/cs";
 
+const LIMIT = 15;
 const toast = useToast();
 const rows = ref([]);
+const page = ref(1);
+const total = ref(0);
+const totalPages = ref(1);
 const totals = reactive({ PAYMENT: 0, COLLECTION: 0 });
 const net = computed(() => totals.COLLECTION - totals.PAYMENT);
 const filter = reactive({ type: "", date_from: "", date_to: "" });
@@ -124,11 +131,14 @@ function won(n) { return (Number(n) || 0).toLocaleString("ko-KR") + "원"; }
 function d(v) { return String(v).slice(0, 10); }
 
 async function reload() {
-  const res = await ledgerApi.list({ type: filter.type || undefined, date_from: filter.date_from || undefined, date_to: filter.date_to || undefined, limit: 200 });
+  const res = await ledgerApi.list({ type: filter.type || undefined, date_from: filter.date_from || undefined, date_to: filter.date_to || undefined, page: page.value, limit: LIMIT });
   rows.value = res.rows || [];
+  total.value = res.total || 0;
+  totalPages.value = res.totalPages || 1;
   totals.PAYMENT = res.totals?.PAYMENT || 0;
   totals.COLLECTION = res.totals?.COLLECTION || 0;
 }
+function search() { page.value = 1; reload(); }
 async function loadParties() {
   [gamecos.value, vendors.value] = await Promise.all([gameCompanyApi.options(), vendorApi.options()]);
 }

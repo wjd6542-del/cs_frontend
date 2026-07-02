@@ -18,7 +18,7 @@
 
     <div v-if="!rows.length" class="empty">등록된 FAQ가 없습니다.</div>
     <ul class="list">
-      <li v-for="f in rows" :key="f.id" class="item">
+      <li v-for="f in pagedRows" :key="f.id" class="item">
         <div class="q" @click="toggle(f.id)">
           <span class="cat" v-if="f.category">{{ f.category }}</span>
           <span class="qt">{{ f.question }}</span>
@@ -33,6 +33,8 @@
         </div>
       </li>
     </ul>
+
+    <Pager v-model:page="page" :total-pages="totalPages" :total="rows.length" @change="scrollTop" />
 
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
@@ -58,10 +60,14 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, computed, watch, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import BaseInput from "@/components/base/BaseInput.vue";
+import Pager from "@/components/base/Pager.vue";
 import { faqApi } from "@/api/cs";
+
+const LIMIT = 10;
+const page = ref(1);
 
 const toast = useToast();
 const rows = ref([]);
@@ -69,6 +75,11 @@ const categories = ref([]);
 const open = reactive({});
 const q = ref("");
 const cat = ref("");
+
+const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / LIMIT)));
+const pagedRows = computed(() => rows.value.slice((page.value - 1) * LIMIT, page.value * LIMIT));
+watch(rows, () => { if (page.value > totalPages.value) page.value = 1; });
+function scrollTop() { window.scrollTo({ top: 0, behavior: "smooth" }); }
 
 const showForm = ref(false);
 const editing = ref(false);
