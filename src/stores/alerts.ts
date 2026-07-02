@@ -9,6 +9,7 @@ export const useAlertsStore = defineStore("alerts", {
     total: 0,
     counts: { VENDOR: 0, GAME_COMPANY: 0 },
     loaded: false,
+    _timer: null,
   }),
   actions: {
     async fetch() {
@@ -20,6 +21,18 @@ export const useAlertsStore = defineStore("alerts", {
         this.loaded = true;
       } catch (e) {
         /* 미로그인/오류 시 조용히 무시 */
+      }
+    },
+    // 주기적 자동 갱신 시작 (기본 30초)
+    startPolling(ms = 30000) {
+      this.stopPolling();
+      this.fetch();
+      this._timer = setInterval(() => this.fetch(), ms);
+    },
+    stopPolling() {
+      if (this._timer) {
+        clearInterval(this._timer);
+        this._timer = null;
       }
     },
   },
