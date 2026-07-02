@@ -11,7 +11,7 @@
           <tr><th>아이디</th><th>이름</th><th>이메일</th><th>역할</th><th class="c">상태</th><th class="c w-act">수정</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!users.length"><td colspan="6" class="state">계정이 없습니다.</td></tr>
+          <tr v-if="!users.length"><td colspan="6"><EmptyState icon="👤" title="계정이 없어요" desc="등록된 계정이 아직 없어요." hint="＋ 계정 추가로 시작해요" compact /></td></tr>
           <tr v-for="u in users" :key="u.id">
             <td class="nm">{{ u.username }}</td>
             <td>{{ u.name }}</td>
@@ -58,6 +58,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import EmptyState from "@/components/base/EmptyState.vue";
 import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import BaseInput from "@/components/base/BaseInput.vue";

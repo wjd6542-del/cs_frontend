@@ -109,7 +109,7 @@
         </div>
 
         <div class="thread">
-          <div v-if="!detail.messages.length" class="empty">메시지가 없습니다.</div>
+          <div v-if="!detail.messages.length"><EmptyState icon="✉️" title="아직 대화가 없어요" desc="첫 메시지를 남겨보세요." hint="아래에 입력!" compact /></div>
           <div v-for="m in detail.messages" :key="m.id" class="msgrow" :class="{ internal: m.is_internal }">
             <div class="mmeta"><span v-if="m.is_internal" class="ibadge">내부</span>{{ d(m.created_at, true) }}</div>
             <div class="mbody">{{ m.content }}</div>

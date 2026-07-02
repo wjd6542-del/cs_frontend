@@ -28,7 +28,7 @@
           <button class="mini danger" @click="del(b)">삭제</button>
         </div>
       </li>
-      <li v-if="!boards.length" class="empty">게시판이 없습니다.</li>
+      <li v-if="!boards.length"><EmptyState variant="board" title="게시판이 없어요" desc="게시판을 만들어 보세요." hint="＋ 게시판 추가" compact /></li>
     </ul>
 
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
@@ -62,6 +62,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import EmptyState from "@/components/base/EmptyState.vue";
 import { ref, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import BaseInput from "@/components/base/BaseInput.vue";

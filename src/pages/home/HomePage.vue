@@ -64,7 +64,7 @@
             <span class="npt">{{ p.title }}</span>
             <span class="ndate num">{{ fmt(p.created_at) }}</span>
           </li>
-          <li v-if="!notices.length" class="nempty">등록된 공지가 없습니다.</li>
+          <li v-if="!notices.length"><EmptyState icon="📭" title="공지가 없어요" desc="등록된 공지사항이 없어요." hint="관리자만 등록할 수 있어요" compact /></li>
         </ul>
       </section>
 
@@ -96,6 +96,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import EmptyState from "@/components/base/EmptyState.vue";
 import { ref, reactive, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { boardApi } from "@/api/board";
