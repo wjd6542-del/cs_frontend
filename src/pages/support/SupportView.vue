@@ -44,7 +44,8 @@
               <h3 class="r-name">{{ selected.name }}</h3>
             </div>
             <div class="r-tools">
-              <SearchSelect class="!w-32" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="reloadTickets" />
+              <div class="w-48"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
+              <SearchSelect class="!w-32" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" />
               <button class="btn btn-primary" @click="openNew">+ 응대 등록</button>
             </div>
           </div>
@@ -58,7 +59,7 @@
                 <tr v-if="!tickets.length"><td colspan="6"><EmptyState variant="support" compact /></td></tr>
                 <tr v-for="t in tickets" :key="t.id" class="row" @click="openDetail(t.id)">
                   <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
-                  <td class="nm">{{ t.title }}</td>
+                  <td class="nm">{{ t.title }} <TagChips :tags="t.tags" /></td>
                   <td class="muted">{{ t.category || "-" }}</td>
                   <td class="c"><span class="pri" :class="'p' + t.priority">{{ priLabel(t.priority) }}</span></td>
                   <td class="c muted">{{ t.message_count }}</td>
@@ -85,6 +86,10 @@
             <SearchSelect v-model="form.priority" :options="PRIO_OPTS" />
           </label>
           <label class="fld col2">
+            <span class="form-label">태그</span>
+            <TagSelect v-model="form.tag_ids" />
+          </label>
+          <label class="fld col2">
             <span class="form-label">내용</span>
             <RichEditor v-model="form.content" placeholder="최초 문의/응대 내용" />
           </label>
@@ -106,6 +111,11 @@
             <p class="dsub">{{ detail.vendor_name || detail.game_company_name }} · {{ detail.category || "분류없음" }}</p>
           </div>
           <SearchSelect class="!w-32" v-model="detail.status" :options="STATUS_OPTS" @change="changeStatus" />
+        </div>
+
+        <div class="dtags">
+          <span class="dtags-lbl">🏷️ 태그</span>
+          <div class="dtags-sel"><TagSelect v-model="detailTags" @change="updateDetailTags" /></div>
         </div>
 
         <div class="thread">
@@ -142,6 +152,8 @@ import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import VendorTree from "@/components/base/VendorTree.vue";
 import RichEditor from "@/components/base/RichEditor.vue";
+import TagSelect from "@/components/base/TagSelect.vue";
+import TagChips from "@/components/base/TagChips.vue";
 import { supportApi, gameCompanyApi } from "@/api/cs";
 
 const route = useRoute();
@@ -165,6 +177,8 @@ const page = ref(1);
 const total = ref(0);
 const totalPages = ref(1);
 const filter = reactive({ status: "" });
+const filterTags = ref([]);
+const detailTags = ref([]);
 
 const treeRef = ref(null);
 const gamecos = ref([]);
@@ -178,7 +192,7 @@ const filteredGamecos = computed(() => {
 const showForm = ref(false);
 const saving = ref(false);
 const msg = ref("");
-const form = reactive({ title: "", category: "", priority: 0, content: "" });
+const form = reactive({ title: "", category: "", priority: 0, content: "", tag_ids: [] });
 
 const detail = ref(null);
 const sending = ref(false);
@@ -192,14 +206,17 @@ function onSelect(entity) {
   selected.value = entity;
   page.value = 1;
   filter.status = "";
+  filterTags.value = [];
   reloadTickets();
 }
+function applyFilter() { page.value = 1; reloadTickets(); }
 
 async function reloadTickets() {
   if (!selected.value) { tickets.value = []; total.value = 0; totalPages.value = 1; return; }
   const body = { party: props.party, page: page.value, limit: LIMIT };
   body[isVendor.value ? "vendor_id" : "game_company_id"] = selected.value.id;
   if (filter.status) body.status = filter.status;
+  if (filterTags.value.length) body.tag_ids = filterTags.value;
   const res = await supportApi.list(body);
   tickets.value = res.rows || [];
   total.value = res.total || 0;
@@ -213,7 +230,7 @@ async function loadLeft() {
 }
 
 function openNew() {
-  Object.assign(form, { title: "", category: "", priority: 0, content: "" });
+  Object.assign(form, { title: "", category: "", priority: 0, content: "", tag_ids: [] });
   msg.value = ""; showForm.value = true;
 }
 async function submit() {
@@ -224,6 +241,7 @@ async function submit() {
       vendor_id: isVendor.value ? selected.value.id : null,
       game_company_id: isVendor.value ? null : selected.value.id,
       title: form.title, category: form.category || null, priority: form.priority, status: "OPEN",
+      tag_ids: form.tag_ids,
     });
     if (form.content.trim()) await supportApi.addMessage({ ticket_id: t.id, content: form.content, is_internal: false });
     toast.success("등록되었습니다."); showForm.value = false; await reloadTickets();
@@ -232,7 +250,26 @@ async function submit() {
 }
 async function openDetail(id) {
   detail.value = await supportApi.get(id);
+  detailTags.value = (detail.value.tags || []).map((t) => t.id);
   Object.assign(reply, { content: "", is_internal: false });
+}
+// 상세에서 태그 변경 시 즉시 저장
+async function updateDetailTags(ids) {
+  if (!detail.value) return;
+  try {
+    await supportApi.save({
+      id: detail.value.id,
+      party: detail.value.party,
+      vendor_id: detail.value.vendor_id,
+      game_company_id: detail.value.game_company_id,
+      title: detail.value.title,
+      category: detail.value.category,
+      status: detail.value.status,
+      priority: detail.value.priority,
+      tag_ids: ids,
+    });
+    await reloadTickets();
+  } catch (e) { toast.error(e?.message || "태그 저장 실패"); }
 }
 async function changeStatus() {
   try { await supportApi.setStatus(detail.value.id, detail.value.status); toast.success("상태가 변경되었습니다."); await reloadTickets(); }
@@ -266,6 +303,7 @@ async function handleOpenQuery() {
       : { id: t.game_company_id, name: t.game_company_name };
     await reloadTickets();
     detail.value = t;
+    detailTags.value = (t.tags || []).map((x) => x.id);
     Object.assign(reply, { content: "", is_internal: false });
   } catch (e) { /* 없는 티켓이면 무시 */ }
 }
@@ -327,6 +365,9 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .fld { display: block; } .col2 { grid-column: 1 / -1; }
 .dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .dsub { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.2rem; }
+.dtags { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.9rem; }
+.dtags-lbl { font-family: var(--font-pixel); font-size: 0.64rem; color: var(--ink-muted); flex-shrink: 0; }
+.dtags-sel { flex: 1; }
 .thread { max-height: 44vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding: 0.5rem; background: var(--surface-2); border-radius: 3px; margin-bottom: 0.9rem; }
 .thread .empty { text-align: center; color: var(--ink-faint); padding: 1rem 0; font-size: 0.85rem; }
 .msgrow { background: #fff; border: 2px solid var(--line); border-radius: 3px; padding: 0.6rem 0.8rem; }

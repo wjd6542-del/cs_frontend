@@ -62,3 +62,10 @@ export const faqCategoryApi = {
   save: (body) => api.post("/faqCategory/save", body).then((r) => r.data),
   remove: (id) => api.post("/faqCategory/delete", { id }).then((r) => r.data),
 };
+
+// 태그 (CS 공통)
+export const tagApi = {
+  list: (body = {}) => api.post("/tag/list", body).then((r) => r.data),
+  save: (body) => api.post("/tag/save", body).then((r) => r.data),
+  remove: (id) => api.post("/tag/delete", { id }).then((r) => r.data),
+};

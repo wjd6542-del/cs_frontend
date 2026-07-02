@@ -84,7 +84,6 @@ const menus = computed(() => [
     ],
   },
   { label: "게시판", icon: "fa-clipboard-list", children: boards.value.map((b) => ({ label: b.name, to: `/board/${b.slug}` })) },
-  { label: "마이페이지", to: "/mypage", icon: "fa-id-card" },
   { label: "환경설정", to: "/settings", icon: "fa-gear" },
 ]);
 

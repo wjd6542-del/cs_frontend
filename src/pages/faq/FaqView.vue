@@ -12,6 +12,7 @@
     <div class="filterbar">
       <input v-model="q" class="field !w-56" placeholder="질문·답변 검색" @keyup.enter="search" />
       <div class="msbox"><MultiSelect v-model="cats" :options="catOptions" placeholder="분류(다중 선택)" search-placeholder="분류 검색…" @change="search" /></div>
+      <div class="msbox"><TagSelect v-model="ftags" placeholder="태그 필터" @change="search" /></div>
     </div>
 
     <!-- 목록 영역 -->
@@ -21,6 +22,7 @@
         <div class="q" @click="toggle(f.id)">
           <span class="cat" v-if="f.category">{{ f.category }}</span>
           <span class="qt">{{ f.question }}</span>
+          <TagChips :tags="f.tags" />
           <i class="fa-solid fa-chevron-down chev" :class="{ up: open[f.id] }"></i>
         </div>
         <div v-if="open[f.id]" class="a">
@@ -44,6 +46,10 @@
             <SearchSelect v-model="form.category" :options="catOptions" placeholder="분류 선택 (환경설정에서 관리)" search-placeholder="분류 검색…" />
           </label>
           <BaseInput v-model="form.question" label="질문" />
+          <label class="fld">
+            <span class="form-label">태그</span>
+            <TagSelect v-model="form.tag_ids" />
+          </label>
           <label class="fld">
             <span class="form-label">답변</span>
             <RichEditor v-model="form.answer" placeholder="답변 내용" />
@@ -71,6 +77,8 @@ import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import MultiSelect from "@/components/base/MultiSelect.vue";
 import RichEditor from "@/components/base/RichEditor.vue";
+import TagSelect from "@/components/base/TagSelect.vue";
+import TagChips from "@/components/base/TagChips.vue";
 import { faqApi, faqCategoryApi } from "@/api/cs";
 
 const LIMIT = 10;
@@ -83,6 +91,7 @@ const categories = ref([]);
 const open = reactive({});
 const q = ref("");
 const cats = ref([]);
+const ftags = ref([]);
 
 const catOptions = computed(() => categories.value.map((c) => ({ value: c.name, label: c.name })));
 
@@ -90,12 +99,13 @@ const showForm = ref(false);
 const editing = ref(false);
 const saving = ref(false);
 const msg = ref("");
-const form = reactive({ id: null, category: "", question: "", answer: "", sort: 0 });
+const form = reactive({ id: null, category: "", question: "", answer: "", sort: 0, tag_ids: [] });
 
 async function reload() {
   const res = await faqApi.list({
     q: q.value || undefined,
     categories: cats.value.length ? cats.value : undefined,
+    tag_ids: ftags.value.length ? ftags.value : undefined,
     page: page.value,
     limit: LIMIT,
   });
@@ -108,18 +118,18 @@ async function loadCats() { categories.value = await faqCategoryApi.list({ only_
 function toggle(id) { open[id] = !open[id]; }
 function openNew() {
   editing.value = false;
-  Object.assign(form, { id: null, category: "", question: "", answer: "", sort: 0 });
+  Object.assign(form, { id: null, category: "", question: "", answer: "", sort: 0, tag_ids: [] });
   msg.value = ""; showForm.value = true;
 }
 function openEdit(f) {
   editing.value = true;
-  Object.assign(form, { id: f.id, category: f.category || "", question: f.question, answer: f.answer, sort: f.sort });
+  Object.assign(form, { id: f.id, category: f.category || "", question: f.question, answer: f.answer, sort: f.sort, tag_ids: (f.tags || []).map((t) => t.id) });
   msg.value = ""; showForm.value = true;
 }
 async function submit() {
   msg.value = ""; saving.value = true;
   try {
-    await faqApi.save({ id: form.id || undefined, category: form.category || null, question: form.question, answer: form.answer, sort: Number(form.sort) || 0, is_active: true });
+    await faqApi.save({ id: form.id || undefined, category: form.category || null, question: form.question, answer: form.answer, sort: Number(form.sort) || 0, is_active: true, tag_ids: form.tag_ids });
     toast.success("저장되었습니다."); showForm.value = false; await reload();
   } catch (e) { msg.value = e?.message || "저장 실패"; }
   finally { saving.value = false; }
