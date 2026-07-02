@@ -16,10 +16,16 @@
         <option value="PARTIAL">부분정산</option>
         <option value="DONE">완료</option>
       </select>
-      <select v-model="filter.party_id" class="field !w-48" @change="search">
-        <option value="">{{ isVendor ? "전체 업체" : "전체 게임사" }}</option>
-        <option v-for="o in parties" :key="o.id" :value="o.id">{{ o.name }}</option>
-      </select>
+      <SearchSelect
+        class="!w-52"
+        v-model="filter.party_id"
+        :options="parties"
+        label-key="name"
+        value-key="id"
+        :placeholder="isVendor ? '전체 업체' : '전체 게임사'"
+        search-placeholder="이름 검색…"
+        @change="search"
+      />
     </div>
 
     <div class="tablewrap">
@@ -59,10 +65,7 @@
         <div class="grid">
           <label class="fld col2">
             <span class="form-label">{{ isVendor ? "업체" : "게임사" }}</span>
-            <select v-model="form.party_id" class="field">
-              <option :value="null" disabled>선택</option>
-              <option v-for="o in parties" :key="o.id" :value="o.id">{{ o.name }}</option>
-            </select>
+            <SearchSelect v-model="form.party_id" :options="parties" label-key="name" value-key="id" placeholder="선택하세요" search-placeholder="이름 검색…" />
           </label>
           <BaseInput v-model="form.period_start" label="기간 시작" type="date" />
           <BaseInput v-model="form.period_end" label="기간 종료" type="date" />
@@ -107,8 +110,10 @@
 // @ts-nocheck
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useToast } from "vue-toastification";
+import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
+import SearchSelect from "@/components/base/SearchSelect.vue";
 import { settlementApi, gameCompanyApi, vendorApi } from "@/api/cs";
 
 const props = defineProps({ type: { type: String, default: "VENDOR" } });
@@ -193,7 +198,7 @@ async function doSettle() {
   finally { settling.value = false; }
 }
 async function remove(s) {
-  if (!confirm("이 정산을 삭제할까요?")) return;
+  if (!await confirmDelete("이 정산을 삭제할까요?")) return;
   try { await settlementApi.remove(s.id); toast.success("삭제되었습니다."); await reload(); }
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }

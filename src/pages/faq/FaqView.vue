@@ -62,6 +62,7 @@
 // @ts-nocheck
 import { ref, reactive, computed, watch, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
 import { faqApi } from "@/api/cs";
@@ -111,7 +112,7 @@ async function submit() {
   finally { saving.value = false; }
 }
 async function remove(f) {
-  if (!confirm("이 FAQ를 삭제할까요?")) return;
+  if (!await confirmDelete("이 FAQ를 삭제할까요?")) return;
   try { await faqApi.remove(f.id); toast.success("삭제되었습니다."); await reload(); }
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }

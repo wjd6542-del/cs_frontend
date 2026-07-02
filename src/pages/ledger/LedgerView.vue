@@ -31,9 +31,7 @@
         <option value="PAYMENT">지급</option>
         <option value="COLLECTION">회수</option>
       </select>
-      <input v-model="filter.date_from" type="date" class="field !w-40" @change="search" />
-      <span class="tilde">~</span>
-      <input v-model="filter.date_to" type="date" class="field !w-40" @change="search" />
+      <DateRange v-model:from="filter.date_from" v-model:to="filter.date_to" @change="search" />
     </div>
 
     <div class="tablewrap">
@@ -76,10 +74,7 @@
           </label>
           <label class="fld">
             <span class="form-label">{{ form.type === 'PAYMENT' ? '게임사' : '업체' }}</span>
-            <select v-model="form.party_id" class="field">
-              <option :value="null" disabled>선택</option>
-              <option v-for="o in partyOptions" :key="o.id" :value="o.id">{{ o.name }}</option>
-            </select>
+            <SearchSelect v-model="form.party_id" :options="partyOptions" label-key="name" value-key="id" placeholder="선택하세요" search-placeholder="이름 검색…" />
           </label>
           <BaseInput v-model="form.entry_date" label="일자" type="date" />
           <BaseInput v-model="form.amount" label="금액(원)" type="number" />
@@ -102,8 +97,11 @@
 // @ts-nocheck
 import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
+import DateRange from "@/components/base/DateRange.vue";
+import SearchSelect from "@/components/base/SearchSelect.vue";
 import { ledgerApi, gameCompanyApi, vendorApi } from "@/api/cs";
 
 const LIMIT = 15;
@@ -170,7 +168,7 @@ async function submit() {
   finally { saving.value = false; }
 }
 async function remove(e) {
-  if (!confirm("이 거래를 삭제할까요?")) return;
+  if (!await confirmDelete("이 거래를 삭제할까요?")) return;
   try { await ledgerApi.remove(e.id); toast.success("삭제되었습니다."); await reload(); }
   catch (err) { toast.error(err?.message || "삭제 실패"); }
 }

@@ -146,6 +146,7 @@
 // @ts-nocheck
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useToast } from "vue-toastification";
+import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
 import VendorTree from "@/components/base/VendorTree.vue";
@@ -246,7 +247,7 @@ async function sendMessage() {
   finally { sending.value = false; }
 }
 async function removeTicket() {
-  if (!confirm("이 응대 건을 삭제할까요?")) return;
+  if (!await confirmDelete("이 응대 건을 삭제할까요?")) return;
   try { await supportApi.remove(detail.value.id); toast.success("삭제되었습니다."); detail.value = null; await reloadTickets(); }
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }

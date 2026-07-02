@@ -58,6 +58,7 @@
 // @ts-nocheck
 import { ref, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
 import { vendorApi } from "@/api/cs";
@@ -107,7 +108,7 @@ async function submit() {
   finally { saving.value = false; }
 }
 async function remove(v) {
-  if (!confirm(`'${v.name}' 업체를 삭제할까요?`)) return;
+  if (!await confirmDelete(`'${v.name}' 업체를 삭제할까요?`)) return;
   try { await vendorApi.remove(v.id); toast.success("삭제되었습니다."); await reload(); }
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }

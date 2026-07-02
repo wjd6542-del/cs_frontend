@@ -62,6 +62,7 @@
 // @ts-nocheck
 import { ref, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
+import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
 import { gameCompanyApi } from "@/api/cs";
@@ -112,7 +113,7 @@ async function submit() {
   finally { saving.value = false; }
 }
 async function remove(g) {
-  if (!confirm(`'${g.name}' 게임사를 삭제할까요?`)) return;
+  if (!await confirmDelete(`'${g.name}' 게임사를 삭제할까요?`)) return;
   try { await gameCompanyApi.remove(g.id); toast.success("삭제되었습니다."); await reload(); }
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }

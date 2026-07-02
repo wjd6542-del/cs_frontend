@@ -51,6 +51,7 @@
 // @ts-nocheck
 import { ref, reactive, computed, onMounted, nextTick } from "vue";
 import { useToast } from "vue-toastification";
+import { confirmDelete } from "@/lib/ui";
 import { vendorApi } from "@/api/cs";
 
 const props = defineProps({ selectedId: { type: Number, default: null } });
@@ -142,7 +143,7 @@ async function confirmEdit() {
 }
 
 async function remove(node) {
-  if (!confirm(`'${node.name}' 업체를 삭제할까요?`)) return;
+  if (!await confirmDelete(`'${node.name}' 업체를 삭제할까요?`)) return;
   try {
     await vendorApi.remove(node.id);
     await reload();
