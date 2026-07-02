@@ -18,10 +18,14 @@ import { TooltipComponent, GridComponent, LegendComponent } from "echarts/compon
 import { CanvasRenderer } from "echarts/renderers";
 echarts.use([BarChart, LineChart, PieChart, TooltipComponent, GridComponent, LegendComponent, CanvasRenderer]);
 
+import VCalendar from "v-calendar";
+import "v-calendar/style.css";
+
 import AlertPlugin from "@/plugins/alert.plugin";
 
 const app = createApp(App);
 
+app.use(VCalendar, {});
 app.use(AlertPlugin);
 app.use(pinia);
 pinia.use(piniaPluginPersistedstate);

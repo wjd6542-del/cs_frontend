@@ -27,7 +27,7 @@
     <!-- 필터 -->
     <div class="filters">
       <SearchSelect class="!w-32" v-model="filter.type" :options="TYPE_OPTS" placeholder="전체 구분" @change="search" />
-      <DateRange v-model:from="filter.date_from" v-model:to="filter.date_to" @change="search" />
+      <div class="w-72"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" placeholder="거래 기간 선택" @change="onDateChange" /></div>
     </div>
 
     <div class="tablewrap">
@@ -93,8 +93,9 @@ import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
-import DateRange from "@/components/base/DateRange.vue";
+import DateRangePicker from "@/components/base/DateRangePicker.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
+import { formatDateOnly } from "@/utils/date";
 import { ledgerApi, gameCompanyApi, vendorApi } from "@/api/cs";
 
 const LIMIT = 15;
@@ -108,6 +109,14 @@ const totalPages = ref(1);
 const totals = reactive({ PAYMENT: 0, COLLECTION: 0 });
 const net = computed(() => totals.COLLECTION - totals.PAYMENT);
 const filter = reactive({ type: "", date_from: "", date_to: "" });
+const dateRange = ref({ start: null, end: null });
+
+function onDateChange() {
+  const r = dateRange.value || {};
+  filter.date_from = r.start ? formatDateOnly(r.start) : "";
+  filter.date_to = r.end ? formatDateOnly(r.end) : "";
+  search();
+}
 
 const gamecos = ref([]);
 const vendors = ref([]);
