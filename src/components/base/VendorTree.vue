@@ -14,7 +14,7 @@
     </div>
 
     <div class="vt-body">
-      <div v-if="!flat.length" class="vt-empty">업체가 없습니다.</div>
+      <div v-if="!flat.length"><EmptyState variant="vendor" compact /></div>
       <div
         v-for="row in flat"
         :key="row.node.id"
@@ -53,6 +53,7 @@ import { ref, reactive, computed, onMounted, nextTick } from "vue";
 import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import { vendorApi } from "@/api/cs";
+import EmptyState from "@/components/base/EmptyState.vue";
 
 const props = defineProps({ selectedId: { type: Number, default: null } });
 const emit = defineEmits(["select", "change"]);

@@ -1,6 +1,6 @@
 <template>
   <div class="relative w-full">
-    <div class="flex h-[30px] border border-[#b9bccf] rounded-[3px] overflow-hidden bg-white">
+    <div class="flex h-[34px] border-2 border-[#b9bccf] rounded-[3px] overflow-hidden bg-white">
       <input
         :value="formattedDate"
         @click="toggleCalendar"
@@ -13,7 +13,7 @@
         v-if="innerValue"
         type="button"
         @click.stop="clearDate"
-        class="px-2 h-[30px] border-l hover:bg-[#f0f1f8] text-red-500 text-xs"
+        class="px-2 h-[34px] border-l hover:bg-[#f0f1f8] text-red-500 text-xs"
       >
         <i class="fa-solid fa-xmark"></i>
       </button>
@@ -21,7 +21,7 @@
       <button
         type="button"
         @click.stop="toggleCalendar"
-        class="px-2 h-[30px] border-l hover:bg-[#f0f1f8] text-[#5b607d] text-xs"
+        class="px-2 h-[34px] border-l hover:bg-[#f0f1f8] text-[#5b607d] text-xs"
       >
         <i class="fa-regular fa-calendar"></i>
       </button>
@@ -29,9 +29,9 @@
 
     <div
       v-show="openCalendar"
-      class="absolute left-0 mt-2 z-50 bg-white border rounded-[4px] shadow-lg"
+      class="absolute left-0 mt-2 z-50 bg-white border-2 border-[#1b1d2e] rounded-[3px] shadow-[4px_4px_0_#1b1d2e]"
     >
-      <VCDatePicker
+      <VCDatePicker color="purple"
         v-model="innerValue"
         :mode="mode"
         :is24hr="true"

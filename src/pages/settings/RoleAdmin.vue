@@ -132,17 +132,17 @@ onMounted(load);
 @media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
 .h { font-family: "Galmuri11", monospace; font-weight: 700; color: var(--ink); }
 
-.rolelist { background: #ffffff; border: 1px solid #d9dbe9; border-radius: 12px; padding: 0.8rem; height: max-content; }
+.rolelist { background: #ffffff; border: 2px solid var(--line-hard); border-radius: 4px; padding: 0.8rem; height: max-content; }
 .rl-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
-.add { height: 30px; padding: 0 0.6rem; border-radius: 8px; font-size: 0.76rem; font-weight: 700; color: #ffffff; background: var(--seal); border: 1px solid #5f3fe0; }
+.add { height: 30px; padding: 0 0.6rem; border-radius: 3px; font-size: 0.76rem; font-weight: 700; color: #ffffff; background: var(--seal); border: 1px solid #5f3fe0; }
 .rl { display: flex; flex-direction: column; gap: 2px; }
-.ritem { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.6rem; border-radius: 8px; cursor: pointer; transition: background 0.14s; }
+.ritem { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.6rem; border-radius: 3px; cursor: pointer; transition: background 0.14s; }
 .ritem:hover { background: #ffffff; }
 .ritem.on { background: rgba(122,92,255, 0.12); }
 .rname { font-weight: 600; color: var(--ink); font-size: 0.9rem; }
-.super { font-size: 0.64rem; font-weight: 700; color: var(--seal); background: rgba(122,92,255, 0.12); padding: 0.05rem 0.35rem; border-radius: 999px; }
+.super { font-size: 0.64rem; font-weight: 700; color: var(--seal); background: rgba(122,92,255, 0.12); padding: 0.05rem 0.35rem; border-radius: 3px; }
 
-.perm { background: #ffffff; border: 1px solid #d9dbe9; border-radius: 12px; padding: 1.1rem; min-height: 240px; }
+.perm { background: #ffffff; border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.1rem; min-height: 240px; }
 .p-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .pdesc { font-size: 0.82rem; color: #5b607d; margin-top: 0.2rem; }
 .supernote { color: #5b607d; font-size: 0.88rem; }
@@ -153,15 +153,15 @@ onMounted(load);
 .pcheck code { margin-left: auto; font-size: 0.72rem; color: #9a9fbb; }
 .empty { color: #9a9fbb; font-size: 0.9rem; padding: 2rem 0; text-align: center; }
 
-.save { height: 38px; padding: 0 1.1rem; border-radius: 9px; font-weight: 700; font-size: 0.84rem; color: #ffffff; background: var(--seal-grad); border: 1px solid #5f3fe0; }
+.save { height: 38px; padding: 0 1.1rem; border-radius: 3px; font-weight: 700; font-size: 0.84rem; color: #ffffff; background: var(--seal-grad); border: 1px solid #5f3fe0; }
 .save:hover { filter: brightness(1.05); }
 .save:disabled { opacity: 0.6; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(20, 16, 13, 0.45); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.panel { width: 400px; max-width: 100%; background: #ffffff; border: 1px solid #d9dbe9; border-radius: 16px; padding: 1.4rem; }
+.panel { width: 400px; max-width: 100%; background: #ffffff; border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; }
 .ph { font-family: "Galmuri11", monospace; font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
 .msg { margin-top: 0.7rem; font-size: 0.82rem; font-weight: 600; }
 .msg.err { color: var(--seal); }
 .acts { display: flex; gap: 0.6rem; margin-top: 1.1rem; }
-.cancel { height: 38px; padding: 0 1rem; border-radius: 9px; font-weight: 600; color: #5b607d; background: #f0f1f8; border: 1px solid #b9bccf; }
+.cancel { height: 38px; padding: 0 1rem; border-radius: 3px; font-weight: 600; color: #5b607d; background: #f0f1f8; border: 1px solid #b9bccf; }
 </style>

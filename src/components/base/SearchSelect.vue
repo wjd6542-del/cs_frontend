@@ -35,15 +35,15 @@
         v-if="open"
         ref="dropdown"
         :style="dropdownStyle"
-        class="bg-[#ffffff] border border-[#d9dbe9] rounded-lg shadow-[0_10px_30px_rgba(120,92,42,0.16)] overflow-hidden"
+        class="bg-[#ffffff] border-2 border-[#1b1d2e] rounded-[3px] shadow-[4px_4px_0_#1b1d2e] overflow-hidden"
       >
-        <div class="p-2 bg-[#f0f1f8] border-b border-[#d9dbe9]">
+        <div class="p-2 bg-[#f0f1f8] border-b-2 border-[#1b1d2e]">
           <input
             ref="searchInput"
             v-model="keyword"
             type="text"
             :placeholder="searchPlaceholder"
-            class="w-full px-2 py-1.5 text-xs border border-[#b9bccf] rounded-md focus:outline-none focus:ring-2 focus:ring-[#7a5cff]/15 focus:border-[#7a5cff] bg-[#ffffff]"
+            class="w-full h-[30px] px-2 text-xs border-2 border-[#b9bccf] rounded-[3px] focus:outline-none focus:ring-2 focus:ring-[#7a5cff]/25 focus:border-[#7a5cff] bg-[#ffffff]"
           />
         </div>
 
@@ -136,19 +136,19 @@ export default {
       const hasText = /text-/.test(parentClass);
 
       return [
-        "flex justify-between items-center cursor-pointer transition-all box-border relative",
+        "flex justify-between items-center cursor-pointer transition-all box-border relative text-[color:var(--ink)]",
         // 기본값 세팅 (주입된 클래스가 없을 때만)
-        !hasHeight && !hasPadding && "h-[30px] px-2",
-        !hasPadding && hasHeight && "px-2",
-        !hasBorder && "border border-[#b9bccf]",
-        !hasRounded && "rounded-md",
+        !hasHeight && !hasPadding && "h-[34px] px-2.5",
+        !hasPadding && hasHeight && "px-2.5",
+        !hasBorder && "border-2 border-[#b9bccf]",
+        !hasRounded && "rounded-[3px]",
         !hasText && "text-xs",
-        !hasPadding && !hasHeight && "bg-[#ffffff]",
+        !hasPadding && !hasHeight && "bg-white",
         // 부모 주입 클래스
         parentClass,
         // 상태값
         this.open
-          ? "ring-2 ring-[#7a5cff]/15 border-[#7a5cff]"
+          ? "ring-2 ring-[#7a5cff]/25 border-[#7a5cff]"
           : "hover:border-[#7a5cff]",
       ];
     },

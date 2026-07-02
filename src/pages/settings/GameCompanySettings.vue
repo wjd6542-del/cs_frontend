@@ -14,7 +14,7 @@
           <tr><th>게임사명</th><th>이메일</th><th class="r">요율</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="5" class="state">게임사가 없습니다.</td></tr>
+          <tr v-if="!rows.length"><td colspan="5"><EmptyState variant="gameco" compact /></td></tr>
           <tr v-for="g in rows" :key="g.id">
             <td class="nm">{{ g.name }}</td>
             <td class="muted">{{ g.contact_email || "-" }}</td>
@@ -65,6 +65,7 @@ import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
+import EmptyState from "@/components/base/EmptyState.vue";
 import { gameCompanyApi } from "@/api/cs";
 
 const LIMIT = 15;
@@ -125,9 +126,9 @@ onMounted(reload);
 .h { font-weight: 700; color: var(--ink); }
 .c { color: var(--seal); }
 .tools { display: flex; gap: 0.5rem; align-items: center; }
-.tablewrap { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.tablewrap { border: 2px solid var(--line-hard); border-radius: 4px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow-hard); }
 .tbl { width: 100%; border-collapse: collapse; }
-.tbl th { text-align: left; padding: 0.6rem 0.8rem; background: var(--surface-2); border-bottom: 1px solid var(--line); font-weight: 600; font-size: 0.78rem; color: var(--ink-muted); }
+.tbl th { text-align: left; padding: 0.6rem 0.8rem; background: var(--surface-2); border-bottom: 2px solid var(--line-strong); font-weight: 600; font-family: var(--font-pixel); font-size: 0.78rem; color: var(--ink-muted); }
 .tbl td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line); font-size: 0.88rem; color: var(--ink); }
 .tbl tbody tr:last-child td { border-bottom: none; }
 .r { text-align: right; }
@@ -136,20 +137,20 @@ onMounted(reload);
 .nm { font-weight: 700; }
 .muted { color: var(--ink-muted); }
 .state { text-align: center; padding: 1.6rem 0; color: var(--ink-faint); }
-.st { font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px; }
+.st { font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 3px; }
 .st.on { color: #047857; background: #d1fae5; }
 .st.off { color: #64748b; background: #f1f5f9; }
 .btn-xs + .btn-xs { margin-left: 0.3rem; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.panel { width: 520px; max-width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
+.panel { width: 520px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
 .ph { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .fld { display: block; }
 .col2 { grid-column: 1 / -1; }
 .toggle { display: flex; align-items: center; gap: 0.6rem; }
 .toggle .form-label { margin-bottom: 0; }
-.sw { width: 44px; height: 24px; border-radius: 999px; background: #cbd5e1; position: relative; cursor: pointer; transition: background 0.18s; }
+.sw { width: 44px; height: 24px; border-radius: 3px; background: #cbd5e1; position: relative; cursor: pointer; transition: background 0.18s; }
 .sw.on { background: #059669; }
 .sw .knob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.18s; }
 .sw.on .knob { transform: translateX(20px); }

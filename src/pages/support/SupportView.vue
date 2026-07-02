@@ -16,7 +16,7 @@
             <input v-model="gkw" class="field field-xs" placeholder="게임사 검색" />
           </div>
           <div class="gl-body">
-            <div v-if="!filteredGamecos.length" class="gl-empty">게임사가 없습니다.</div>
+            <div v-if="!filteredGamecos.length"><EmptyState variant="gameco" compact /></div>
             <div
               v-for="g in filteredGamecos"
               :key="g.id"
@@ -34,8 +34,7 @@
       <!-- 우측: 선택 대상 응대 -->
       <section class="right">
         <div v-if="!selected" class="ph-empty pcard">
-          <i class="fa-solid fa-hand-pointer"></i>
-          <p>{{ isVendor ? "좌측에서 업체를 선택하세요." : "좌측에서 게임사를 선택하세요." }}</p>
+          <EmptyState variant="select" :desc="isVendor ? '좌측에서 업체를 선택하면 응대가 여기에 표시돼요.' : '좌측에서 게임사를 선택하면 응대가 여기에 표시돼요.'" />
         </div>
 
         <template v-else>
@@ -56,7 +55,7 @@
                 <tr><th class="c">상태</th><th>제목</th><th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th></tr>
               </thead>
               <tbody>
-                <tr v-if="!tickets.length"><td colspan="6" class="state">응대 건이 없습니다.</td></tr>
+                <tr v-if="!tickets.length"><td colspan="6"><EmptyState variant="support" compact /></td></tr>
                 <tr v-for="t in tickets" :key="t.id" class="row" @click="openDetail(t.id)">
                   <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
                   <td class="nm">{{ t.title }}</td>
@@ -138,6 +137,7 @@ import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
+import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import VendorTree from "@/components/base/VendorTree.vue";
 import { supportApi, gameCompanyApi } from "@/api/cs";

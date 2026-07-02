@@ -4,14 +4,14 @@
     <div v-if="showQuickButtons" class="relative">
       <button
         @click.stop="toggleQuick"
-        class="h-[30px] w-[30px] flex items-center justify-center border border-[#b9bccf] rounded-[3px] hover:bg-[#f0f1f8] text-[#5b607d] text-xs"
+        class="h-[34px] w-[34px] flex items-center justify-center border-2 border-[#b9bccf] rounded-[3px] hover:bg-[#f0f1f8] text-[#5b607d] text-xs"
       >
         <i class="fa-solid fa-ellipsis-vertical"></i>
       </button>
 
       <div
         v-show="openQuick"
-        class="absolute left-0 mt-1 w-32 bg-white border rounded-[3px] shadow-md z-50"
+        class="absolute left-0 mt-1 w-32 bg-white border-2 border-[#1b1d2e] rounded-[3px] shadow-[3px_3px_0_#1b1d2e] z-50"
       >
         <button
           class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[#f0f1f8]"
@@ -50,7 +50,7 @@
 
     <!-- 날짜 입력 -->
     <div class="relative flex-1">
-      <div class="flex h-[30px] border border-[#b9bccf] rounded-[3px] overflow-hidden bg-white">
+      <div class="flex h-[34px] border-2 border-[#b9bccf] rounded-[3px] overflow-hidden bg-white">
         <input
           :value="formattedRange"
           @click="toggleCalendar"
@@ -62,14 +62,14 @@
         <button
           v-if="innerValue.start || innerValue.end"
           @click.stop="clearRange"
-          class="px-2 h-[30px] border-l hover:bg-[#f0f1f8] text-red-500 text-xs"
+          class="px-2 h-[34px] border-l hover:bg-[#f0f1f8] text-red-500 text-xs"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
 
         <button
           @click.stop="toggleCalendar"
-          class="px-2 h-[30px] border-l hover:bg-[#f0f1f8] text-[#5b607d] text-xs"
+          class="px-2 h-[34px] border-l hover:bg-[#f0f1f8] text-[#5b607d] text-xs"
         >
           <i class="fa-regular fa-calendar"></i>
         </button>
@@ -80,7 +80,7 @@
         v-show="openCalendar"
         class="absolute left-0 mt-1 z-50 bg-white border rounded-[3px] shadow-lg"
       >
-        <DatePicker
+        <DatePicker color="purple"
           v-model.range="innerValue"
           :mode="mode"
           :is24hr="true"

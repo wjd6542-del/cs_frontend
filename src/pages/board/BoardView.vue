@@ -116,7 +116,7 @@ watch(slug, loadBoard);
 .ttl { font-family: "Galmuri11", monospace; font-size: 1.6rem; font-weight: 700; color: var(--ink); margin-top: 0.25rem; }
 .desc { font-size: 0.85rem; color: #5b607d; margin-top: 0.2rem; }
 .write {
-  flex-shrink: 0; height: 40px; padding: 0 1.1rem; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.4rem;
+  flex-shrink: 0; height: 40px; padding: 0 1.1rem; border-radius: 3px; display: inline-flex; align-items: center; gap: 0.4rem;
   font-weight: 700; font-size: 0.86rem; color: #ffffff; text-decoration: none;
   background: var(--seal-grad); border: 1px solid #5f3fe0;
 }
@@ -125,7 +125,7 @@ watch(slug, loadBoard);
 .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
 @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
 .card {
-  display: block; background: #ffffff; border: 1px solid #d9dbe9; border-radius: 14px; overflow: hidden;
+  display: block; background: #ffffff; border: 2px solid var(--line-hard); border-radius: 4px; overflow: hidden;
   text-decoration: none; transition: transform 0.12s, box-shadow 0.15s, border-color 0.15s;
 }
 .card:hover { transform: translateY(-2px); border-color: #d9b7a2; box-shadow: 0 8px 20px rgba(27,29,46,0.14); }

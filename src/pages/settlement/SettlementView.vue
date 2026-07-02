@@ -33,7 +33,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="7" class="state">정산 내역이 없습니다.</td></tr>
+          <tr v-if="!rows.length"><td colspan="7"><EmptyState variant="settlement" compact /></td></tr>
           <tr v-for="s in rows" :key="s.id">
             <td class="nm">{{ s.vendor_name || s.game_company_name || "-" }}</td>
             <td class="muted">{{ d(s.period_start) }} ~ {{ d(s.period_end) }}</td>
@@ -108,6 +108,7 @@ import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
+import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import { settlementApi, gameCompanyApi, vendorApi } from "@/api/cs";
 
@@ -211,9 +212,9 @@ onMounted(async () => { await Promise.all([reload(), loadParties()]); });
 .desc { font-size: 0.85rem; color: var(--ink-muted); margin-top: 0.2rem; }
 .filters { display: flex; gap: 0.5rem; margin-bottom: 0.8rem; }
 
-.tablewrap { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.tablewrap { border: 2px solid var(--line-hard); border-radius: 4px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow-hard); }
 .tbl { width: 100%; border-collapse: collapse; }
-.tbl th { text-align: left; padding: 0.6rem 0.8rem; background: var(--surface-2); border-bottom: 1px solid var(--line); font-weight: 600; font-size: 0.78rem; color: var(--ink-muted); }
+.tbl th { text-align: left; padding: 0.6rem 0.8rem; background: var(--surface-2); border-bottom: 2px solid var(--line-strong); font-weight: 600; font-family: var(--font-pixel); font-size: 0.78rem; color: var(--ink-muted); }
 .tbl td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line); font-size: 0.88rem; color: var(--ink); }
 .tbl tbody tr:last-child td { border-bottom: none; }
 .r { text-align: right; } .c { text-align: center; }
@@ -221,19 +222,19 @@ onMounted(async () => { await Promise.all([reload(), loadParties()]); });
 .nm { font-weight: 700; } .muted { color: var(--ink-muted); }
 .pos { color: var(--flow-in); } .neg { color: #dc2626; }
 .state { text-align: center; padding: 1.6rem 0; color: var(--ink-faint); }
-.tag { font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px; }
+.tag { font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 3px; }
 .tag.pending { color: #b45309; background: #fef3c7; }
 .tag.partial { color: #4f46e5; background: #e0e7ff; }
 .tag.done { color: #047857; background: var(--flow-in-bg); }
 .btn-xs + .btn-xs { margin-left: 0.3rem; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.panel { width: 520px; max-width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
+.panel { width: 520px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
 .panel.sm { width: 420px; }
 .ph { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .fld { display: block; } .col2 { grid-column: 1 / -1; }
-.settle-info { font-size: 0.9rem; color: var(--ink); background: var(--surface-2); border-radius: 10px; padding: 0.7rem 0.9rem; margin-bottom: 0.9rem; line-height: 1.5; }
+.settle-info { font-size: 0.9rem; color: var(--ink); background: var(--surface-2); border-radius: 3px; padding: 0.7rem 0.9rem; margin-bottom: 0.9rem; line-height: 1.5; }
 .hint { font-size: 0.76rem; color: var(--ink-muted); margin-top: 0.6rem; }
 .msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; } .msg.err { color: #dc2626; }
 .acts { display: flex; gap: 0.6rem; margin-top: 1.2rem; }

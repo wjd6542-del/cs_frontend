@@ -94,14 +94,14 @@ async function changePw() {
 
 .card {
   background: #ffffff;
-  border: 1px solid #d9dbe9;
-  border-radius: 14px;
+  border: 2px solid var(--line-hard);
+  border-radius: 4px;
   padding: 1.25rem;
 }
 .profile { display: flex; flex-direction: column; gap: 0.9rem; }
 .avatar {
   width: 62px; height: 62px; display: grid; place-items: center;
-  border-radius: 16px;
+  border-radius: 4px;
   font-family: "Galmuri11", monospace; font-weight: 700; font-size: 1.7rem; color: #ffffff;
   background: linear-gradient(145deg, #8a6bff, var(--seal) 55%, #5f3fe0);
   box-shadow: inset 0 0 0 2px rgba(255, 236, 214, 0.6);
@@ -110,7 +110,7 @@ async function changePw() {
 .pid { font-size: 0.82rem; color: #5b607d; margin-top: 0.1rem; }
 .rolechip {
   display: inline-block; margin-top: 0.5rem;
-  padding: 0.15rem 0.6rem; border-radius: 999px;
+  padding: 0.15rem 0.6rem; border-radius: 3px;
   font-size: 0.72rem; font-weight: 700; color: var(--seal);
   background: rgba(122,92,255, 0.1);
 }
@@ -123,14 +123,14 @@ async function changePw() {
 .fld span { display: block; font-size: 0.72rem; font-weight: 700; color: #2c2f45; margin-bottom: 0.35rem; }
 .fld input {
   width: 100%; height: 42px; padding: 0 0.8rem; font-size: 0.9rem; color: var(--ink);
-  background: #ffffff; border: 1px solid #b9bccf; border-radius: 9px; outline: none;
+  background: #ffffff; border: 1px solid #b9bccf; border-radius: 3px; outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .fld input:focus { border-color: var(--seal); box-shadow: 0 0 0 3px rgba(122,92,255, 0.13); }
 .msg { font-size: 0.82rem; font-weight: 600; color: #2e7d43; }
 .msg.err { color: var(--seal); }
 .save {
-  margin-top: 0.2rem; height: 44px; border-radius: 9px;
+  margin-top: 0.2rem; height: 44px; border-radius: 3px;
   background: var(--seal-grad);
   color: #ffffff; font-weight: 700; font-size: 0.95rem;
   border: 1px solid #5f3fe0; cursor: pointer; transition: filter 0.15s, transform 0.08s;

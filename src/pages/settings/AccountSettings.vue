@@ -22,9 +22,9 @@ const sub = ref("user");
 .subtabs { display: flex; gap: 0.4rem; margin-bottom: 1.1rem; }
 .st {
   display: inline-flex; align-items: center; gap: 0.4rem;
-  height: 34px; padding: 0 0.9rem; border-radius: 9px;
+  height: 34px; padding: 0 0.9rem; border-radius: 3px;
   font-size: 0.85rem; font-weight: 600; color: #2c2f45;
-  background: #f0f1f8; border: 1px solid #d9dbe9;
+  background: #f0f1f8; border: 2px solid var(--line-hard);
 }
 .st:hover { background: #e7e8f1; }
 .st.on { color: #ffffff; background: var(--seal); border-color: #5f3fe0; }

@@ -13,7 +13,7 @@
       <SearchSelect class="!w-40" v-model="cat" :options="catOptions" placeholder="전체 분류" @change="reload" />
     </div>
 
-    <div v-if="!rows.length" class="empty">등록된 FAQ가 없습니다.</div>
+    <div v-if="!rows.length"><EmptyState variant="faq" /></div>
     <ul class="list">
       <li v-for="f in pagedRows" :key="f.id" class="item">
         <div class="q" @click="toggle(f.id)">
@@ -62,6 +62,7 @@ import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
+import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import { faqApi } from "@/api/cs";
 
@@ -127,10 +128,10 @@ onMounted(async () => { await Promise.all([reload(), loadCats()]); });
 .empty { text-align: center; color: var(--ink-faint); padding: 2rem 0; }
 
 .list { display: flex; flex-direction: column; gap: 0.5rem; }
-.item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.item { background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); overflow: hidden; }
 .q { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1rem; cursor: pointer; }
 .q:hover { background: var(--surface-2); }
-.cat { font-size: 0.68rem; font-weight: 700; color: var(--seal); background: #e0e7ff; padding: 0.1rem 0.5rem; border-radius: 999px; flex-shrink: 0; }
+.cat { font-size: 0.68rem; font-weight: 700; color: var(--seal); background: #e0e7ff; padding: 0.1rem 0.5rem; border-radius: 3px; flex-shrink: 0; }
 .qt { font-weight: 600; color: var(--ink); flex: 1; }
 .chev { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }
 .chev.up { transform: rotate(180deg); }
@@ -139,7 +140,7 @@ onMounted(async () => { await Promise.all([reload(), loadCats()]); });
 .itools { display: flex; gap: 0.4rem; margin-top: 0.8rem; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.panel { width: 560px; max-width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
+.panel { width: 560px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
 .ph { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
 .fcol { display: flex; flex-direction: column; gap: 0.9rem; }
 .fld { display: block; }
