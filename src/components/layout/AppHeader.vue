@@ -31,15 +31,29 @@
         </div>
       </div>
 
-      <div class="who">
-        <span class="nm">{{ auth.user?.name || auth.user?.username }}</span>
-        <span class="rl">{{ roleLabel }}</span>
+      <!-- 계정 드롭다운 -->
+      <div ref="acctWrap" class="acct-wrap">
+        <button class="acct" :class="{ on: acctOpen }" @click="toggleAcct">
+          <div class="who">
+            <span class="nm">{{ auth.user?.name || auth.user?.username }}</span>
+            <span class="rl">{{ roleLabel }}</span>
+          </div>
+          <div class="avatar">{{ initial }}</div>
+          <i class="fa-solid fa-chevron-down acc-chev" :class="{ up: acctOpen }"></i>
+        </button>
+
+        <div v-if="acctOpen" class="dropdown acct-dd">
+          <div class="acc-head">
+            <div class="avatar sm">{{ initial }}</div>
+            <div class="acc-who">
+              <div class="acc-name">{{ auth.user?.name || auth.user?.username }}</div>
+              <div class="acc-id">@{{ auth.user?.username }} · {{ roleLabel }}</div>
+            </div>
+          </div>
+          <RouterLink to="/mypage" class="acc-item" @click="acctOpen = false"><i class="fa-solid fa-id-card"></i> 마이페이지</RouterLink>
+          <button class="acc-item danger" @click="onLogout"><i class="fa-solid fa-right-from-bracket"></i> 로그아웃</button>
+        </div>
       </div>
-      <RouterLink to="/mypage" class="avatar" :title="'마이페이지'">{{ initial }}</RouterLink>
-      <button class="logout" @click="onLogout">
-        <i class="fa-solid fa-right-from-bracket"></i>
-        <span class="lo-txt">로그아웃</span>
-      </button>
     </div>
   </header>
 </template>
@@ -63,13 +77,19 @@ const initial = computed(() => (auth.user?.name || auth.user?.username || "?").s
 
 const bellOpen = ref(false);
 const bellWrap = ref(null);
-function toggleBell() { bellOpen.value = !bellOpen.value; if (bellOpen.value) alerts.fetch(); }
+const acctOpen = ref(false);
+const acctWrap = ref(null);
+function toggleBell() { bellOpen.value = !bellOpen.value; acctOpen.value = false; if (bellOpen.value) alerts.fetch(); }
+function toggleAcct() { acctOpen.value = !acctOpen.value; bellOpen.value = false; }
 function openTicket(t) {
   bellOpen.value = false;
   const path = t.party === "VENDOR" ? "/support/vendor" : "/support/gameco";
   router.push({ path, query: { open: t.id } });
 }
-function onOutside(e) { if (bellWrap.value && !bellWrap.value.contains(e.target)) bellOpen.value = false; }
+function onOutside(e) {
+  if (bellWrap.value && !bellWrap.value.contains(e.target)) bellOpen.value = false;
+  if (acctWrap.value && !acctWrap.value.contains(e.target)) acctOpen.value = false;
+}
 
 onMounted(() => {
   document.addEventListener("click", onOutside, true);
@@ -80,6 +100,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onOutside, true));
 watch(() => route.fullPath, () => { if (auth.user) alerts.fetch(); });
 
 function onLogout() {
+  acctOpen.value = false;
   auth.logout();
   router.replace("/login");
 }
@@ -122,24 +143,37 @@ function onLogout() {
 .dti { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.84rem; font-weight: 600; color: var(--ink); }
 .dst { flex-shrink: 0; font-family: var(--font-pixel); font-size: 0.58rem; }
 .dst.o { color: #b45309; } .dst.i { color: var(--seal-deep); }
+/* 계정 트리거 */
+.acct-wrap { position: relative; }
+.acct {
+  display: flex; align-items: center; gap: 0.6rem; height: 44px; padding: 0 0.5rem 0 0.7rem;
+  border: 2px solid var(--line-hard); border-radius: 3px; background: var(--surface);
+  box-shadow: 2px 2px 0 var(--line-hard); transition: transform 0.08s, box-shadow 0.08s;
+}
+.acct:hover, .acct.on { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }
 .who { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.15; }
-.who .nm { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
-.who .rl { font-family: var(--font-pixel); font-size: 0.6rem; letter-spacing: 0.06em; color: var(--seal-deep); }
+.who .nm { font-size: 0.84rem; font-weight: 700; color: var(--ink); }
+.who .rl { font-family: var(--font-pixel); font-size: 0.58rem; letter-spacing: 0.04em; color: var(--seal-deep); }
 .avatar {
-  width: 40px; height: 40px; display: grid; place-items: center; font-family: var(--font-pixel);
-  font-weight: 700; font-size: 1rem; color: #fff; text-decoration: none;
-  background: var(--seal); border: 2px solid var(--line-hard); box-shadow: 2px 2px 0 var(--line-hard);
-  transition: transform 0.08s, box-shadow 0.08s;
+  width: 34px; height: 34px; display: grid; place-items: center; font-family: var(--font-pixel);
+  font-weight: 700; font-size: 0.9rem; color: #fff;
+  background: var(--seal); border: 2px solid var(--line-hard); border-radius: 3px;
 }
-.avatar:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }
-.logout {
-  display: flex; align-items: center; gap: 0.4rem; height: 38px; padding: 0 0.8rem;
-  font-size: 0.8rem; font-weight: 700; color: var(--ink); border: 2px solid var(--line-hard);
-  border-radius: 3px; background: var(--surface); box-shadow: 2px 2px 0 var(--line-hard);
-  transition: transform 0.08s, box-shadow 0.08s;
-}
-.logout:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }
-.logout:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line-hard); }
+.avatar.sm { width: 40px; height: 40px; font-size: 1rem; box-shadow: 2px 2px 0 var(--line-hard); }
+.acc-chev { font-size: 0.62rem; color: var(--ink-faint); transition: transform 0.2s; }
+.acc-chev.up { transform: rotate(180deg); }
 
-@media (max-width: 640px) { .who { display: none; } .lo-txt { display: none; } .logout { padding: 0 0.6rem; } }
+.acct-dd { width: 240px; }
+.acc-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem; background: var(--surface-2); border-bottom: 2px solid var(--line); }
+.acc-name { font-family: var(--font-pixel); font-size: 0.85rem; color: var(--ink); }
+.acc-id { font-size: 0.72rem; color: var(--ink-muted); margin-top: 0.15rem; }
+.acc-item { width: 100%; display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.9rem; font-size: 0.88rem; font-weight: 600; color: var(--ink); text-decoration: none; background: #fff; border-bottom: 1px solid var(--line); }
+.acc-item:last-child { border-bottom: none; }
+.acc-item i { width: 18px; text-align: center; color: var(--ink-muted); }
+.acc-item:hover { background: var(--surface-2); color: var(--seal); }
+.acc-item:hover i { color: var(--seal); }
+.acc-item.danger:hover { color: var(--danger); }
+.acc-item.danger:hover i { color: var(--danger); }
+
+@media (max-width: 640px) { .who { display: none; } .acct { padding: 0 0.4rem; } }
 </style>
