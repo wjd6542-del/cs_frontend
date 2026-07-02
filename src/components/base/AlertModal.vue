@@ -2,27 +2,27 @@
   <teleport to="body">
     <div
       v-if="visible"
-      class="fixed inset-0 z-[300] flex items-center justify-center bg-[#1b1714]/45 backdrop-blur-[2px]"
+      class="fixed inset-0 z-[300] flex items-center justify-center bg-[#1b1d2e]/55"
       @click="onBackdropClick"
     >
       <div
-        class="w-[380px] rounded-2xl bg-[#fffdf7] ring-1 ring-[#e6d9bd] shadow-[0_24px_60px_rgba(50,36,14,0.28)] overflow-hidden"
+        class="w-[380px] rounded-[4px] bg-white border-2 border-[color:var(--line-hard)] shadow-[6px_6px_0_var(--line-hard)] overflow-hidden"
         @click.stop
       >
         <!-- 헤더 -->
         <div
-          class="flex items-center gap-3 px-4 py-3 border-b border-[#efe6d2]"
+          class="flex items-center gap-3 px-4 py-3 border-b-2 border-[color:var(--line)]"
           :class="theme.headerBg"
         >
           <div
-            class="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            class="w-9 h-9 flex items-center justify-center shrink-0 border-2 border-[color:var(--line-hard)]"
             :class="theme.iconWrap"
           >
             <i :class="['fa-solid', theme.icon, 'text-white']"></i>
           </div>
           <div class="flex-1 min-w-0">
             <div
-              class="text-[10px] font-bold uppercase tracking-widest"
+              class="text-[10px] font-bold uppercase tracking-widest pixel"
               :class="theme.label"
             >
               {{ variantLabel }}
@@ -34,21 +34,21 @@
         </div>
 
         <!-- 내용 -->
-        <div class="px-4 py-4 text-[13px] text-[#4b4235] whitespace-pre-line">
+        <div class="px-4 py-4 text-[13px] text-[color:var(--ink-soft)] whitespace-pre-line">
           {{ message }}
         </div>
 
         <!-- 버튼 -->
-        <div class="flex justify-end gap-2 px-4 py-3 border-t border-[#efe6d2] bg-[#f7f0df]/70">
+        <div class="flex justify-end gap-2 px-4 py-3 border-t-2 border-[color:var(--line)] bg-[color:var(--surface-2)]">
           <button
             v-if="type === 'confirm'"
-            class="h-[32px] px-4 rounded-lg text-xs font-semibold text-[#6f6455] bg-[#f4ead6] border border-[#ddceb0] hover:bg-[#ece0c6]"
+            class="btn btn-xs"
             @click="emit('cancel')"
           >
             취소
           </button>
           <button
-            class="h-[32px] px-4 rounded-lg text-xs font-bold text-white shadow-sm"
+            class="btn btn-xs text-white"
             :class="theme.okBtn"
             @click="emit('ok')"
           >
@@ -92,24 +92,24 @@ const VARIANT_THEMES: Record<Variant, {
 }> = {
   info: {
     icon: "fa-circle-info",
-    iconWrap: "bg-[#a9852f] shadow-md shadow-[#a9852f]/30",
-    headerBg: "bg-[#f7f0df]/70",
-    label: "text-[#8a6c1f]",
-    okBtn: "bg-[#9a7729] hover:bg-[#86671f]",
+    iconWrap: "bg-[color:var(--seal)]",
+    headerBg: "bg-[#ede9ff]",
+    label: "text-[color:var(--seal-deep)]",
+    okBtn: "!bg-[color:var(--seal)]",
   },
   warning: {
     icon: "fa-triangle-exclamation",
-    iconWrap: "bg-amber-500 shadow-md shadow-amber-500/30",
-    headerBg: "bg-amber-50/60",
-    label: "text-amber-600",
-    okBtn: "bg-amber-600 hover:bg-amber-700",
+    iconWrap: "bg-[color:var(--gold)]",
+    headerBg: "bg-amber-50",
+    label: "text-amber-700",
+    okBtn: "!bg-[color:var(--gold)]",
   },
   danger: {
     icon: "fa-circle-exclamation",
-    iconWrap: "bg-red-500 shadow-md shadow-red-500/30",
-    headerBg: "bg-red-50/60",
-    label: "text-red-600",
-    okBtn: "bg-red-600 hover:bg-red-700",
+    iconWrap: "bg-[color:var(--danger)]",
+    headerBg: "bg-[#fbe0e2]",
+    label: "text-[color:var(--danger)]",
+    okBtn: "!bg-[color:var(--danger)]",
   },
 };
 

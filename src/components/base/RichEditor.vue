@@ -86,19 +86,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.reditor { border: 1px solid #cdbf9f; border-radius: 10px; overflow: hidden; background: #fffef9; }
-.rtoolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 0.4rem 0.5rem; border-bottom: 1px solid #e6d9bd; background: #f7f0df; }
+.reditor { border: 1px solid #b9bccf; border-radius: 10px; overflow: hidden; background: #ffffff; }
+.rtoolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 0.4rem 0.5rem; border-bottom: 1px solid #d9dbe9; background: #f0f1f8; }
 .rtoolbar button { min-width: 30px; height: 28px; padding: 0 0.5rem; border-radius: 6px; font-size: 0.8rem; color: #6b5f4b; background: transparent; transition: background 0.12s; }
-.rtoolbar button:hover { background: #ece0c6; }
-.sep { width: 1px; height: 18px; background: #ddceb0; margin: 0 4px; }
+.rtoolbar button:hover { background: #e7e8f1; }
+.sep { width: 1px; height: 18px; background: #b9bccf; margin: 0 4px; }
 .uprog { font-size: 0.72rem; color: var(--seal); margin-left: 0.3rem; }
 .rcontent {
   min-height: 240px; max-height: 60vh; overflow-y: auto;
   padding: 0.9rem 1rem; font-size: 0.95rem; line-height: 1.7; color: var(--ink); outline: none;
 }
-.rcontent:empty::before { content: attr(data-ph); color: #a99c84; }
+.rcontent:empty::before { content: attr(data-ph); color: #9a9fbb; }
 .rcontent :deep(h2) { font-family: "Noto Serif KR", serif; font-size: 1.25rem; font-weight: 700; margin: 0.6rem 0 0.3rem; }
-.rcontent :deep(blockquote) { border-left: 3px solid var(--seal); margin: 0.5rem 0; padding: 0.2rem 0.9rem; color: #6b5f4b; background: #f7f0df; border-radius: 0 8px 8px 0; }
+.rcontent :deep(blockquote) { border-left: 3px solid var(--seal); margin: 0.5rem 0; padding: 0.2rem 0.9rem; color: #6b5f4b; background: #f0f1f8; border-radius: 0 8px 8px 0; }
 .rcontent :deep(ul), .rcontent :deep(ol) { padding-left: 1.4rem; margin: 0.4rem 0; }
 .rcontent :deep(a) { color: var(--seal); text-decoration: underline; }
 .rcontent :deep(img) { max-width: 100%; border-radius: 8px; }

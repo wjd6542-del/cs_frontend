@@ -23,9 +23,9 @@ const sub = ref("user");
 .st {
   display: inline-flex; align-items: center; gap: 0.4rem;
   height: 34px; padding: 0 0.9rem; border-radius: 9px;
-  font-size: 0.85rem; font-weight: 600; color: #7a6e5c;
-  background: #f4ead6; border: 1px solid #e2d4b6;
+  font-size: 0.85rem; font-weight: 600; color: #2c2f45;
+  background: #f0f1f8; border: 1px solid #d9dbe9;
 }
-.st:hover { background: #ece0c6; }
-.st.on { color: #fdefe2; background: var(--seal); border-color: #8e2a20; }
+.st:hover { background: #e7e8f1; }
+.st.on { color: #ffffff; background: var(--seal); border-color: #5f3fe0; }
 </style>

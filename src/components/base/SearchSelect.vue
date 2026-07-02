@@ -14,7 +14,7 @@
         <button
           v-if="modelValue !== null && modelValue !== ''"
           @click.stop="clear"
-          class="text-[#a2957f] hover:text-[#b23a2e] transition-colors flex items-center justify-center text-[10px]"
+          class="text-[#9a9fbb] hover:text-[#7a5cff] transition-colors flex items-center justify-center text-[10px]"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -22,7 +22,7 @@
         <i
           class="fa-solid fa-chevron-down transition-transform duration-200 flex items-center justify-center"
           :class="[
-            open ? 'rotate-180 text-[#b23a2e]' : 'text-[#a2957f]',
+            open ? 'rotate-180 text-[#7a5cff]' : 'text-[#9a9fbb]',
             isLargeSize ? 'text-xl' : 'text-[9px]',
           ]"
         ></i>
@@ -35,15 +35,15 @@
         v-if="open"
         ref="dropdown"
         :style="dropdownStyle"
-        class="bg-[#fffdf7] border border-[#e6d9bd] rounded-lg shadow-[0_10px_30px_rgba(120,92,42,0.16)] overflow-hidden"
+        class="bg-[#ffffff] border border-[#d9dbe9] rounded-lg shadow-[0_10px_30px_rgba(120,92,42,0.16)] overflow-hidden"
       >
-        <div class="p-2 bg-[#f7f0df] border-b border-[#e6d9bd]">
+        <div class="p-2 bg-[#f0f1f8] border-b border-[#d9dbe9]">
           <input
             ref="searchInput"
             v-model="keyword"
             type="text"
             :placeholder="searchPlaceholder"
-            class="w-full px-2 py-1.5 text-xs border border-[#cdbf9f] rounded-md focus:outline-none focus:ring-2 focus:ring-[#b23a2e]/15 focus:border-[#b23a2e] bg-[#fffef9]"
+            class="w-full px-2 py-1.5 text-xs border border-[#b9bccf] rounded-md focus:outline-none focus:ring-2 focus:ring-[#7a5cff]/15 focus:border-[#7a5cff] bg-[#ffffff]"
           />
         </div>
 
@@ -51,20 +51,20 @@
           <div
             v-for="item in filteredOptions"
             :key="item[valueKey]"
-            class="px-3 py-1.5 text-xs hover:bg-[#f7f0df] cursor-pointer flex justify-between items-center group transition-colors"
+            class="px-3 py-1.5 text-xs hover:bg-[#f0f1f8] cursor-pointer flex justify-between items-center group transition-colors"
             @click="select(item)"
           >
-            <span class="text-[#4b4235] group-hover:text-[#b23a2e] font-medium">
+            <span class="text-[#2c2f45] group-hover:text-[#7a5cff] font-medium">
               {{ item[labelKey] }}
             </span>
             <i
               v-if="item[valueKey] === modelValue"
-              class="fa-solid fa-check text-[#b23a2e] text-[10px]"
+              class="fa-solid fa-check text-[#7a5cff] text-[10px]"
             ></i>
           </div>
           <div
             v-if="filteredOptions.length === 0"
-            class="px-3 py-5 text-[#a2957f] text-center text-xs"
+            class="px-3 py-5 text-[#9a9fbb] text-center text-xs"
           >
             {{ emptyText }}
           </div>
@@ -140,16 +140,16 @@ export default {
         // 기본값 세팅 (주입된 클래스가 없을 때만)
         !hasHeight && !hasPadding && "h-[30px] px-2",
         !hasPadding && hasHeight && "px-2",
-        !hasBorder && "border border-[#cdbf9f]",
+        !hasBorder && "border border-[#b9bccf]",
         !hasRounded && "rounded-md",
         !hasText && "text-xs",
-        !hasPadding && !hasHeight && "bg-[#fffef9]",
+        !hasPadding && !hasHeight && "bg-[#ffffff]",
         // 부모 주입 클래스
         parentClass,
         // 상태값
         this.open
-          ? "ring-2 ring-[#b23a2e]/15 border-[#b23a2e]"
-          : "hover:border-[#b58f6b]",
+          ? "ring-2 ring-[#7a5cff]/15 border-[#7a5cff]"
+          : "hover:border-[#7a5cff]",
       ];
     },
   },

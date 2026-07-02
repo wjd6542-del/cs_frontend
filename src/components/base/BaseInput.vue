@@ -1,9 +1,9 @@
-﻿<template>
+<template>
   <div class="w-full">
     <!-- label -->
-    <label v-if="label" class="block text-[11px] font-semibold text-[#7a6e5c] mb-1">
+    <label v-if="label" class="form-label">
       {{ label }}
-      <span v-if="required" class="text-[#b23a2e] ml-1">*</span>
+      <span v-if="required" class="text-[color:var(--danger)] ml-0.5">*</span>
     </label>
 
     <!-- input -->
@@ -13,12 +13,12 @@
       :placeholder="placeholder"
       :disabled="disabled"
       @input="updateValue"
-      class="w-full h-[30px] rounded-md border px-2.5 text-xs bg-[#fffef9] text-[color:var(--ink)] transition focus:outline-none focus:ring-2 focus:ring-[#b23a2e]/15 focus:border-[#b23a2e] disabled:bg-[#f1ead9] disabled:cursor-not-allowed placeholder:text-[#c3b596]"
-      :class="error ? 'border-[#b23a2e]' : 'border-[#cdbf9f]'"
+      class="field"
+      :class="error ? '!border-[color:var(--danger)]' : ''"
     />
 
     <!-- error -->
-    <p v-if="error" class="text-[11px] text-[#b23a2e] mt-1">
+    <p v-if="error" class="text-[11px] text-[color:var(--danger)] mt-1 font-semibold">
       {{ error }}
     </p>
   </div>

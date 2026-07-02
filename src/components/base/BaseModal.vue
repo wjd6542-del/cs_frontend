@@ -3,18 +3,18 @@
     <div
       v-for="(entry, index) in modal.stack"
       :key="index"
-      class="fixed inset-0 flex items-center justify-center bg-[#1b1714]/45 backdrop-blur-[2px]"
+      class="fixed inset-0 flex items-center justify-center bg-[#1b1d2e]/55"
       :style="{ zIndex: 200 + index * 10 }"
     >
       <div
-        class="relative bg-[#fffdf7] rounded-2xl shadow-[0_24px_60px_rgba(50,36,14,0.28)] ring-1 ring-[#e6d9bd] w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
+        class="relative bg-white rounded-[4px] border-2 border-[color:var(--line-hard)] shadow-[6px_6px_0_var(--line-hard)] w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
         :class="sizeClass(entry.size)"
       >
         <!-- 공용 닫기 버튼 (우측 상단) -->
         <button
           type="button"
           @click="modal.closeModal()"
-          class="absolute top-2.5 right-2.5 z-10 w-8 h-8 flex items-center justify-center rounded-lg text-[#a2957f] hover:bg-[#efe6d2] hover:text-[#b23a2e] transition"
+          class="absolute top-2.5 right-2.5 z-10 w-8 h-8 flex items-center justify-center rounded-[3px] border-2 border-[color:var(--line-hard)] bg-white text-[color:var(--ink)] shadow-[2px_2px_0_var(--line-hard)] hover:bg-[color:var(--surface-2)] transition"
           aria-label="닫기"
         >
           <i class="fa-solid fa-xmark text-base"></i>
@@ -63,18 +63,18 @@ onBeforeUnmount(() => document.removeEventListener("keydown", handleKeydown));
 <style scoped>
 .modal-enter-active,
 .modal-leave-active {
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-  transform: scale(0.95);
+  transform: translate(4px, 4px);
 }
 
 .modal-enter-to,
 .modal-leave-from {
   opacity: 1;
-  transform: scale(1);
+  transform: translate(0, 0);
 }
 </style>
