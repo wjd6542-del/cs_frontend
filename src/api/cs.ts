@@ -39,6 +39,7 @@ export const settlementApi = {
 // CS 응대 (업체 응대 / 게임사 응대)
 export const supportApi = {
   list: (body = {}) => api.post("/support/list", body).then((r) => r.data),
+  alerts: (body = {}) => api.post("/support/alerts", body).then((r) => r.data),
   get: (id) => api.post("/support/get", { id }).then((r) => r.data),
   save: (body) => api.post("/support/save", body).then((r) => r.data),
   setStatus: (id, status) => api.post("/support/status", { id, status }).then((r) => r.data),

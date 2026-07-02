@@ -24,7 +24,7 @@
           <i class="fa-solid fa-chevron-down chev" :class="{ up: open[f.id] }"></i>
         </div>
         <div v-if="open[f.id]" class="a">
-          <p class="atext">{{ f.answer }}</p>
+          <div class="atext prose" v-html="f.answer"></div>
           <div class="itools">
             <button class="btn btn-xs" @click="openEdit(f)">수정</button>
             <button class="btn btn-xs btn-danger" @click="remove(f)">삭제</button>
@@ -46,7 +46,7 @@
           <BaseInput v-model="form.question" label="질문" />
           <label class="fld">
             <span class="form-label">답변</span>
-            <textarea v-model="form.answer" class="field-auto" rows="5"></textarea>
+            <RichEditor v-model="form.answer" placeholder="답변 내용" />
           </label>
           <BaseInput v-model="form.sort" label="정렬순서" type="number" />
         </div>
@@ -70,6 +70,7 @@ import Pager from "@/components/base/Pager.vue";
 import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import MultiSelect from "@/components/base/MultiSelect.vue";
+import RichEditor from "@/components/base/RichEditor.vue";
 import { faqApi, faqCategoryApi } from "@/api/cs";
 
 const LIMIT = 10;
@@ -148,7 +149,10 @@ onMounted(async () => { await Promise.all([reload(), loadCats()]); });
 .chev { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }
 .chev.up { transform: rotate(180deg); }
 .a { padding: 0 1rem 1rem; border-top: 1px solid var(--line); }
-.atext { font-size: 0.9rem; color: var(--ink-soft); white-space: pre-wrap; line-height: 1.6; padding-top: 0.8rem; }
+.atext { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.6; padding-top: 0.8rem; }
+.atext :deep(img) { max-width: 100%; border-radius: 3px; }
+.atext :deep(ul), .atext :deep(ol) { padding-left: 1.3rem; margin: 0.3rem 0; }
+.atext :deep(a) { color: var(--seal); text-decoration: underline; }
 .itools { display: flex; gap: 0.4rem; margin-top: 0.8rem; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(27, 29, 46, 0.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }

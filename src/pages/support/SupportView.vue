@@ -86,7 +86,7 @@
           </label>
           <label class="fld col2">
             <span class="form-label">내용</span>
-            <textarea v-model="form.content" class="field-auto" rows="4" placeholder="최초 문의/응대 내용"></textarea>
+            <RichEditor v-model="form.content" placeholder="최초 문의/응대 내용" />
           </label>
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
@@ -112,13 +112,13 @@
           <div v-if="!detail.messages.length"><EmptyState icon="✉️" title="아직 대화가 없어요" desc="첫 메시지를 남겨보세요." hint="아래에 입력!" compact /></div>
           <div v-for="m in detail.messages" :key="m.id" class="msgrow" :class="{ internal: m.is_internal }">
             <div class="mmeta"><span v-if="m.is_internal" class="ibadge">내부</span>{{ d(m.created_at, true) }}</div>
-            <div class="mbody">{{ m.content }}</div>
+            <div class="mbody prose" v-html="m.content"></div>
           </div>
         </div>
 
         <div class="reply">
           <label class="chk"><input v-model="reply.is_internal" type="checkbox" /> 내부 메모</label>
-          <textarea v-model="reply.content" class="field-auto" rows="2" placeholder="답변/메모 입력"></textarea>
+          <RichEditor v-model="reply.content" placeholder="답변/메모 입력" />
           <div class="acts">
             <button class="btn btn-primary" :disabled="sending || !reply.content.trim()" @click="sendMessage">전송</button>
             <button class="btn btn-danger" @click="removeTicket">삭제</button>
@@ -133,6 +133,7 @@
 <script setup lang="ts">
 // @ts-nocheck
 import { ref, reactive, computed, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
@@ -140,7 +141,10 @@ import Pager from "@/components/base/Pager.vue";
 import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import VendorTree from "@/components/base/VendorTree.vue";
+import RichEditor from "@/components/base/RichEditor.vue";
 import { supportApi, gameCompanyApi } from "@/api/cs";
+
+const route = useRoute();
 
 const STATUS_OPTS = [
   { value: "OPEN", label: "접수" },
@@ -250,8 +254,25 @@ async function removeTicket() {
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }
 
-watch(() => props.party, async () => { detail.value = null; gkw.value = ""; await loadLeft(); });
-onMounted(loadLeft);
+// 알림 바로가기: ?open=<ticketId> 로 진입하면 해당 티켓을 선택·상세 오픈
+async function handleOpenQuery() {
+  const id = Number(route.query.open);
+  if (!id) return;
+  try {
+    const t = await supportApi.get(id);
+    if (t.party !== props.party) return;
+    selected.value = isVendor.value
+      ? { id: t.vendor_id, name: t.vendor_name }
+      : { id: t.game_company_id, name: t.game_company_name };
+    await reloadTickets();
+    detail.value = t;
+    Object.assign(reply, { content: "", is_internal: false });
+  } catch (e) { /* 없는 티켓이면 무시 */ }
+}
+
+watch(() => props.party, async () => { detail.value = null; gkw.value = ""; await loadLeft(); await handleOpenQuery(); });
+watch(() => route.query.open, handleOpenQuery);
+onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 </script>
 
 <style scoped>
@@ -312,7 +333,11 @@ onMounted(loadLeft);
 .msgrow.internal { background: #fffbeb; border-color: #fde68a; }
 .mmeta { font-size: 0.7rem; color: var(--ink-faint); margin-bottom: 0.3rem; display: flex; gap: 0.4rem; align-items: center; }
 .ibadge { font-size: 0.62rem; font-weight: 700; color: #b45309; background: #fef3c7; padding: 0.05rem 0.35rem; border-radius: 3px; }
-.mbody { font-size: 0.88rem; color: var(--ink); white-space: pre-wrap; }
+.mbody { font-size: 0.88rem; color: var(--ink); line-height: 1.6; }
+.mbody :deep(img) { max-width: 100%; border-radius: 3px; margin: 0.3rem 0; }
+.mbody :deep(ul), .mbody :deep(ol) { padding-left: 1.3rem; margin: 0.3rem 0; }
+.mbody :deep(a) { color: var(--seal); text-decoration: underline; }
+.mbody :deep(blockquote) { border-left: 3px solid var(--seal); padding-left: 0.7rem; color: var(--ink-muted); margin: 0.4rem 0; }
 .reply .chk { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: var(--ink-muted); margin-bottom: 0.4rem; }
 .msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; } .msg.err { color: var(--danger); }
 .acts { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
