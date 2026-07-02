@@ -1,16 +1,16 @@
 <template>
   <aside class="side" :class="{ open, mobile: isMobile, closed: !open }">
+    <div class="scan" aria-hidden="true"></div>
     <div class="brand">
       <div class="mark" aria-hidden="true">CS</div>
       <div v-if="open" class="word">
-        <span class="ko">CS ERP</span>
-        <span class="sub">고객센터 관리</span>
+        <span class="ko">CS</span>
+        <span class="sub">SETTLEMENT DESK</span>
       </div>
     </div>
 
     <nav class="menu">
       <template v-for="m in menus" :key="m.label">
-        <!-- 단일 링크 -->
         <RouterLink
           v-if="m.to"
           :to="m.to"
@@ -23,7 +23,6 @@
           <span v-if="open" class="lbl">{{ m.label }}</span>
         </RouterLink>
 
-        <!-- 하위 메뉴 그룹 -->
         <template v-else>
           <div class="item group" :class="{ on: groupActive(m) }" :title="m.label" @click="toggle(m)">
             <i class="fa-solid ic" :class="m.icon"></i>
@@ -47,15 +46,14 @@
       </template>
     </nav>
 
-    <div v-if="open" class="foot">CS ERP · 고객센터</div>
+    <div v-if="open" class="foot">v0.1 · READY ▮</div>
   </aside>
 </template>
 
 <script setup lang="ts">
 // @ts-nocheck
-import { reactive, computed, onMounted, watch } from "vue";
+import { reactive, computed, onMounted, watch, ref } from "vue";
 import { useRoute } from "vue-router";
-import { ref } from "vue";
 import { boardApi } from "@/api/board";
 
 defineProps({ open: { type: Boolean, default: true }, isMobile: { type: Boolean, default: false } });
@@ -94,12 +92,8 @@ function isActive(m) {
   if (m.exact) return route.path === m.to;
   return route.path === m.to || route.path.startsWith(m.to + "/");
 }
-function groupActive(m) {
-  return (m.children || []).some((c) => isActive(c));
-}
-function toggle(m) {
-  expanded[m.label] = !expanded[m.label];
-}
+function groupActive(m) { return (m.children || []).some((c) => isActive(c)); }
+function toggle(m) { expanded[m.label] = !expanded[m.label]; }
 
 async function load() {
   try { boards.value = await boardApi.list(); } catch (e) { boards.value = []; }
@@ -109,35 +103,36 @@ watch(() => route.path, (p) => { if (p.startsWith("/board") || p.startsWith("/po
 </script>
 
 <style scoped>
-.side { width: 236px; flex-shrink: 0; height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; color: #cbd5e1; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid rgba(148, 163, 184, 0.12); transition: width 0.25s ease, transform 0.25s ease; }
-.side.closed { width: 70px; }
-.brand { height: 64px; display: flex; align-items: center; gap: 0.7rem; padding: 0 1rem; border-bottom: 1px solid rgba(148, 163, 184, 0.12); }
-.mark { flex-shrink: 0; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 9px; font-weight: 800; font-size: 0.9rem; line-height: 1; color: #fff; letter-spacing: -0.5px; background: linear-gradient(145deg, #6366f1, #4f46e5 60%, #4338ca); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4); }
-.word { display: flex; flex-direction: column; line-height: 1.1; overflow: hidden; }
-.word .ko { font-weight: 800; font-size: 1.05rem; color: #f1f5f9; letter-spacing: 0.02em; }
-.word .sub { font-size: 0.66rem; color: #94a3b8; }
+.side { position: relative; width: 236px; flex-shrink: 0; height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; color: #d7d9e8; background: #16182a; border-right: 3px solid var(--line-hard); transition: width 0.2s ease, transform 0.2s ease; overflow: hidden; }
+.side.closed { width: 72px; }
+.scan { position: absolute; inset: 0; pointer-events: none; opacity: 0.35; background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 2px, transparent 2px 4px); }
 
-.menu { flex: 1; padding: 0.75rem 0.6rem; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
-.item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.7rem; border-radius: 9px; color: rgba(203, 213, 225, 0.75); font-size: 0.9rem; font-weight: 500; text-decoration: none; position: relative; transition: background 0.15s, color 0.15s; cursor: pointer; }
+.brand { position: relative; z-index: 1; height: 64px; display: flex; align-items: center; gap: 0.7rem; padding: 0 1rem; border-bottom: 2px solid rgba(122, 92, 255, 0.25); }
+.mark { flex-shrink: 0; width: 40px; height: 40px; display: grid; place-items: center; font-family: var(--font-pixel); font-weight: 700; font-size: 1rem; color: #fff; background: var(--seal); border: 2px solid #0d0e1a; box-shadow: 3px 3px 0 #0d0e1a; letter-spacing: 0.02em; }
+.word { display: flex; flex-direction: column; line-height: 1.15; overflow: hidden; }
+.word .ko { font-family: var(--font-pixel); font-size: 1.1rem; color: #fff; letter-spacing: 0.04em; }
+.word .sub { font-family: var(--font-pixel); font-size: 0.58rem; color: #8b90b8; letter-spacing: 0.1em; }
+
+.menu { position: relative; z-index: 1; flex: 1; padding: 0.75rem 0.6rem; display: flex; flex-direction: column; gap: 3px; overflow-y: auto; }
+.item { display: flex; align-items: center; gap: 0.7rem; padding: 0.55rem 0.7rem; color: rgba(215, 217, 232, 0.72); font-size: 0.86rem; font-weight: 600; text-decoration: none; position: relative; transition: background 0.12s, color 0.12s; cursor: pointer; border: 2px solid transparent; border-radius: 3px; }
 .closed .item { justify-content: center; }
-.item .ic { width: 20px; text-align: center; font-size: 0.95rem; color: rgba(148, 163, 184, 0.7); transition: color 0.15s; }
-.item:hover { background: rgba(148, 163, 184, 0.1); color: #f1f5f9; }
-.item:hover .ic { color: #cbd5e1; }
-.item.on { background: rgba(79, 70, 229, 0.22); color: #fff; }
-.item.on .ic { color: #a5b4fc; }
-.item.on::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: 3px; border-radius: 0 3px 3px 0; background: #6366f1; }
-.chev { margin-left: auto; font-size: 0.65rem; opacity: 0.5; transition: transform 0.2s; }
+.item .ic { width: 20px; text-align: center; font-size: 0.95rem; color: rgba(154, 159, 187, 0.8); transition: color 0.12s; }
+.item:hover { background: rgba(122, 92, 255, 0.12); color: #fff; }
+.item:hover .ic { color: #c3b7ff; }
+.item.on { background: rgba(122, 92, 255, 0.2); color: #fff; border-color: var(--seal); box-shadow: 2px 2px 0 #0d0e1a; }
+.item.on .ic { color: #c3b7ff; }
+.chev { margin-left: auto; font-size: 0.62rem; opacity: 0.5; transition: transform 0.2s; }
 .chev.up { transform: rotate(180deg); }
 
-.children { display: flex; flex-direction: column; gap: 1px; margin: 2px 0 4px 0.7rem; padding-left: 0.5rem; border-left: 1px solid rgba(148, 163, 184, 0.15); }
-.child { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.6rem; border-radius: 8px; font-size: 0.85rem; color: rgba(203, 213, 225, 0.65); text-decoration: none; transition: background 0.14s, color 0.14s; }
-.child .dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(148, 163, 184, 0.5); }
-.child:hover { background: rgba(148, 163, 184, 0.08); color: #f1f5f9; }
+.children { display: flex; flex-direction: column; gap: 1px; margin: 2px 0 4px 0.85rem; padding-left: 0.55rem; border-left: 2px solid rgba(122, 92, 255, 0.22); }
+.child { display: flex; align-items: center; gap: 0.5rem; padding: 0.42rem 0.6rem; border-radius: 3px; font-size: 0.82rem; color: rgba(215, 217, 232, 0.6); text-decoration: none; transition: background 0.12s, color 0.12s; }
+.child .dot { width: 5px; height: 5px; background: rgba(154, 159, 187, 0.6); }
+.child:hover { background: rgba(122, 92, 255, 0.1); color: #fff; }
 .child.on { color: #fff; }
-.child.on .dot { background: #6366f1; }
-.child.empty { color: rgba(148, 163, 184, 0.35); cursor: default; }
+.child.on .dot { background: var(--seal); }
+.child.empty { color: rgba(154, 159, 187, 0.35); cursor: default; }
 
-.foot { padding: 0.9rem 1rem; font-size: 0.68rem; letter-spacing: 0.04em; color: rgba(148, 163, 184, 0.4); border-top: 1px solid rgba(148, 163, 184, 0.12); }
-.side.mobile { position: fixed; left: 0; top: 0; z-index: 60; box-shadow: 0 0 40px rgba(0, 0, 0, 0.5); }
+.foot { position: relative; z-index: 1; padding: 0.8rem 1rem; font-family: var(--font-pixel); font-size: 0.62rem; letter-spacing: 0.08em; color: rgba(154, 159, 187, 0.5); border-top: 2px solid rgba(122, 92, 255, 0.18); }
+.side.mobile { position: fixed; left: 0; top: 0; z-index: 60; box-shadow: 6px 0 0 rgba(13, 14, 26, 0.4); }
 .side.mobile.closed { transform: translateX(-100%); width: 236px; }
 </style>

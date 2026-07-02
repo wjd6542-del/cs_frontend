@@ -208,12 +208,12 @@ onMounted(async () => { await Promise.all([reload(), loadParties()]); });
 .r { text-align: right; } .c { text-align: center; }
 .w-act { width: 190px; }
 .nm { font-weight: 700; } .muted { color: var(--ink-muted); }
-.pos { color: #059669; } .neg { color: #dc2626; }
+.pos { color: var(--flow-in); } .neg { color: #dc2626; }
 .state { text-align: center; padding: 1.6rem 0; color: var(--ink-faint); }
 .tag { font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px; }
 .tag.pending { color: #b45309; background: #fef3c7; }
 .tag.partial { color: #4f46e5; background: #e0e7ff; }
-.tag.done { color: #047857; background: #d1fae5; }
+.tag.done { color: #047857; background: var(--flow-in-bg); }
 .btn-xs + .btn-xs { margin-left: 0.3rem; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; }

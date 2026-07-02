@@ -4,51 +4,69 @@
 
 @layer base {
   :root {
-    /* 텍스트 계조 (slate) */
-    --ink: #0f172a;
-    --ink-soft: #1e293b;
-    --ink-muted: #64748b;
-    --ink-faint: #94a3b8;
+    /* 콘솔 네이비 계조 */
+    --ink: #1b1d2e;
+    --ink-soft: #2c2f45;
+    --ink-muted: #5b607d;
+    --ink-faint: #9a9fbb;
 
-    /* 표면/경계 */
-    --paper: #f1f5f9;      /* 앱 배경 */
-    --surface: #ffffff;    /* 카드 */
-    --surface-2: #f8fafc;  /* 옅은 패널 */
-    --hanji: #f1f5f9;
-    --hanji-deep: #e2e8f0;
-    --line: #e2e8f0;       /* 기본 경계 */
-    --line-strong: #cbd5e1;
+    /* 표면/경계 (쿨 픽셀 페이퍼) */
+    --paper: #e7e8f1;
+    --surface: #ffffff;
+    --surface-2: #f0f1f8;
+    --hanji: #e7e8f1;
+    --hanji-deep: #d7d9e8;
+    --line: #d9dbe9;         /* 옅은 구분선 (테이블 등) */
+    --line-strong: #b9bccf;
+    --line-hard: #1b1d2e;    /* 픽셀 하드 보더 */
 
-    /* 강조 (indigo) */
-    --seal: #4f46e5;
-    --seal-deep: #4338ca;
-    --gold: #0ea5e9;
-    --seal-grad: linear-gradient(180deg, #6366f1, #4f46e5 55%, #4338ca);
+    /* 아케이드 바이올렛 — 브랜드/활성/링크 */
+    --seal: #7a5cff;
+    --seal-deep: #5f3fe0;
+    --gold: #ff9f1c;
+    --seal-grad: linear-gradient(180deg, #8a6bff, #7a5cff 55%, #5f3fe0);
 
-    /* 효과 */
-    --radius: 12px;
-    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-    --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.10);
-    --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.16);
-    --ring: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    /* 방향성 머니 플로우 */
+    --flow-in: #0ea88f;      /* 회수 (money in) */
+    --flow-in-bg: #d2f4ee;
+    --flow-out: #e07d16;     /* 지급 (money out) */
+    --flow-out-bg: #ffe8cf;
+    --danger: #e23b46;
+
+    /* 픽셀 폰트 */
+    --font-pixel: "Galmuri11", "Galmuri", monospace;
+    --font-body: "Pretendard", "Galmuri11", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+    /* 효과 — 하드(블러 없음) 오프셋 그림자 */
+    --radius: 3px;
+    --shadow-sm: 2px 2px 0 rgba(27, 29, 46, 0.16);
+    --shadow-md: 4px 4px 0 rgba(27, 29, 46, 0.14);
+    --shadow-lg: 6px 6px 0 rgba(27, 29, 46, 0.16);
+    --shadow-hard: 3px 3px 0 var(--line-hard);
+    --ring: 0 0 0 3px rgba(122, 92, 255, 0.24);
   }
 
   html,
   body {
-    font-family: "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: var(--font-body);
     color: var(--ink);
   }
 
   body {
     background-color: var(--paper);
+    /* 아주 옅은 픽셀 도트 격자 배경 */
+    background-image: radial-gradient(rgba(27, 29, 46, 0.05) 1px, transparent 1px);
+    background-size: 4px 4px;
   }
 
-  h1, h2, h3, h4 {
-    font-family: "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+  /* 표시용 제목·라벨은 픽셀 폰트 */
+  h1, h2, h3, h4, .pixel {
+    font-family: var(--font-pixel);
+    letter-spacing: 0.01em;
   }
 
   ::selection {
-    background: rgba(79, 70, 229, 0.18);
+    background: rgba(122, 92, 255, 0.24);
     color: var(--ink);
   }
 
@@ -59,19 +77,11 @@
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: #b9bccf transparent;
   }
   *::-webkit-scrollbar { width: 10px; height: 10px; }
-  *::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border: 2px solid transparent;
-    background-clip: padding-box;
-    border-radius: 999px;
-  }
-  *::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-    background-clip: padding-box;
-  }
+  *::-webkit-scrollbar-thumb { background: #b9bccf; border: 2px solid transparent; background-clip: padding-box; }
+  *::-webkit-scrollbar-thumb:hover { background: #9a9fbb; background-clip: padding-box; }
   *::-webkit-scrollbar-track { background: transparent; }
 
   @media (prefers-reduced-motion: reduce) {
@@ -84,140 +94,97 @@
 }
 
 @layer components {
-  /* 공통 폼 필드 (input/select/textarea) - 높이 30px 통일 */
+  /* 공통 폼 필드 — 각진 픽셀 보더 */
   .field {
-    @apply w-full h-[30px] px-2.5 text-xs bg-[#fffef9] border border-[#cdbf9f] rounded-md
+    @apply w-full h-[34px] px-2.5 text-xs bg-white rounded-[3px]
+           border-2 border-[color:var(--line-strong)]
            transition outline-none text-[color:var(--ink)]
-           focus:ring-2 focus:ring-[#b23a2e]/15 focus:border-[#b23a2e]
-           disabled:bg-[#f1ead9] disabled:cursor-not-allowed;
+           focus:border-[color:var(--seal)] focus:shadow-[0_0_0_3px_rgba(122,92,255,0.24)]
+           disabled:bg-[color:var(--surface-2)] disabled:cursor-not-allowed;
   }
-  /* textarea 등 높이 고정이 곤란한 경우 */
   .field-auto {
-    @apply w-full min-h-[30px] px-2.5 py-1.5 text-xs bg-[#fffef9] border border-[#cdbf9f] rounded-md
+    @apply w-full min-h-[34px] px-2.5 py-1.5 text-xs bg-white rounded-[3px]
+           border-2 border-[color:var(--line-strong)]
            transition outline-none text-[color:var(--ink)]
-           focus:ring-2 focus:ring-[#b23a2e]/15 focus:border-[#b23a2e]
-           disabled:bg-[#f1ead9] disabled:cursor-not-allowed;
+           focus:border-[color:var(--seal)] focus:shadow-[0_0_0_3px_rgba(122,92,255,0.24)]
+           disabled:bg-[color:var(--surface-2)] disabled:cursor-not-allowed;
   }
-  .field-xs {
-    @apply h-[26px] px-2 text-[11px];
-  }
+  .field-xs { @apply h-[28px] px-2 text-[11px]; }
 
-  /* 셀 내부 인풋 (테이블/목록용) */
   .cell-input {
-    @apply w-full px-2 py-1 text-xs bg-[#fffef9] border border-[#e6d9bd] rounded-md
-           outline-none transition
-           focus:ring-2 focus:ring-[#b23a2e]/12 focus:border-[#b23a2e]
-           placeholder:text-[#c3b596];
+    @apply w-full px-2 py-1 text-xs bg-white rounded-[3px] border-2 border-[color:var(--line-strong)]
+           outline-none transition focus:border-[color:var(--seal)]
+           placeholder:text-[color:var(--ink-faint)];
   }
 
-  /* 공통 버튼 베이스 (한지 톤) */
+  /* 픽셀 버튼 — 각진 보더 + 하드 오프셋 그림자, 누르면 쑥 */
   .btn {
-    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs
-           font-semibold rounded-lg border border-[#ddceb0] bg-[#f4ead6] text-[#6f6455]
-           transition active:scale-[0.98]
-           hover:bg-[#ece0c6] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-1.5 px-3 h-[34px] text-xs
+           font-semibold rounded-[3px] border-2 border-[color:var(--line-hard)]
+           bg-white text-[color:var(--ink)]
+           transition-all duration-75
+           hover:-translate-x-[1px] hover:-translate-y-[1px]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+    box-shadow: 2px 2px 0 var(--line-hard);
+    font-family: var(--font-pixel);
   }
-  .btn-xs {
-    @apply px-2 py-1 text-[11px] gap-1;
-  }
-  /* 인장 강조 버튼 */
-  .btn-primary {
-    @apply text-[#fdefe2] border-[#8e2a20]
-           bg-gradient-to-b from-[#bd4133] via-[#b23a2e] to-[#9c2c22]
-           hover:brightness-105 hover:bg-[#b23a2e];
-  }
-  .btn-danger {
-    @apply bg-[#b23a2e] border-[#8e2a20] text-white hover:bg-[#9c2c22];
-  }
-  .btn-ghost {
-    @apply bg-transparent border-transparent text-[#6f6455] hover:bg-[#efe6d2];
-  }
+  .btn:hover { box-shadow: 3px 3px 0 var(--line-hard); }
+  .btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line-hard); }
+  .btn-xs { @apply px-2 h-[26px] text-[11px] gap-1; box-shadow: 2px 2px 0 var(--line-hard); }
 
-  /* 폼 라벨 */
-  .form-label {
-    @apply block text-[11px] font-semibold text-[#7a6e5c] mb-1;
-  }
+  .btn-primary { @apply text-white border-[color:var(--line-hard)]; background: var(--seal); }
+  .btn-primary:hover { background: #8a6bff; }
+  .btn-danger { @apply text-white border-[color:var(--line-hard)]; background: var(--danger); }
+  .btn-ghost { @apply bg-transparent border-transparent text-[color:var(--ink-muted)] shadow-none hover:bg-[color:var(--surface-2)]; }
+  .btn-ghost:hover { box-shadow: none; transform: none; }
 
-  /* 테이블 셀 (얇고 작은 테이블용) */
+  .form-label { @apply block text-[11px] font-bold text-[color:var(--ink-soft)] mb-1; }
+
+  /* 테이블 셀 */
   .th {
-    @apply px-2 py-1.5 text-[11px] font-semibold text-[#7a6e5c] border border-[#e6d9bd]
-           bg-[#f4ead6] uppercase tracking-wide;
+    @apply px-2 py-1.5 text-[11px] font-bold text-[color:var(--ink-muted)]
+           border-b-2 border-[color:var(--line-strong)] bg-[color:var(--surface-2)] tracking-wide;
+    font-family: var(--font-pixel);
   }
-  .td {
-    @apply px-2 py-1 align-middle border border-[#efe6d2];
+  .td { @apply px-2 py-1 align-middle border-b border-[color:var(--line)]; }
+
+  /* 픽셀 카드 (컨테이너) */
+  .pcard {
+    @apply bg-white rounded-[4px] border-2 border-[color:var(--line-hard)];
+    box-shadow: var(--shadow-hard);
   }
 
-  /* 상태/카테고리 표시용 통일 뱃지 */
+  /* HUD 숫자 (금액 등) */
+  .num { font-family: var(--font-pixel); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+
+  /* 상태/카테고리 뱃지 — 각진 픽셀 */
   .badge {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold whitespace-nowrap;
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-[3px] text-[11px] font-bold whitespace-nowrap
+           border border-[color:var(--line-hard)];
+    font-family: var(--font-pixel);
   }
-  .badge-icon {
-    @apply text-[10px];
-  }
-  .badge-success {
-    @apply bg-emerald-50 text-emerald-600;
-  }
-  .badge-error {
-    @apply bg-[#f6e3df] text-[#b23a2e];
-  }
-  .badge-warning {
-    @apply bg-amber-50 text-amber-600;
-  }
-  .badge-info {
-    @apply bg-[#efe6d2] text-[#8a7d68];
-  }
-  .badge-indigo {
-    @apply bg-indigo-50 text-indigo-600;
-  }
-  .badge-neutral {
-    @apply bg-[#efe6d2] text-[#7a6e5c];
-  }
-  .badge-muted {
-    @apply text-[#c3b596] font-normal;
-  }
+  .badge-icon { @apply text-[10px]; }
+  .badge-in { background: var(--flow-in-bg); color: var(--flow-in); }
+  .badge-out { background: var(--flow-out-bg); color: var(--flow-out); }
+  .badge-success { @apply bg-emerald-50 text-emerald-700; }
+  .badge-error { background: #fbe0e2; color: var(--danger); }
+  .badge-warning { @apply bg-amber-50 text-amber-700; }
+  .badge-info { background: #ede9ff; color: var(--seal-deep); }
+  .badge-indigo { background: #ede9ff; color: var(--seal-deep); }
+  .badge-neutral { @apply bg-[color:var(--surface-2)] text-[color:var(--ink-muted)]; }
+  .badge-muted { @apply text-[color:var(--ink-faint)] font-normal border-transparent; }
 }
 
-/* ========================= */
-/* 전표/라벨 인쇄 (utils/print.ts와 짝)
-   인쇄 시점에 .print-area를 body 직속으로 복제한 #voucher-print-clone만 보여주고
-   나머지 body 자식(모달 오버레이/사이드바/헤더 등)은 모두 숨긴다.
-   ========================= */
 @media print {
-  /* 모달 박스의 max-h/overflow-hidden 영향 차단 */
-  html, body {
-    height: auto !important;
-    overflow: visible !important;
-    background: white !important;
-  }
-
-  body > *:not(#voucher-print-clone) {
-    display: none !important;
-  }
-
+  html, body { height: auto !important; overflow: visible !important; background: white !important; }
+  body > *:not(#voucher-print-clone) { display: none !important; }
   #voucher-print-clone {
-    position: static !important;
-    width: 100% !important;
-    max-height: none !important;
-    overflow: visible !important;
-    opacity: 1 !important;
-    z-index: auto !important;
-    pointer-events: auto !important;
-    box-shadow: none !important;
-    border: none !important;
-    background: white !important;
-    color: #111 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    position: static !important; width: 100% !important; max-height: none !important;
+    overflow: visible !important; opacity: 1 !important; z-index: auto !important;
+    pointer-events: auto !important; box-shadow: none !important; border: none !important;
+    background: white !important; color: #111 !important;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
-
-  #voucher-print-clone * {
-    visibility: visible !important;
-    max-height: none !important;
-    overflow: visible !important;
-  }
-
-  /* 인쇄에서 노출 안 되어야 하는 컨트롤 */
-  .no-print {
-    display: none !important;
-  }
+  #voucher-print-clone * { visibility: visible !important; max-height: none !important; overflow: visible !important; }
+  .no-print { display: none !important; }
 }

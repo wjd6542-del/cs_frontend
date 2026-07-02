@@ -177,7 +177,7 @@ onMounted(async () => { await Promise.all([reload(), loadParties()]); });
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0.9rem 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
 .card .lbl { font-size: 0.76rem; color: var(--ink-muted); font-weight: 600; }
 .card .val { font-size: 1.35rem; font-weight: 800; color: var(--ink); }
-.val.pos { color: #059669; } .val.neg { color: #dc2626; }
+.val.pos { color: var(--flow-in); } .val.neg { color: #dc2626; }
 
 .filters { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.8rem; }
 .tilde { color: var(--ink-faint); }
@@ -189,12 +189,12 @@ onMounted(async () => { await Promise.all([reload(), loadParties()]); });
 .tbl tbody tr:last-child td { border-bottom: none; }
 .r { text-align: right; } .c { text-align: center; }
 .w-act { width: 120px; }
-.amt { font-weight: 700; } .amt.pos { color: #059669; } .amt.neg { color: #dc2626; }
+.amt { font-weight: 700; } .amt.pos { color: var(--flow-in); } .amt.neg { color: #dc2626; }
 .muted { color: var(--ink-muted); } .xs { font-size: 0.72rem; } .ml { margin-left: 0.4rem; }
 .state { text-align: center; padding: 1.6rem 0; color: var(--ink-faint); }
 .tag { font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 999px; }
 .tag.pay { color: #dc2626; background: #fee2e2; }
-.tag.col { color: #059669; background: #d1fae5; }
+.tag.col { color: var(--flow-in); background: var(--flow-in-bg); }
 .btn-xs + .btn-xs { margin-left: 0.3rem; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; }
