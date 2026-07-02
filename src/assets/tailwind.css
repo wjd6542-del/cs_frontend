@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 텍스트 계조 (slate) */
+    --ink: #0f172a;
+    --ink-soft: #1e293b;
+    --ink-muted: #64748b;
+    --ink-faint: #94a3b8;
+
+    /* 표면/경계 */
+    --paper: #f1f5f9;      /* 앱 배경 */
+    --surface: #ffffff;    /* 카드 */
+    --surface-2: #f8fafc;  /* 옅은 패널 */
+    --hanji: #f1f5f9;
+    --hanji-deep: #e2e8f0;
+    --line: #e2e8f0;       /* 기본 경계 */
+    --line-strong: #cbd5e1;
+
+    /* 강조 (indigo) */
+    --seal: #4f46e5;
+    --seal-deep: #4338ca;
+    --gold: #0ea5e9;
+    --seal-grad: linear-gradient(180deg, #6366f1, #4f46e5 55%, #4338ca);
+
+    /* 효과 */
+    --radius: 12px;
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.10);
+    --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.16);
+    --ring: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  }
+
+  html,
+  body {
+    font-family: "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+  }
+
+  body {
+    background-color: var(--paper);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Pretendard", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  ::selection {
+    background: rgba(79, 70, 229, 0.18);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--seal);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-track { background: transparent; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* 공통 폼 필드 (input/select/textarea) - 높이 30px 통일 */
+  .field {
+    @apply w-full h-[30px] px-2.5 text-xs bg-[#fffef9] border border-[#cdbf9f] rounded-md
+           transition outline-none text-[color:var(--ink)]
+           focus:ring-2 focus:ring-[#b23a2e]/15 focus:border-[#b23a2e]
+           disabled:bg-[#f1ead9] disabled:cursor-not-allowed;
+  }
+  /* textarea 등 높이 고정이 곤란한 경우 */
+  .field-auto {
+    @apply w-full min-h-[30px] px-2.5 py-1.5 text-xs bg-[#fffef9] border border-[#cdbf9f] rounded-md
+           transition outline-none text-[color:var(--ink)]
+           focus:ring-2 focus:ring-[#b23a2e]/15 focus:border-[#b23a2e]
+           disabled:bg-[#f1ead9] disabled:cursor-not-allowed;
+  }
+  .field-xs {
+    @apply h-[26px] px-2 text-[11px];
+  }
+
+  /* 셀 내부 인풋 (테이블/목록용) */
+  .cell-input {
+    @apply w-full px-2 py-1 text-xs bg-[#fffef9] border border-[#e6d9bd] rounded-md
+           outline-none transition
+           focus:ring-2 focus:ring-[#b23a2e]/12 focus:border-[#b23a2e]
+           placeholder:text-[#c3b596];
+  }
+
+  /* 공통 버튼 베이스 (한지 톤) */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs
+           font-semibold rounded-lg border border-[#ddceb0] bg-[#f4ead6] text-[#6f6455]
+           transition active:scale-[0.98]
+           hover:bg-[#ece0c6] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-xs {
+    @apply px-2 py-1 text-[11px] gap-1;
+  }
+  /* 인장 강조 버튼 */
+  .btn-primary {
+    @apply text-[#fdefe2] border-[#8e2a20]
+           bg-gradient-to-b from-[#bd4133] via-[#b23a2e] to-[#9c2c22]
+           hover:brightness-105 hover:bg-[#b23a2e];
+  }
+  .btn-danger {
+    @apply bg-[#b23a2e] border-[#8e2a20] text-white hover:bg-[#9c2c22];
+  }
+  .btn-ghost {
+    @apply bg-transparent border-transparent text-[#6f6455] hover:bg-[#efe6d2];
+  }
+
+  /* 폼 라벨 */
+  .form-label {
+    @apply block text-[11px] font-semibold text-[#7a6e5c] mb-1;
+  }
+
+  /* 테이블 셀 (얇고 작은 테이블용) */
+  .th {
+    @apply px-2 py-1.5 text-[11px] font-semibold text-[#7a6e5c] border border-[#e6d9bd]
+           bg-[#f4ead6] uppercase tracking-wide;
+  }
+  .td {
+    @apply px-2 py-1 align-middle border border-[#efe6d2];
+  }
+
+  /* 상태/카테고리 표시용 통일 뱃지 */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold whitespace-nowrap;
+  }
+  .badge-icon {
+    @apply text-[10px];
+  }
+  .badge-success {
+    @apply bg-emerald-50 text-emerald-600;
+  }
+  .badge-error {
+    @apply bg-[#f6e3df] text-[#b23a2e];
+  }
+  .badge-warning {
+    @apply bg-amber-50 text-amber-600;
+  }
+  .badge-info {
+    @apply bg-[#efe6d2] text-[#8a7d68];
+  }
+  .badge-indigo {
+    @apply bg-indigo-50 text-indigo-600;
+  }
+  .badge-neutral {
+    @apply bg-[#efe6d2] text-[#7a6e5c];
+  }
+  .badge-muted {
+    @apply text-[#c3b596] font-normal;
+  }
+}
+
+/* ========================= */
+/* 전표/라벨 인쇄 (utils/print.ts와 짝)
+   인쇄 시점에 .print-area를 body 직속으로 복제한 #voucher-print-clone만 보여주고
+   나머지 body 자식(모달 오버레이/사이드바/헤더 등)은 모두 숨긴다.
+   ========================= */
+@media print {
+  /* 모달 박스의 max-h/overflow-hidden 영향 차단 */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  body > *:not(#voucher-print-clone) {
+    display: none !important;
+  }
+
+  #voucher-print-clone {
+    position: static !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    z-index: auto !important;
+    pointer-events: auto !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  #voucher-print-clone * {
+    visibility: visible !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* 인쇄에서 노출 안 되어야 하는 컨트롤 */
+  .no-print {
+    display: none !important;
+  }
+}
