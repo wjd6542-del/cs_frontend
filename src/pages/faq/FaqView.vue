@@ -147,7 +147,7 @@ onMounted(async () => { await Promise.all([reload(), loadCats()]); });
 .phead { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.1rem; }
 .eyebrow { font-family: var(--font-pixel); font-size: 0.66rem; letter-spacing: 0.16em; color: var(--seal); }
 .ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
-.msbox { width: 16rem; }
+.msbox { width: 12rem; }
 
 .listcard { background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); }
 .list { display: flex; flex-direction: column; gap: 0.5rem; }

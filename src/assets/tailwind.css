@@ -154,7 +154,7 @@
     box-shadow: var(--shadow-hard);
   }
 
-  /* 검색/필터 바 — 테이블 영역과 명확히 분리되는 별도 카드 */
+  /* 검색/필터 바 — 테이블 영역과 분리된 별도 카드. 한 줄 가로 정렬(좁으면 줄바꿈) */
   .filterbar {
     @apply flex items-center gap-2 flex-wrap bg-white rounded-[4px] px-3 py-2.5 mb-3
            border-2 border-[color:var(--line-hard)];
@@ -168,6 +168,14 @@
     margin-right: 0.35rem;
     padding-right: 0.55rem;
     border-right: 2px solid var(--line);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  /* 필터 항목 라벨 */
+  .filterbar .f-label {
+    font-family: var(--font-pixel);
+    font-size: 0.62rem;
+    color: var(--ink-faint);
     white-space: nowrap;
   }
 
