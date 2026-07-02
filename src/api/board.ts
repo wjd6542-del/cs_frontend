@@ -17,7 +17,7 @@ export const boardApi = {
   save: (body) => api.post("/board/save", body).then((r) => r.data),
   remove: (id) => api.post("/board/delete", { id }).then((r) => r.data),
   // post
-  postList: (board_id, cursor = null, take = 20) => api.post("/post/list", { board_id, cursor, take }).then((r) => r.data),
+  postList: (board_id, page = 1, limit = 20) => api.post("/post/list", { board_id, page, limit }).then((r) => r.data),
   postGet: (id) => api.post("/post/get", { id }).then((r) => r.data),
   postSave: (body) => api.post("/post/save", body).then((r) => r.data),
   postDelete: (id) => api.post("/post/delete", { id }).then((r) => r.data),

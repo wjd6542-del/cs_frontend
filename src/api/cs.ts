@@ -54,3 +54,10 @@ export const faqApi = {
   save: (body) => api.post("/faq/save", body).then((r) => r.data),
   remove: (id) => api.post("/faq/delete", { id }).then((r) => r.data),
 };
+
+// FAQ 분류 (환경설정)
+export const faqCategoryApi = {
+  list: (body = {}) => api.post("/faqCategory/list", body).then((r) => r.data),
+  save: (body) => api.post("/faqCategory/save", body).then((r) => r.data),
+  remove: (id) => api.post("/faqCategory/delete", { id }).then((r) => r.data),
+};

@@ -125,7 +125,7 @@ async function openPost(id) { try { modalPost.value = await boardApi.postGet(id)
 onMounted(async () => {
   try {
     noticeBoard.value = await boardApi.get("notice");
-    const res = await boardApi.postList(noticeBoard.value.id, null, 5);
+    const res = await boardApi.postList(noticeBoard.value.id, 1, 5);
     notices.value = [...(res.notices || []), ...(res.rows || [])].slice(0, 5);
   } catch (e) { /* skip */ }
   try {

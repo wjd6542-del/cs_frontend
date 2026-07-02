@@ -154,6 +154,23 @@
     box-shadow: var(--shadow-hard);
   }
 
+  /* 검색/필터 바 — 테이블 영역과 명확히 분리되는 별도 카드 */
+  .filterbar {
+    @apply flex items-center gap-2 flex-wrap bg-white rounded-[4px] px-3 py-2.5 mb-3
+           border-2 border-[color:var(--line-hard)];
+    box-shadow: var(--shadow-hard);
+  }
+  .filterbar::before {
+    content: "🔍 검색";
+    font-family: var(--font-pixel);
+    font-size: 0.68rem;
+    color: var(--ink-muted);
+    margin-right: 0.35rem;
+    padding-right: 0.55rem;
+    border-right: 2px solid var(--line);
+    white-space: nowrap;
+  }
+
   /* HUD 숫자 (금액 등) */
   .num { font-family: var(--font-pixel); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
 

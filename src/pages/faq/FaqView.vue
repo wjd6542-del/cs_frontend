@@ -8,14 +8,16 @@
       <button class="btn btn-primary" @click="openNew()">+ FAQ 추가</button>
     </header>
 
-    <div class="filters">
-      <input v-model="q" class="field !w-64" placeholder="질문·답변 검색" @keyup.enter="reload" />
-      <SearchSelect class="!w-40" v-model="cat" :options="catOptions" placeholder="전체 분류" @change="reload" />
+    <!-- 검색 영역 -->
+    <div class="filterbar">
+      <input v-model="q" class="field !w-56" placeholder="질문·답변 검색" @keyup.enter="search" />
+      <div class="msbox"><MultiSelect v-model="cats" :options="catOptions" placeholder="분류(다중 선택)" search-placeholder="분류 검색…" @change="search" /></div>
     </div>
 
-    <div v-if="!rows.length"><EmptyState variant="faq" /></div>
-    <ul class="list">
-      <li v-for="f in pagedRows" :key="f.id" class="item">
+    <!-- 목록 영역 -->
+    <div v-if="!rows.length" class="listcard"><EmptyState variant="faq" /></div>
+    <ul v-else class="list">
+      <li v-for="f in rows" :key="f.id" class="item">
         <div class="q" @click="toggle(f.id)">
           <span class="cat" v-if="f.category">{{ f.category }}</span>
           <span class="qt">{{ f.question }}</span>
@@ -31,13 +33,16 @@
       </li>
     </ul>
 
-    <Pager v-model:page="page" :total-pages="totalPages" :total="rows.length" @change="scrollTop" />
+    <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reload" />
 
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
         <h4 class="ph">{{ editing ? "FAQ 수정" : "FAQ 추가" }}</h4>
         <div class="fcol">
-          <BaseInput v-model="form.category" label="분류" placeholder="예: 정산, 계정, 이용안내" />
+          <label class="fld">
+            <span class="form-label">분류</span>
+            <SearchSelect v-model="form.category" :options="catOptions" placeholder="분류 선택 (환경설정에서 관리)" search-placeholder="분류 검색…" />
+          </label>
           <BaseInput v-model="form.question" label="질문" />
           <label class="fld">
             <span class="form-label">답변</span>
@@ -57,30 +62,28 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, reactive, computed, watch, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
 import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
-import { faqApi } from "@/api/cs";
+import MultiSelect from "@/components/base/MultiSelect.vue";
+import { faqApi, faqCategoryApi } from "@/api/cs";
 
 const LIMIT = 10;
-const page = ref(1);
-
 const toast = useToast();
 const rows = ref([]);
+const page = ref(1);
+const total = ref(0);
+const totalPages = ref(1);
 const categories = ref([]);
 const open = reactive({});
 const q = ref("");
-const cat = ref("");
+const cats = ref([]);
 
-const catOptions = computed(() => categories.value.map((c) => ({ value: c, label: c })));
-const totalPages = computed(() => Math.max(1, Math.ceil(rows.value.length / LIMIT)));
-const pagedRows = computed(() => rows.value.slice((page.value - 1) * LIMIT, page.value * LIMIT));
-watch(rows, () => { if (page.value > totalPages.value) page.value = 1; });
-function scrollTop() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+const catOptions = computed(() => categories.value.map((c) => ({ value: c.name, label: c.name })));
 
 const showForm = ref(false);
 const editing = ref(false);
@@ -89,9 +92,18 @@ const msg = ref("");
 const form = reactive({ id: null, category: "", question: "", answer: "", sort: 0 });
 
 async function reload() {
-  rows.value = await faqApi.list({ q: q.value || undefined, category: cat.value || undefined });
+  const res = await faqApi.list({
+    q: q.value || undefined,
+    categories: cats.value.length ? cats.value : undefined,
+    page: page.value,
+    limit: LIMIT,
+  });
+  rows.value = res.rows || [];
+  total.value = res.total || 0;
+  totalPages.value = res.totalPages || 1;
 }
-async function loadCats() { categories.value = await faqApi.categories(); }
+function search() { page.value = 1; reload(); }
+async function loadCats() { categories.value = await faqCategoryApi.list({ only_active: true }); }
 function toggle(id) { open[id] = !open[id]; }
 function openNew() {
   editing.value = false;
@@ -107,7 +119,7 @@ async function submit() {
   msg.value = ""; saving.value = true;
   try {
     await faqApi.save({ id: form.id || undefined, category: form.category || null, question: form.question, answer: form.answer, sort: Number(form.sort) || 0, is_active: true });
-    toast.success("저장되었습니다."); showForm.value = false; await Promise.all([reload(), loadCats()]);
+    toast.success("저장되었습니다."); showForm.value = false; await reload();
   } catch (e) { msg.value = e?.message || "저장 실패"; }
   finally { saving.value = false; }
 }
@@ -122,16 +134,16 @@ onMounted(async () => { await Promise.all([reload(), loadCats()]); });
 <style scoped>
 .page { max-width: 860px; margin: 0 auto; }
 .phead { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.1rem; }
-.eyebrow { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; color: var(--seal); text-transform: uppercase; }
-.ttl { font-size: 1.5rem; font-weight: 800; color: var(--ink); margin-top: 0.25rem; }
-.filters { display: flex; gap: 0.5rem; margin-bottom: 0.9rem; }
-.empty { text-align: center; color: var(--ink-faint); padding: 2rem 0; }
+.eyebrow { font-family: var(--font-pixel); font-size: 0.66rem; letter-spacing: 0.16em; color: var(--seal); }
+.ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
+.msbox { width: 16rem; }
 
+.listcard { background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); }
 .list { display: flex; flex-direction: column; gap: 0.5rem; }
 .item { background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); overflow: hidden; }
 .q { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1rem; cursor: pointer; }
 .q:hover { background: var(--surface-2); }
-.cat { font-size: 0.68rem; font-weight: 700; color: var(--seal); background: #e0e7ff; padding: 0.1rem 0.5rem; border-radius: 3px; flex-shrink: 0; }
+.cat { font-family: var(--font-pixel); font-size: 0.64rem; color: var(--seal-deep); background: #ede9ff; border: 1px solid var(--line-hard); padding: 0.1rem 0.45rem; border-radius: 3px; flex-shrink: 0; }
 .qt { font-weight: 600; color: var(--ink); flex: 1; }
 .chev { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }
 .chev.up { transform: rotate(180deg); }
@@ -139,11 +151,11 @@ onMounted(async () => { await Promise.all([reload(), loadCats()]); });
 .atext { font-size: 0.9rem; color: var(--ink-soft); white-space: pre-wrap; line-height: 1.6; padding-top: 0.8rem; }
 .itools { display: flex; gap: 0.4rem; margin-top: 0.8rem; }
 
-.drawer { position: fixed; inset: 0; z-index: 210; background: rgba(15, 23, 42, 0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.drawer { position: fixed; inset: 0; z-index: 210; background: rgba(27, 29, 46, 0.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
 .panel { width: 560px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
-.ph { font-size: 1.1rem; font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
+.ph { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); margin-bottom: 1rem; }
 .fcol { display: flex; flex-direction: column; gap: 0.9rem; }
 .fld { display: block; }
-.msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; } .msg.err { color: #dc2626; }
+.msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; } .msg.err { color: var(--danger); }
 .acts { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
 </style>

@@ -1,0 +1,108 @@
+<template>
+  <div ref="wrap" class="ms" :class="{ open }">
+    <div class="trigger" @click="toggle">
+      <div class="chips" v-if="selected.length">
+        <span v-for="s in selectedShown" :key="s.value" class="chip">
+          {{ s.label }}
+          <i class="fa-solid fa-xmark x" @click.stop="removeVal(s.value)"></i>
+        </span>
+        <span v-if="selected.length > maxChips" class="more">+{{ selected.length - maxChips }}</span>
+      </div>
+      <span v-else class="ph">{{ placeholder }}</span>
+      <div class="tools">
+        <button v-if="selected.length" class="clr" @click.stop="clearAll"><i class="fa-solid fa-xmark"></i></button>
+        <i class="fa-solid fa-chevron-down chev" :class="{ up: open }"></i>
+      </div>
+    </div>
+
+    <div v-if="open" class="panel">
+      <input ref="search" v-model="kw" class="msearch" :placeholder="searchPlaceholder" @click.stop />
+      <div class="list">
+        <label v-for="o in filtered" :key="o[valueKey]" class="opt" @click.stop>
+          <input type="checkbox" :checked="isChecked(o[valueKey])" @change="toggleVal(o[valueKey])" />
+          <span>{{ o[labelKey] }}</span>
+        </label>
+        <div v-if="!filtered.length" class="none">결과 없음</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+// @ts-nocheck
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
+
+const props = defineProps({
+  modelValue: { type: Array, default: () => [] },
+  options: { type: Array, default: () => [] },
+  labelKey: { type: String, default: "label" },
+  valueKey: { type: String, default: "value" },
+  placeholder: { type: String, default: "선택" },
+  searchPlaceholder: { type: String, default: "검색…" },
+  maxChips: { type: Number, default: 3 },
+});
+const emit = defineEmits(["update:modelValue", "change"]);
+
+const wrap = ref(null);
+const search = ref(null);
+const open = ref(false);
+const kw = ref("");
+
+const selected = computed(() =>
+  props.options.filter((o) => props.modelValue.includes(o[props.valueKey])),
+);
+const selectedShown = computed(() =>
+  selected.value.slice(0, props.maxChips).map((o) => ({ value: o[props.valueKey], label: o[props.labelKey] })),
+);
+const filtered = computed(() => {
+  const k = kw.value.trim().toLowerCase();
+  if (!k) return props.options;
+  return props.options.filter((o) => String(o[props.labelKey]).toLowerCase().includes(k));
+});
+
+function isChecked(v) { return props.modelValue.includes(v); }
+function toggle() {
+  open.value = !open.value;
+  if (open.value) { kw.value = ""; nextTick(() => search.value?.focus()); }
+}
+function emitVals(vals) { emit("update:modelValue", vals); emit("change", vals); }
+function toggleVal(v) {
+  const set = new Set(props.modelValue);
+  set.has(v) ? set.delete(v) : set.add(v);
+  emitVals([...set]);
+}
+function removeVal(v) { emitVals(props.modelValue.filter((x) => x !== v)); }
+function clearAll() { emitVals([]); }
+
+function onOutside(e) { if (wrap.value && !wrap.value.contains(e.target)) open.value = false; }
+onMounted(() => document.addEventListener("click", onOutside, true));
+onBeforeUnmount(() => document.removeEventListener("click", onOutside, true));
+</script>
+
+<style scoped>
+.ms { position: relative; width: 100%; }
+.trigger {
+  min-height: 34px; display: flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.5rem;
+  background: #fff; border: 2px solid var(--line-strong); border-radius: 3px; cursor: pointer;
+}
+.ms.open .trigger { border-color: var(--seal); box-shadow: var(--ring); }
+.chips { display: flex; flex-wrap: wrap; gap: 0.25rem; flex: 1; }
+.chip { display: inline-flex; align-items: center; gap: 0.25rem; font-family: var(--font-pixel); font-size: 0.68rem; color: var(--seal-deep); background: #ede9ff; border: 1px solid var(--line-hard); border-radius: 3px; padding: 0.05rem 0.35rem; }
+.chip .x { cursor: pointer; font-size: 0.6rem; }
+.chip .x:hover { color: var(--danger); }
+.more { font-family: var(--font-pixel); font-size: 0.66rem; color: var(--ink-muted); align-self: center; }
+.ph { flex: 1; font-size: 0.8rem; color: var(--ink-faint); }
+.tools { display: flex; align-items: center; gap: 0.3rem; }
+.clr { color: var(--ink-faint); font-size: 0.7rem; }
+.clr:hover { color: var(--seal); }
+.chev { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }
+.chev.up { transform: rotate(180deg); }
+
+.panel { position: absolute; left: 0; top: calc(100% + 4px); z-index: 50; width: 100%; min-width: 180px; background: #fff; border: 2px solid var(--line-hard); border-radius: 3px; box-shadow: 4px 4px 0 var(--line-hard); overflow: hidden; }
+.msearch { width: 100%; height: 30px; padding: 0 0.6rem; font-size: 0.78rem; border: none; border-bottom: 2px solid var(--line); outline: none; background: var(--surface-2); }
+.list { max-height: 220px; overflow-y: auto; }
+.opt { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.82rem; color: var(--ink); cursor: pointer; }
+.opt:hover { background: var(--surface-2); }
+.opt input { accent-color: var(--seal); width: 15px; height: 15px; }
+.none { padding: 0.9rem; text-align: center; color: var(--ink-faint); font-size: 0.8rem; }
+</style>

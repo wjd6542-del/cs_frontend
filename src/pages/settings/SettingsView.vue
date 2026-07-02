@@ -32,12 +32,14 @@ import { ref, computed, markRaw } from "vue";
 import GameCompanySettings from "@/pages/settings/GameCompanySettings.vue";
 import VendorSettings from "@/pages/settings/VendorSettings.vue";
 import BoardSettings from "@/pages/settings/BoardSettings.vue";
+import FaqCategorySettings from "@/pages/settings/FaqCategorySettings.vue";
 import AccountSettings from "@/pages/settings/AccountSettings.vue";
 
 const tabs = [
   { key: "gameco", label: "게임사", icon: "fa-gamepad", comp: markRaw(GameCompanySettings), desc: "사용료를 지급하는 게임사를 등록·관리합니다. 정산·응대에서 이 목록을 사용합니다." },
   { key: "vendor", label: "업체", icon: "fa-store", comp: markRaw(VendorSettings), desc: "사용대금을 회수하는 업체를 등록·관리합니다." },
   { key: "board", label: "게시판", icon: "fa-clipboard-list", comp: markRaw(BoardSettings), desc: "게시판을 만들고 권한(읽기/쓰기)·댓글·첨부 허용을 설정합니다." },
+  { key: "faqcat", label: "FAQ 분류", icon: "fa-tags", comp: markRaw(FaqCategorySettings), desc: "자주 하는 질문의 분류를 등록·관리합니다. FAQ 작성 시 이 분류를 선택합니다." },
   { key: "account", label: "계정·권한", icon: "fa-users-gear", comp: markRaw(AccountSettings), desc: "계정을 만들고 역할별 권한을 지정합니다." },
 ];
 

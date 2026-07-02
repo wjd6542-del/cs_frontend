@@ -9,7 +9,7 @@
       <button class="btn btn-primary" @click="openNew()">+ 정산 등록</button>
     </header>
 
-    <div class="filters">
+    <div class="filterbar">
       <SearchSelect class="!w-36" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="search" />
       <SearchSelect
         class="!w-52"

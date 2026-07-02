@@ -6,66 +6,72 @@
         <h1 class="ttl">{{ board?.name }}</h1>
         <p v-if="board?.description" class="desc">{{ board.description }}</p>
       </div>
-      <router-link v-if="canWrite" :to="`/board/${slug}/write`" class="write"><i class="fa-solid fa-pen"></i> 글쓰기</router-link>
+      <router-link v-if="canWrite" :to="`/board/${slug}/write`" class="btn btn-primary"><i class="fa-solid fa-pen"></i> 글쓰기</router-link>
     </header>
 
-    <div class="cards">
-      <!-- 공지 -->
-      <router-link v-for="p in notices" :key="'n' + p.id" :to="`/post/${p.id}`" class="card notice">
-        <span class="pin"><i class="fa-solid fa-thumbtack"></i> 공지</span>
-        <PostCardBody :post="p" />
-      </router-link>
-      <!-- 일반 -->
-      <router-link v-for="p in rows" :key="p.id" :to="`/post/${p.id}`" class="card">
-        <PostCardBody :post="p" />
-      </router-link>
+    <div class="tablewrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th class="c w-no">번호</th>
+            <th>제목</th>
+            <th class="c w-au">작성자</th>
+            <th class="c w-vc">조회</th>
+            <th class="c w-dt">작성일</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!loading && !notices.length && !rows.length">
+            <td colspan="5"><EmptyState variant="board" hint="＋ 글쓰기로 첫 글을 남겨보세요" compact /></td>
+          </tr>
+
+          <!-- 공지 (1페이지 상단 고정) -->
+          <tr v-for="p in notices" :key="'n' + p.id" class="row notice" @click="open(p.id)">
+            <td class="c"><span class="badge badge-indigo">공지</span></td>
+            <td class="ti">{{ p.title }}<span v-if="p.comment_count" class="cc">[{{ p.comment_count }}]</span></td>
+            <td class="c muted">{{ p.author }}</td>
+            <td class="c muted num">{{ p.view_count }}</td>
+            <td class="c muted num">{{ fmt(p.created_at) }}</td>
+          </tr>
+
+          <!-- 일반글 -->
+          <tr v-for="(p, i) in rows" :key="p.id" class="row" @click="open(p.id)">
+            <td class="c muted num">{{ total - (page - 1) * LIMIT - i }}</td>
+            <td class="ti">{{ p.title }}<span v-if="p.comment_count" class="cc">[{{ p.comment_count }}]</span></td>
+            <td class="c muted">{{ p.author }}</td>
+            <td class="c muted num">{{ p.view_count }}</td>
+            <td class="c muted num">{{ fmt(p.created_at) }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div v-if="!loading && !notices.length && !rows.length" class="empty">첫 글을 남겨보세요.</div>
-    <div ref="sentinel" class="sentinel"></div>
-    <div v-if="loading" class="loading">불러오는 중…</div>
+    <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="load" />
   </div>
 </template>
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, computed, onMounted, onBeforeUnmount, watch, h } from "vue";
-import { useRoute } from "vue-router";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { boardApi, mediaUrl } from "@/api/board";
+import { boardApi } from "@/api/board";
+import Pager from "@/components/base/Pager.vue";
+import EmptyState from "@/components/base/EmptyState.vue";
 import { formatDateDot as fmt } from "@/utils/date";
 
-// 간단 카드 본문 컴포넌트 (인라인)
-const PostCardBody = {
-  props: ["post"],
-  setup(props) {
-    return () =>
-      h("div", { class: "cbody" }, [
-        props.post.thumb ? h("div", { class: "thumb", style: `background-image:url(${mediaUrl(props.post.thumb)})` }) : null,
-        h("div", { class: "ctxt" }, [
-          h("div", { class: "cti" }, props.post.title),
-          h("div", { class: "cmeta" }, [
-            h("span", props.post.author),
-            h("span", { class: "dot" }, "·"),
-            h("span", fmt(props.post.created_at)),
-            props.post.comment_count ? h("span", { class: "cc" }, ` 💬 ${props.post.comment_count}`) : null,
-            h("span", { class: "vc" }, ` 👁 ${props.post.view_count}`),
-          ]),
-        ]),
-      ]);
-  },
-};
+const LIMIT = 20;
 const route = useRoute();
+const router = useRouter();
 const auth = useAuthStore();
 const slug = computed(() => route.params.slug);
 const board = ref(null);
 const notices = ref([]);
 const rows = ref([]);
-const cursor = ref(null);
-const done = ref(false);
+const page = ref(1);
+const total = ref(0);
+const totalPages = ref(1);
 const loading = ref(false);
-const sentinel = ref(null);
-let io;
 
 const canWrite = computed(() => {
   if (!board.value || !auth.user) return false;
@@ -73,73 +79,49 @@ const canWrite = computed(() => {
   return true;
 });
 
+function open(id) { router.push(`/post/${id}`); }
+
 async function loadBoard() {
   board.value = await boardApi.get(slug.value);
-  notices.value = [];
-  rows.value = [];
-  cursor.value = null;
-  done.value = false;
-  await loadMore(true);
+  page.value = 1;
+  await load();
 }
-async function loadMore(first = false) {
-  if (loading.value || (done.value && !first)) return;
+async function load() {
   loading.value = true;
   try {
-    const res = await boardApi.postList(board.value.id, cursor.value, 20);
-    if (first) notices.value = res.notices || [];
-    rows.value.push(...(res.rows || []));
-    cursor.value = res.nextCursor;
-    if (!res.nextCursor) done.value = true;
+    const res = await boardApi.postList(board.value.id, page.value, LIMIT);
+    notices.value = res.notices || [];
+    rows.value = res.rows || [];
+    total.value = res.total || 0;
+    totalPages.value = res.totalPages || 1;
   } finally {
     loading.value = false;
   }
 }
 
-function setupObserver() {
-  io = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) loadMore();
-  }, { rootMargin: "300px" });
-  if (sentinel.value) io.observe(sentinel.value);
-}
-
-onMounted(async () => { await loadBoard(); setupObserver(); });
-onBeforeUnmount(() => io && io.disconnect());
+onMounted(loadBoard);
 watch(slug, loadBoard);
 </script>
 
 <style scoped>
-.bview { max-width: 900px; margin: 0 auto; }
+.bview { max-width: 960px; margin: 0 auto; }
 .phead { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.1rem; gap: 1rem; }
-.back { font-size: 0.78rem; color: #5b607d; text-decoration: none; }
-.back:hover { color: var(--seal); }
-.eyebrow { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.2em; color: var(--seal); }
-.ttl { font-family: "Galmuri11", monospace; font-size: 1.6rem; font-weight: 700; color: var(--ink); margin-top: 0.25rem; }
-.desc { font-size: 0.85rem; color: #5b607d; margin-top: 0.2rem; }
-.write {
-  flex-shrink: 0; height: 40px; padding: 0 1.1rem; border-radius: 3px; display: inline-flex; align-items: center; gap: 0.4rem;
-  font-weight: 700; font-size: 0.86rem; color: #ffffff; text-decoration: none;
-  background: var(--seal-grad); border: 1px solid #5f3fe0;
-}
-.write:hover { filter: brightness(1.05); }
+.eyebrow { font-family: var(--font-pixel); font-size: 0.66rem; letter-spacing: 0.16em; color: var(--seal); }
+.ttl { font-family: var(--font-pixel); font-size: 1.4rem; color: var(--ink); margin-top: 0.25rem; }
+.desc { font-size: 0.85rem; color: var(--ink-muted); margin-top: 0.2rem; }
 
-.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
-@media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
-.card {
-  display: block; background: #ffffff; border: 2px solid var(--line-hard); border-radius: 4px; overflow: hidden;
-  text-decoration: none; transition: transform 0.12s, box-shadow 0.15s, border-color 0.15s;
-}
-.card:hover { transform: translateY(-2px); border-color: #d9b7a2; box-shadow: 0 8px 20px rgba(27,29,46,0.14); }
-.card.notice { border-color: #e0b6a8; }
-.pin { display: inline-block; margin: 0.7rem 0.7rem 0; font-size: 0.68rem; font-weight: 700; color: var(--seal); }
-:deep(.cbody) { display: flex; flex-direction: column; }
-:deep(.thumb) { height: 140px; background-size: cover; background-position: center; background-color: #d9dbe9; }
-:deep(.ctxt) { padding: 0.85rem 0.9rem; }
-:deep(.cti) { font-family: "Galmuri11", monospace; font-weight: 700; font-size: 1rem; color: var(--ink); line-height: 1.3; }
-:deep(.cmeta) { margin-top: 0.4rem; font-size: 0.74rem; color: #5b607d; display: flex; gap: 0.3rem; align-items: center; flex-wrap: wrap; }
-:deep(.cmeta .dot) { color: #b9bccf; }
-:deep(.cmeta .cc) { color: var(--seal); }
-:deep(.cmeta .vc) { margin-left: auto; }
-.empty { text-align: center; color: #9a9fbb; padding: 3rem 0; }
-.sentinel { height: 1px; }
-.loading { text-align: center; color: #5b607d; padding: 1rem; font-size: 0.85rem; }
+.tablewrap { border: 2px solid var(--line-hard); border-radius: 4px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow-hard); }
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { text-align: left; padding: 0.6rem 0.8rem; background: var(--surface-2); border-bottom: 2px solid var(--line-strong); font-family: var(--font-pixel); font-weight: 600; font-size: 0.74rem; color: var(--ink-muted); }
+.tbl td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line); font-size: 0.88rem; color: var(--ink); }
+.tbl tbody tr:last-child td { border-bottom: none; }
+.c { text-align: center; }
+.w-no { width: 64px; } .w-au { width: 110px; } .w-vc { width: 64px; } .w-dt { width: 110px; }
+.row { cursor: pointer; }
+.row:hover { background: var(--surface-2); }
+.row:hover .ti { color: var(--seal); }
+.row.notice { background: #f7f6ff; }
+.ti { font-weight: 600; }
+.cc { color: var(--seal); font-weight: 700; margin-left: 0.3rem; font-size: 0.8rem; }
+.muted { color: var(--ink-muted); }
 </style>
