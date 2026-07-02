@@ -26,8 +26,8 @@
 
     <!-- 필터 -->
     <div class="filterbar">
-      <SearchSelect class="!w-32" v-model="filter.type" :options="TYPE_OPTS" placeholder="전체 구분" @change="search" />
-      <div class="w-72"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" placeholder="거래 기간 선택" @change="onDateChange" /></div>
+      <div class="w-32 shrink-0"><SearchSelect v-model="filter.type" :options="TYPE_OPTS" placeholder="전체 구분" @change="search" /></div>
+      <div class="w-72 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" placeholder="거래 기간 선택" @change="onDateChange" /></div>
     </div>
 
     <div class="tablewrap">

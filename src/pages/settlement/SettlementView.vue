@@ -10,8 +10,8 @@
     </header>
 
     <div class="filterbar">
-      <SearchSelect class="!w-36" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="search" />
-      <SearchSelect
+      <div class="w-36 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="search" /></div>
+      <div class="w-52 shrink-0"><SearchSelect
         class="!w-52"
         v-model="filter.party_id"
         :options="parties"
@@ -20,7 +20,7 @@
         :placeholder="isVendor ? '전체 업체' : '전체 게임사'"
         search-placeholder="이름 검색…"
         @change="search"
-      />
+      /></div>
     </div>
 
     <div class="tablewrap">

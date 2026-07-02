@@ -45,7 +45,7 @@
             </div>
             <div class="r-tools">
               <div class="w-44"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
-              <SearchSelect class="!w-28" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" />
+              <div class="w-28 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" /></div>
               <button class="btn btn-primary" @click="openNew">+ 등록</button>
             </div>
           </div>
