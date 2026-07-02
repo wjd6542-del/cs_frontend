@@ -9,7 +9,7 @@
 
     <div class="split">
       <!-- 좌측: 업체 트리 / 게임사 리스트 -->
-      <aside class="left pcard">
+      <aside class="pane pcard left">
         <VendorTree v-if="isVendor" ref="treeRef" :selected-id="selected?.id" @select="onSelect" />
         <div v-else class="glist">
           <div class="gl-head">
@@ -32,25 +32,25 @@
       </aside>
 
       <!-- 우측: 선택 대상 응대 -->
-      <section class="right">
-        <div v-if="!selected" class="ph-empty pcard">
+      <section class="pane pcard right">
+        <div v-if="!selected" class="pane-empty">
           <EmptyState variant="select" :desc="isVendor ? '좌측에서 업체를 선택하면 응대가 여기에 표시돼요.' : '좌측에서 게임사를 선택하면 응대가 여기에 표시돼요.'" />
         </div>
 
         <template v-else>
           <div class="r-head">
-            <div>
+            <div class="r-title">
               <span class="r-eye">{{ isVendor ? "업체" : "게임사" }}</span>
               <h3 class="r-name">{{ selected.name }}</h3>
             </div>
             <div class="r-tools">
-              <div class="w-48"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
-              <SearchSelect class="!w-32" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" />
-              <button class="btn btn-primary" @click="openNew">+ 응대 등록</button>
+              <div class="w-44"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
+              <SearchSelect class="!w-28" v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" />
+              <button class="btn btn-primary" @click="openNew">+ 등록</button>
             </div>
           </div>
 
-          <div class="tablewrap pcard">
+          <div class="r-body">
             <table class="tbl">
               <thead>
                 <tr><th class="c">상태</th><th>제목</th><th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th></tr>
@@ -69,7 +69,9 @@
             </table>
           </div>
 
-          <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reloadTickets" />
+          <div class="r-foot">
+            <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reloadTickets" />
+          </div>
         </template>
       </section>
     </div>
@@ -319,10 +321,11 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .eyebrow { font-family: var(--font-pixel); font-size: 0.66rem; letter-spacing: 0.16em; color: var(--seal); }
 .ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
 
-.split { display: grid; grid-template-columns: 300px 1fr; gap: 1rem; align-items: start; }
-@media (max-width: 820px) { .split { grid-template-columns: 1fr; } }
+.split { display: grid; grid-template-columns: 300px 1fr; gap: 1rem; align-items: stretch; }
+@media (max-width: 820px) { .split { grid-template-columns: 1fr; } .pane { height: auto; min-height: 320px; } }
 
-.left { height: 70vh; overflow: hidden; display: flex; flex-direction: column; }
+/* 좌우 동일 높이 카드 (상단 정렬 + 내부 스크롤) */
+.pane { height: 74vh; min-height: 420px; overflow: hidden; display: flex; flex-direction: column; padding: 0; }
 .glist { display: flex; flex-direction: column; height: 100%; }
 .gl-head { padding: 0.6rem; border-bottom: 2px solid var(--line); }
 .gl-body { flex: 1; overflow-y: auto; padding: 0.3rem; }
@@ -334,16 +337,19 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .gl-row .code { font-size: 0.66rem; color: var(--ink-faint); }
 
 .right { min-width: 0; }
-.ph-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; height: 40vh; color: var(--ink-faint); }
-.ph-empty i { font-size: 1.6rem; }
+.pane-empty { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; }
 
-.r-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem; flex-wrap: wrap; }
-.r-eye { font-family: var(--font-pixel); font-size: 0.62rem; color: var(--seal-deep); }
-.r-name { font-family: var(--font-pixel); font-size: 1.1rem; color: var(--ink); }
-.r-tools { display: flex; gap: 0.5rem; }
+.r-head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.65rem 0.85rem; border-bottom: 2px solid var(--line); flex-wrap: wrap; flex-shrink: 0; }
+.r-title { display: flex; flex-direction: column; line-height: 1.15; }
+.r-eye { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--seal-deep); }
+.r-name { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); }
+.r-tools { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.r-body { flex: 1; overflow-y: auto; }
+.r-foot { flex-shrink: 0; padding: 0.4rem 0.85rem; border-top: 2px solid var(--line); }
+.r-foot :deep(.pager) { margin-top: 0; }
 
-.tablewrap { overflow: hidden; }
 .tbl { width: 100%; border-collapse: collapse; }
+.tbl thead th { position: sticky; top: 0; z-index: 1; }
 .tbl th { text-align: left; padding: 0.55rem 0.7rem; background: var(--surface-2); border-bottom: 2px solid var(--line-strong); font-family: var(--font-pixel); font-weight: 600; font-size: 0.72rem; color: var(--ink-muted); }
 .tbl td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line); font-size: 0.86rem; color: var(--ink); }
 .tbl tbody tr:last-child td { border-bottom: none; }
