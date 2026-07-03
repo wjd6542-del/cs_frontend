@@ -23,7 +23,7 @@
           <div class="dlist">
             <div v-if="!alerts.rows.length" class="dnone">{{ $t("🔔 미해결 응대가 없어요!") }}</div>
             <button v-for="t in alerts.rows.slice(0, 8)" :key="t.id" class="drow" @click="openTicket(t)">
-              <span class="dp" :class="t.party === 'VENDOR' ? 'v' : 'g'">{{ t.party === 'VENDOR' ? '업체' : '게임사' }}</span>
+              <span class="dp">{{ t.desk_name }}</span>
               <span class="dti">{{ t.title }}</span>
               <span class="dst" :class="t.status === 'OPEN' ? 'o' : 'i'">{{ t.status === 'OPEN' ? '접수' : '처리중' }}</span>
             </button>
@@ -114,8 +114,7 @@ function toggleBell() { bellOpen.value = !bellOpen.value; acctOpen.value = false
 function toggleAcct() { acctOpen.value = !acctOpen.value; bellOpen.value = false; }
 function openTicket(t) {
   bellOpen.value = false;
-  const path = t.party === "VENDOR" ? "/support/vendor" : "/support/gameco";
-  router.push({ path, query: { open: t.id } });
+  router.push({ path: `/support/${t.desk_code || ""}`, query: { open: t.id } });
 }
 function onOutside(e) {
   if (bellWrap.value && !bellWrap.value.contains(e.target)) bellOpen.value = false;

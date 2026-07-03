@@ -45,7 +45,7 @@
         <span class="s-ic warn"><i class="fa-solid fa-hourglass-half"></i></span>
         <div><span class="s-lbl">{{ $t("미정산") }}</span><strong class="s-val num">{{ pendingCount }}<em>{{ $t("건") }}</em></strong></div>
       </router-link>
-      <router-link v-if="canSupport" to="/support/vendor" class="stat">
+      <router-link v-if="canSupport" to="/alerts" class="stat">
         <span class="s-ic acc"><i class="fa-solid fa-headset"></i></span>
         <div><span class="s-lbl">{{ $t("진행중 응대") }}</span><strong class="s-val num">{{ openTickets }}<em>{{ $t("건") }}</em></strong></div>
       </router-link>
@@ -68,28 +68,28 @@
         <span class="cb-sub">{{ $t("항목별 미해결 문의 · 최근 5건") }}</span>
       </div>
       <div class="cb-cols">
-        <div v-for="p in CS_PARTIES" :key="p.key" class="cb-col">
+        <div v-for="dk in csDesks" :key="dk.id" class="cb-col">
           <div class="cbc-head">
-            <span class="cbc-name"><i :class="p.icon"></i> {{ p.label }}</span>
+            <span class="cbc-name"><i class="fa-solid" :class="dk.icon || 'fa-headset'"></i> {{ dk.name }}</span>
             <div class="cbc-chips">
-              <span class="chip open">{{ $t("접수") }} <em>{{ progress[p.key].open }}</em></span>
-              <span class="chip prog">{{ $t("처리중") }} <em>{{ progress[p.key].prog }}</em></span>
+              <span class="chip open">{{ $t("접수") }} <em>{{ progress[dk.id]?.open || 0 }}</em></span>
+              <span class="chip prog">{{ $t("처리중") }} <em>{{ progress[dk.id]?.prog || 0 }}</em></span>
             </div>
           </div>
           <ul class="cbc-list">
-            <li v-for="t in progress[p.key].rows" :key="t.id" class="cbc-item" :class="'s-' + t.status.toLowerCase()" @click="openCs(t.id)">
+            <li v-for="t in (progress[dk.id]?.rows || [])" :key="t.id" class="cbc-item" :class="'s-' + t.status.toLowerCase()" @click="openCs(t.id)">
               <span class="st-pill" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span>
               <div class="ci-main">
                 <span class="ci-title">{{ t.title }}</span>
-                <span class="ci-meta">{{ t[p.nameField] || "미지정" }} · {{ fmt(t.created_at) }}</span>
+                <span class="ci-meta">{{ t.target_name || "미지정" }} · {{ fmt(t.created_at) }}</span>
               </div>
               <i v-if="t.priority >= 2" class="ci-flag fa-solid fa-flag" :class="'pr-' + t.priority" :title="$t('우선순위 높음')"></i>
             </li>
-            <li v-if="!progress[p.key].rows.length" class="cbc-empty">
+            <li v-if="!(progress[dk.id]?.rows || []).length" class="cbc-empty">
               <EmptyState icon="✅" :title="$t('미해결 문의 없음')" :desc="$t('새 문의가 오면 여기 떠요.')" :hint="$t('청정 상태')" compact />
             </li>
           </ul>
-          <router-link :to="p.to" class="cbc-more">{{ p.label }} 전체보기 ›</router-link>
+          <router-link :to="`/support/${dk.code}`" class="cbc-more">{{ dk.name }} 전체보기 ›</router-link>
         </div>
       </div>
     </section>
@@ -147,13 +147,13 @@
     <div v-if="csDetail" class="pmodal" @click.self="csDetail = null">
       <div class="pbox pcard">
         <button class="pclose" @click="csDetail = null"><i class="fa-solid fa-xmark"></i></button>
-        <p class="peyebrow">{{ partyTitle(csDetail.party) }} · 읽기 전용</p>
+        <p class="peyebrow">{{ csDetail.desk_name }} · 읽기 전용</p>
         <h3 class="ptitle">
           <span class="ro-pill" :class="'st-' + csDetail.status.toLowerCase()">{{ statusLabel(csDetail.status) }}</span>
           {{ csDetail.title }}
         </h3>
         <div class="pmeta">
-          <span>{{ csDetail.vendor_name || csDetail.game_company_name || csDetail.solution_company_name || '미지정' }}</span>
+          <span>{{ csDetail.target_name || '미지정' }}</span>
           <span class="dot">·</span><span>{{ csDetail.category || '분류없음' }}</span>
           <span class="dot">·</span><span class="num">{{ fmt(csDetail.created_at) }}</span>
         </div>
@@ -168,7 +168,7 @@
         </div>
 
         <div class="ro-foot">
-          <router-link v-if="canManageCs" :to="partyPath(csDetail.party)" class="btn btn-primary">{{ $t("응대 관리 페이지 ›") }}</router-link>
+          <router-link v-if="canManageCs" :to="`/support/${csDetail.desk_code}`" class="btn btn-primary">{{ $t("응대 관리 페이지 ›") }}</router-link>
           <span v-else class="ro-note"><i class="fa-solid fa-lock"></i> {{ $t("조회 권한 · 읽기 전용") }}</span>
           <button class="btn" @click="csDetail = null">{{ $t("닫기") }}</button>
         </div>
@@ -184,7 +184,7 @@ import TagChips from "@/components/base/TagChips.vue";
 import { ref, reactive, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { boardApi } from "@/api/board";
-import { ledgerApi, settlementApi, supportApi } from "@/api/cs";
+import { ledgerApi, settlementApi, supportApi, supportDeskApi } from "@/api/cs";
 import { formatDateDot as fmt } from "@/utils/date";
 
 const auth = useAuthStore();
@@ -237,18 +237,8 @@ const totals = reactive({ PAYMENT: 0, COLLECTION: 0 });
 const pendingCount = ref(0);
 const openTickets = ref(0);
 
-const CS_PARTIES = [
-  { key: "VENDOR", label: "업체 응대", to: "/support/vendor", nameField: "vendor_name", icon: "fa-solid fa-store" },
-  { key: "GAME_COMPANY", label: "게임사 응대", to: "/support/gameco", nameField: "game_company_name", icon: "fa-solid fa-gamepad" },
-  { key: "SOLUTION", label: "솔루션 응대", to: "/support/solution", nameField: "solution_company_name", icon: "fa-solid fa-puzzle-piece" },
-];
-const progress = reactive({
-  VENDOR: { open: 0, prog: 0, rows: [] },
-  GAME_COMPANY: { open: 0, prog: 0, rows: [] },
-  SOLUTION: { open: 0, prog: 0, rows: [] },
-});
-function partyPath(party) { return party === "VENDOR" ? "/support/vendor" : party === "GAME_COMPANY" ? "/support/gameco" : "/support/solution"; }
-function partyTitle(party) { return party === "VENDOR" ? "업체 응대" : party === "GAME_COMPANY" ? "게임사 응대" : "솔루션 응대"; }
+const csDesks = ref([]);
+const progress = reactive({}); // { [deskId]: { open, prog, rows } }
 function statusLabel(s) { return { OPEN: "접수", IN_PROGRESS: "처리중" }[s] || s; }
 
 const net = computed(() => totals.COLLECTION - totals.PAYMENT);
@@ -297,13 +287,14 @@ onMounted(async () => {
     openTickets.value = (o.total || 0) + (ip.total || 0);
   } catch (e) { /* skip */ }
   if (canSupport.value) try {
-    await Promise.all(CS_PARTIES.map(async (p) => {
+    csDesks.value = await supportDeskApi.list();
+    await Promise.all(csDesks.value.map(async (dk) => {
       const [op, pr] = await Promise.all([
-        supportApi.list({ party: p.key, status: "OPEN", limit: 5 }),
-        supportApi.list({ party: p.key, status: "IN_PROGRESS", limit: 5 }),
+        supportApi.list({ desk_id: dk.id, status: "OPEN", limit: 5 }),
+        supportApi.list({ desk_id: dk.id, status: "IN_PROGRESS", limit: 5 }),
       ]);
       const rows = [...(op.rows || []), ...(pr.rows || [])].sort((a, b) => b.id - a.id).slice(0, 5);
-      progress[p.key] = { open: op.total || 0, prog: pr.total || 0, rows };
+      progress[dk.id] = { open: op.total || 0, prog: pr.total || 0, rows };
     }));
   } catch (e) { /* skip */ }
 });
@@ -355,8 +346,8 @@ onMounted(async () => {
 .cb-ttl { font-family: var(--font-pixel); font-size: 0.98rem; color: var(--ink); display: flex; align-items: center; gap: 0.45rem; }
 .cb-ttl i { color: var(--seal); font-size: 0.9rem; }
 .cb-sub { font-size: 0.74rem; color: var(--ink-faint); }
-.cb-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
-@media (max-width: 900px) { .cb-cols { grid-template-columns: 1fr; } }
+.cb-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.1rem; }
+@media (max-width: 640px) { .cb-cols { grid-template-columns: 1fr; } }
 .cb-col { display: flex; flex-direction: column; }
 .cb-col + .cb-col { border-left: 2px dashed var(--line); padding-left: 1.1rem; }
 @media (max-width: 900px) { .cb-col + .cb-col { border-left: none; padding-left: 0; border-top: 2px dashed var(--line); padding-top: 0.9rem; } }

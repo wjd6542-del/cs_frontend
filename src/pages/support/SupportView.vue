@@ -10,9 +10,10 @@
       <!-- 좌측: 대상 트리 (토글로 열기/접기) -->
       <aside v-show="treeOpen" class="pane pcard left">
         <EntityTree
-          :key="party"
+          v-if="treeApi"
+          :key="deskCode"
           ref="treeRef"
-          :api="pmeta.api"
+          :api="treeApi"
           :label="pmeta.label"
           :empty-icon="pmeta.icon"
           :selected-id="selected?.id"
@@ -120,7 +121,7 @@
         <div class="dhead">
           <div class="dhead-main">
             <h4 class="ph">{{ detail.title }}</h4>
-            <p class="dsub">{{ detail.vendor_name || detail.game_company_name }} · {{ detail.category || "분류없음" }}</p>
+            <p class="dsub">{{ detail.target_name || detail.desk_name }} · {{ detail.category || "분류없음" }}</p>
           </div>
           <div v-if="canEdit" class="w-32 shrink-0"><SearchSelect v-model="detail.status" :options="STATUS_OPTS" @change="changeStatus" /></div>
           <span v-else class="ro-status badge" :class="'st-' + detail.status.toLowerCase()">{{ statusLabel(detail.status) }}</span>
@@ -174,7 +175,7 @@ import RichEditor from "@/components/base/RichEditor.vue";
 import TagSelect from "@/components/base/TagSelect.vue";
 import TagChips from "@/components/base/TagChips.vue";
 import DateRangePicker from "@/components/base/DateRangePicker.vue";
-import { supportApi, vendorApi, gameCompanyApi, solutionCompanyApi } from "@/api/cs";
+import { supportApi, supportDeskApi, makeTargetTreeApi } from "@/api/cs";
 import { useAuthStore } from "@/stores/auth";
 import { formatDateOnly } from "@/utils/date";
 
@@ -194,13 +195,17 @@ const PRIO_OPTS = [
   { value: 2, label: "긴급", color: "#e23b46" },
 ];
 
-const props = defineProps({ party: { type: String, default: "VENDOR" } });
-const PARTY_META = {
-  VENDOR: { label: "업체", title: "업체 응대", icon: "🏪", api: vendorApi, idField: "vendor_id", nameField: "vendor_name" },
-  GAME_COMPANY: { label: "게임사", title: "게임사 응대", icon: "🎮", api: gameCompanyApi, idField: "game_company_id", nameField: "game_company_name" },
-  SOLUTION: { label: "솔루션사", title: "솔루션 응대", icon: "🧩", api: solutionCompanyApi, idField: "solution_company_id", nameField: "solution_company_name" },
-};
-const pmeta = computed(() => PARTY_META[props.party] || PARTY_META.VENDOR);
+const deskCode = computed(() => route.params.deskCode);
+const desk = ref(null); // { id, name, code, icon }
+// 트리 라벨/타이틀 등을 desk 기반으로 제공 (기존 pmeta 대체)
+const pmeta = computed(() => ({
+  label: desk.value?.name || "대상",
+  title: desk.value?.name || "CS 응대",
+  icon: "🗂️",
+  idField: "target_id",
+  nameField: "target_name",
+}));
+const treeApi = computed(() => (desk.value ? makeTargetTreeApi(desk.value.id) : null));
 const toast = useToast();
 
 const LIMIT = 15;
@@ -272,9 +277,10 @@ async function applyBulk() {
 
 async function reloadTickets() {
   sel.value = [];
+  if (!desk.value) { tickets.value = []; total.value = 0; totalPages.value = 1; return; }
   if (treeRef.value?.reload) treeRef.value.reload(); // 트리 미해결 카운트 갱신
-  const body = { party: props.party, page: page.value, limit: LIMIT };
-  if (selected.value) body[pmeta.value.idField] = selected.value.id; // 선택 시 해당 항목만
+  const body = { desk_id: desk.value.id, page: page.value, limit: LIMIT };
+  if (selected.value) body.target_id = selected.value.id; // 선택 시 해당 대상만
   if (filter.status) body.status = filter.status;
   if (filter.date_from) body.date_from = filter.date_from;
   if (filter.date_to) body.date_to = filter.date_to;
@@ -285,6 +291,12 @@ async function reloadTickets() {
   totalPages.value = res.totalPages || 1;
 }
 
+async function loadDesk() {
+  desk.value = null;
+  selected.value = null;
+  try { desk.value = await supportDeskApi.getByCode(deskCode.value); }
+  catch (e) { desk.value = null; }
+}
 async function loadLeft() {
   selected.value = null;
   await reloadTickets();
@@ -298,8 +310,8 @@ async function submit() {
   msg.value = ""; saving.value = true;
   try {
     const t = await supportApi.save({
-      party: props.party,
-      [pmeta.value.idField]: selected.value.id,
+      desk_id: desk.value.id,
+      target_id: selected.value?.id ?? null,
       title: form.title, category: form.category || null, priority: form.priority, status: "OPEN",
       tag_ids: form.tag_ids,
     });
@@ -319,10 +331,8 @@ async function updateDetailTags(ids) {
   try {
     await supportApi.save({
       id: detail.value.id,
-      party: detail.value.party,
-      vendor_id: detail.value.vendor_id,
-      game_company_id: detail.value.game_company_id,
-      solution_company_id: detail.value.solution_company_id,
+      desk_id: detail.value.desk_id,
+      target_id: detail.value.target_id,
       title: detail.value.title,
       category: detail.value.category,
       status: detail.value.status,
@@ -358,8 +368,8 @@ async function handleOpenQuery() {
   if (!id) return;
   try {
     const t = await supportApi.get(id);
-    if (t.party !== props.party) return;
-    selected.value = { id: t[pmeta.value.idField], name: t[pmeta.value.nameField] };
+    if (desk.value && t.desk_id !== desk.value.id) return;
+    selected.value = t.target_id ? { id: t.target_id, name: t.target_name } : null;
     await reloadTickets();
     detail.value = t;
     detailTags.value = (t.tags || []).map((x) => x.id);
@@ -367,9 +377,9 @@ async function handleOpenQuery() {
   } catch (e) { /* 없는 티켓이면 무시 */ }
 }
 
-watch(() => props.party, async () => { detail.value = null; await loadLeft(); await handleOpenQuery(); });
+watch(() => deskCode.value, async () => { detail.value = null; await loadDesk(); await loadLeft(); await handleOpenQuery(); });
 watch(() => route.query.open, handleOpenQuery);
-onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
+onMounted(async () => { await loadDesk(); await loadLeft(); await handleOpenQuery(); });
 </script>
 
 <style scoped>

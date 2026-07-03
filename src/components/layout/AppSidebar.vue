@@ -55,6 +55,7 @@
 import { reactive, computed, onMounted, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import { boardApi } from "@/api/board";
+import { supportDeskApi } from "@/api/cs";
 import { useAuthStore } from "@/stores/auth";
 
 defineProps({ open: { type: Boolean, default: true }, isMobile: { type: Boolean, default: false } });
@@ -63,6 +64,7 @@ const emit = defineEmits(["close"]);
 const route = useRoute();
 const auth = useAuthStore();
 const boards = ref([]);
+const desks = ref([]);
 const expanded = reactive({ "정산 관리": true, "CS 관리": true, 게시판: false });
 
 const menus = computed(() => [
@@ -80,14 +82,11 @@ const menus = computed(() => [
     label: "CS 관리",
     icon: "fa-headset",
     children: [
-      { label: "업체 응대", to: "/support/vendor", perm: "support.view" },
-      { label: "게임사 응대", to: "/support/gameco", perm: "support.view" },
-      { label: "솔루션 응대", to: "/support/solution", perm: "support.view" },
+      ...desks.value.map((d) => ({ label: d.name, to: `/support/${d.code}`, perm: "support.view" })),
       { label: "자주 하는 질문", to: "/faq", perm: "faq.view" },
     ],
   },
   { label: "게시판", icon: "fa-clipboard-list", perm: "board.view", children: boards.value.map((b) => ({ label: b.name, to: `/board/${b.slug}` })) },
-  { label: "환율 정보", to: "/exchange", icon: "fa-money-bill-trend-up" },
   {
     label: "계정 관리",
     icon: "fa-users-gear",
@@ -96,6 +95,7 @@ const menus = computed(() => [
       { label: "화이트 아이피", to: "/account/whiteip", perm: "usermanager.view" },
     ],
   },
+  { label: "환율 정보", to: "/exchange", icon: "fa-money-bill-trend-up" },
   { label: "환경설정", to: "/settings", icon: "fa-gear", perm: ["gameCompany.view", "vendor.view", "permission.menu.view"] },
 ]);
 
@@ -128,6 +128,7 @@ function toggle(m) { expanded[m.label] = !expanded[m.label]; }
 
 async function load() {
   try { boards.value = await boardApi.list(); } catch (e) { boards.value = []; }
+  try { desks.value = await supportDeskApi.list(); } catch (e) { desks.value = []; }
 }
 onMounted(load);
 watch(() => route.path, (p) => { if (p.startsWith("/board") || p.startsWith("/post")) expanded.게시판 = true; }, { immediate: true });

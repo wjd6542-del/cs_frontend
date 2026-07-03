@@ -49,9 +49,7 @@ export const router = createRouter({
             { path: "settlement/gameco", component: SettlementView, props: { type: "GAME_COMPANY" }, meta: { auth: true, title: "게임사 정산", perm: "settlement.view" } },
 
             // CS 관리
-            { path: "support/vendor", component: SupportView, props: { party: "VENDOR" }, meta: { auth: true, title: "업체 응대", perm: "support.view" } },
-            { path: "support/gameco", component: SupportView, props: { party: "GAME_COMPANY" }, meta: { auth: true, title: "게임사 응대", perm: "support.view" } },
-            { path: "support/solution", component: SupportView, props: { party: "SOLUTION" }, meta: { auth: true, title: "솔루션 응대", perm: "support.view" } },
+            { path: "support/:deskCode", component: SupportView, meta: { auth: true, title: "CS 응대", perm: "support.view" } },
             { path: "faq", component: FaqView, meta: { auth: true, title: "자주 하는 질문", perm: "faq.view" } },
             { path: "alerts", component: AlertsView, meta: { auth: true, title: "알림" } },
             { path: "exchange", component: ExchangeRateView, meta: { auth: true, title: "환율 정보" } },

@@ -12,16 +12,37 @@ export const gameCompanyApi = {
   remove: (id) => api.post("/gameCompany/delete", { id }).then((r) => r.data),
 };
 
-// 솔루션사
-export const solutionCompanyApi = {
-  list: (body = {}) => api.post("/solutionCompany/list", body).then((r) => r.data),
-  tree: () => api.post("/solutionCompany/tree", {}).then((r) => r.data),
-  reorder: (body) => api.post("/solutionCompany/reorder", body).then((r) => r.data),
-  options: () => api.post("/solutionCompany/options", {}).then((r) => r.data),
-  get: (id) => api.post("/solutionCompany/get", { id }).then((r) => r.data),
-  save: (body) => api.post("/solutionCompany/save", body).then((r) => r.data),
-  remove: (id) => api.post("/solutionCompany/delete", { id }).then((r) => r.data),
+// CS 응대 유형 (desk) — 게시판처럼 동적 추가
+export const supportDeskApi = {
+  list: () => api.post("/supportDesk/list", {}).then((r) => r.data),
+  listAll: () => api.post("/supportDesk/listAll", {}).then((r) => r.data),
+  get: (id) => api.post("/supportDesk/get", { id }).then((r) => r.data),
+  getByCode: (code) => api.post("/supportDesk/getByCode", { code }).then((r) => r.data),
+  save: (body) => api.post("/supportDesk/save", body).then((r) => r.data),
+  remove: (id) => api.post("/supportDesk/delete", { id }).then((r) => r.data),
 };
+
+// CS 응대 대상 (유형별 트리) — EntityTree 용으로 desk 스코프 주입 팩토리 제공
+export const supportTargetApi = {
+  tree: (desk_id) => api.post("/supportTarget/tree", { desk_id }).then((r) => r.data),
+  options: (desk_id) => api.post("/supportTarget/options", { desk_id }).then((r) => r.data),
+  list: (body = {}) => api.post("/supportTarget/list", body).then((r) => r.data),
+  get: (id) => api.post("/supportTarget/get", { id }).then((r) => r.data),
+  save: (body) => api.post("/supportTarget/save", body).then((r) => r.data),
+  reorder: (body) => api.post("/supportTarget/reorder", body).then((r) => r.data),
+  remove: (id) => api.post("/supportTarget/delete", { id }).then((r) => r.data),
+};
+// EntityTree 는 api.tree()/save/reorder/remove/options 형태를 기대 → desk 고정 래퍼
+export function makeTargetTreeApi(deskId) {
+  return {
+    tree: () => supportTargetApi.tree(deskId),
+    options: () => supportTargetApi.options(deskId),
+    get: (id) => supportTargetApi.get(id),
+    save: (body) => supportTargetApi.save({ ...body, desk_id: body.id ? undefined : deskId }),
+    reorder: (body) => supportTargetApi.reorder(body),
+    remove: (id) => supportTargetApi.remove(id),
+  };
+}
 
 // 업체
 export const vendorApi = {

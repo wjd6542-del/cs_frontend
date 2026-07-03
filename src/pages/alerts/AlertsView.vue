@@ -11,9 +11,9 @@
     <!-- 요약 -->
     <div class="cards">
       <div class="card"><span class="lbl">{{ $t("전체 미해결") }}</span><strong class="val num">{{ store.total }}건</strong></div>
-      <router-link to="/support/vendor" class="card link"><span class="lbl">{{ $t("🏪 업체 응대") }}</span><strong class="val num">{{ store.counts.VENDOR }}건</strong></router-link>
-      <router-link to="/support/gameco" class="card link"><span class="lbl">{{ $t("🎮 게임사 응대") }}</span><strong class="val num">{{ store.counts.GAME_COMPANY }}건</strong></router-link>
-      <router-link to="/support/solution" class="card link"><span class="lbl">{{ $t("🧩 솔루션 응대") }}</span><strong class="val num">{{ store.counts.SOLUTION }}건</strong></router-link>
+      <router-link v-for="dk in desks" :key="dk.id" :to="`/support/${dk.code}`" class="card link">
+        <span class="lbl">{{ dk.name }}</span><strong class="val num">{{ store.counts[dk.id] || 0 }}건</strong>
+      </router-link>
     </div>
 
     <div v-if="!store.rows.length" class="listcard"><EmptyState icon="🔔" :title="$t('알림이 없어요!')" :desc="$t('처리할 미해결 응대가 없어요.')" :hint="$t('모두 해결됨 ✨')" /></div>
@@ -24,10 +24,10 @@
         </thead>
         <tbody>
           <tr v-for="t in store.rows" :key="t.id" class="row" @click="go(t)">
-            <td class="c"><span class="badge" :class="partyClass(t.party)">{{ partyShort(t.party) }}</span></td>
+            <td class="c"><span class="badge badge-info">{{ t.desk_name }}</span></td>
             <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
             <td class="c"><span class="pri" :class="'p' + t.priority">{{ priLabel(t.priority) }}</span></td>
-            <td class="nm">{{ t.vendor_name || t.game_company_name || t.solution_company_name || '-' }}</td>
+            <td class="nm">{{ t.target_name || '-' }}</td>
             <td class="ti">{{ t.title }}<span v-if="t.message_count" class="cc">[{{ t.message_count }}]</span></td>
             <td class="muted xs num">{{ d(t.created_at) }}</td>
             <td class="c"><button class="btn btn-xs btn-primary" @click.stop="go(t)">{{ $t("바로가기 ›") }}</button></td>
@@ -40,25 +40,25 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAlertsStore } from "@/stores/alerts";
+import { supportDeskApi } from "@/api/cs";
 import EmptyState from "@/components/base/EmptyState.vue";
 
 const router = useRouter();
 const store = useAlertsStore();
+const desks = ref([]);
 
 function d(v) { return String(v).slice(0, 10); }
 function statusLabel(s) { return { OPEN: "접수", IN_PROGRESS: "처리중" }[s] || s; }
 function priLabel(p) { return ["보통", "높음", "긴급"][p] || "보통"; }
-function partyShort(p) { return p === "VENDOR" ? "업체" : p === "GAME_COMPANY" ? "게임사" : "솔루션"; }
-function partyClass(p) { return p === "VENDOR" ? "badge-in" : p === "GAME_COMPANY" ? "badge-info" : "badge-soln"; }
 function go(t) {
-  const path = t.party === "VENDOR" ? "/support/vendor" : t.party === "GAME_COMPANY" ? "/support/gameco" : "/support/solution";
-  router.push({ path, query: { open: t.id } });
+  router.push({ path: `/support/${t.desk_code || ""}`, query: { open: t.id } });
 }
 async function refresh() { await store.fetch(); }
-onMounted(refresh);
+async function loadDesks() { try { desks.value = await supportDeskApi.list(); } catch (e) { desks.value = []; } }
+onMounted(() => { loadDesks(); refresh(); });
 </script>
 
 <style scoped>

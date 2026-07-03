@@ -7,7 +7,7 @@ export const useAlertsStore = defineStore("alerts", {
   state: () => ({
     rows: [],
     total: 0,
-    counts: { VENDOR: 0, GAME_COMPANY: 0, SOLUTION: 0 },
+    counts: {},
     loaded: false,
     _timer: null,
   }),
@@ -17,7 +17,7 @@ export const useAlertsStore = defineStore("alerts", {
         const r = await supportApi.alerts({ limit: 20 });
         this.rows = r.rows || [];
         this.total = r.total || 0;
-        this.counts = r.counts || { VENDOR: 0, GAME_COMPANY: 0 };
+        this.counts = r.counts || {};
         this.loaded = true;
       } catch (e) {
         /* 미로그인/오류 시 조용히 무시 */
