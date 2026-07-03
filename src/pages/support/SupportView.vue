@@ -397,7 +397,7 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .right { min-width: 0; }
 .pane-empty { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; }
 
-.r-head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.65rem 0.85rem; border-bottom: 2px solid var(--line); flex-wrap: wrap; flex-shrink: 0; }
+.r-head { min-height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.5rem 0.85rem; border-bottom: 2px solid var(--line); flex-wrap: wrap; flex-shrink: 0; }
 .r-title { display: flex; flex-direction: row; align-items: center; gap: 0.5rem; line-height: 1.15; }
 .treetgl { flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); background: #fff; box-shadow: 2px 2px 0 var(--line-hard); transition: all 0.075s; }
 .treetgl:hover { color: var(--seal); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }

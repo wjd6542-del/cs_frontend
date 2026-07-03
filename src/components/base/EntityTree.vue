@@ -301,7 +301,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .vtree { display: flex; flex-direction: column; height: 100%; }
-.vt-head { display: flex; align-items: center; gap: 0.35rem; padding: 0.6rem; border-bottom: 2px solid var(--line); flex-wrap: wrap; }
+.vt-head { min-height: 58px; box-sizing: border-box; display: flex; align-items: center; gap: 0.35rem; padding: 0.6rem 0.7rem; border-bottom: 2px solid var(--line); flex-wrap: nowrap; }
 .vt-head .field { flex: 1; min-width: 120px; }
 .vt-head .btn:disabled { opacity: 0.4; }
 .vt-edit { display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 0.6rem; background: var(--surface-2); border-bottom: 2px solid var(--line); flex-wrap: wrap; }
