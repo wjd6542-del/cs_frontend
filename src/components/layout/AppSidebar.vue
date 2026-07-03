@@ -88,7 +88,15 @@ const menus = computed(() => [
   },
   { label: "게시판", icon: "fa-clipboard-list", perm: "board.view", children: boards.value.map((b) => ({ label: b.name, to: `/board/${b.slug}` })) },
   { label: "환율 정보", to: "/exchange", icon: "fa-money-bill-trend-up" },
-  { label: "환경설정", to: "/settings", icon: "fa-gear", perm: ["gameCompany.view", "vendor.view", "usermanager.view", "permission.user.view", "permission.menu.view"] },
+  {
+    label: "계정 관리",
+    icon: "fa-users-gear",
+    children: [
+      { label: "계정 권한", to: "/account/roles", perm: ["usermanager.view", "permission.user.view"] },
+      { label: "화이트 아이피", to: "/account/whiteip", perm: "usermanager.view" },
+    ],
+  },
+  { label: "환경설정", to: "/settings", icon: "fa-gear", perm: ["gameCompany.view", "vendor.view", "permission.menu.view"] },
 ]);
 
 // 권한 필터: perm(문자열/배열) 중 하나라도 보유해야 노출 (super는 항상 통과, perm 없으면 공개)

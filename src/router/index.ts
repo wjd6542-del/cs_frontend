@@ -22,6 +22,8 @@ import ExchangeRateView from "@/pages/exchange/ExchangeRateView.vue";
 
 import MyPage from "@/pages/mypage/MyPage.vue";
 import SettingsView from "@/pages/settings/SettingsView.vue";
+import AccountSettings from "@/pages/settings/AccountSettings.vue";
+import WhiteIpSettings from "@/pages/settings/WhiteIpSettings.vue";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -61,7 +63,9 @@ export const router = createRouter({
             { path: "post/:id/edit", component: PostEditView, meta: { auth: true, title: "글 수정", perm: "board.write" } },
 
             { path: "mypage", component: MyPage, meta: { auth: true, title: "마이페이지" } },
-            { path: "settings", component: SettingsView, meta: { auth: true, title: "환경설정", perm: ["gameCompany.view", "vendor.view", "usermanager.view", "permission.user.view", "permission.menu.view"] } },
+            { path: "account/roles", component: AccountSettings, meta: { auth: true, title: "계정 권한", perm: ["usermanager.view", "permission.user.view"] } },
+            { path: "account/whiteip", component: WhiteIpSettings, meta: { auth: true, title: "화이트 아이피", perm: "usermanager.view" } },
+            { path: "settings", component: SettingsView, meta: { auth: true, title: "환경설정", perm: ["gameCompany.view", "vendor.view", "permission.menu.view"] } },
           ],
         },
       ],

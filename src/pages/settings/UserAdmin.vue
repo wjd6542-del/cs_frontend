@@ -44,6 +44,7 @@
             <span class="sh">{{ form.is_active ? "활성" : "정지" }}</span>
           </label>
         </div>
+
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
