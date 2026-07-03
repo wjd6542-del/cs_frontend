@@ -6,8 +6,9 @@
   >
     <!-- 트리거 -->
     <div :class="triggerClasses" @click="toggle">
-      <div class="flex-1 truncate leading-none">
-        {{ selectedLabel || placeholder }}
+      <div class="flex-1 truncate leading-none flex items-center gap-2">
+        <span v-if="selectedItem && selectedItem[colorKey]" class="w-3 h-3 rounded-[2px] border border-[#1b1d2e] shrink-0" :style="{ backgroundColor: selectedItem[colorKey] }"></span>
+        <span class="truncate">{{ selectedLabel || placeholder }}</span>
       </div>
 
       <div class="flex items-center gap-1 ml-1.5 h-full">
@@ -54,7 +55,8 @@
             class="px-3 py-1.5 text-xs hover:bg-[#f0f1f8] cursor-pointer flex justify-between items-center group transition-colors"
             @click="select(item)"
           >
-            <span class="text-[#2c2f45] group-hover:text-[#7a5cff] font-medium">
+            <span class="text-[#2c2f45] group-hover:text-[#7a5cff] font-medium flex items-center gap-2">
+              <span v-if="item[colorKey]" class="w-3 h-3 rounded-[2px] border border-[#1b1d2e] shrink-0" :style="{ backgroundColor: item[colorKey] }"></span>
               {{ item[labelKey] }}
             </span>
             <i
@@ -87,6 +89,7 @@ export default {
     placeholder: { type: String, default: "선택하세요" },
     searchPlaceholder: { type: String, default: "검색..." },
     emptyText: { type: String, default: "검색 결과가 없습니다" },
+    colorKey: { type: String, default: "color" },
   },
   emits: ["update:modelValue", "change"],
   data() {
@@ -104,12 +107,13 @@ export default {
     };
   },
   computed: {
+    // 현재 선택된 옵션 객체
+    selectedItem() {
+      return this.options.find((o) => o[this.valueKey] === this.modelValue) || null;
+    },
     // 현재 선택된 옵션의 라벨을 반환한다
     selectedLabel() {
-      const found = this.options.find(
-        (o) => o[this.valueKey] === this.modelValue,
-      );
-      return found ? found[this.labelKey] : "";
+      return this.selectedItem ? this.selectedItem[this.labelKey] : "";
     },
     // 키워드로 필터링된 옵션 목록을 반환한다
     filteredOptions() {

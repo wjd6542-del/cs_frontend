@@ -6,7 +6,10 @@
         <h1 class="ttl">환율 정보</h1>
         <p class="desc">기준 통화 <b>원(KRW)</b> · 매일 자동 수집 · 표기: 외화 1{{ '' }}단위 = 원</p>
       </div>
-      <button class="btn" @click="refresh"><i class="fa-solid fa-rotate-right"></i> 새로고침</button>
+      <div class="hbtns">
+        <button class="btn btn-primary" @click="openCalc"><i class="fa-solid fa-calculator"></i> 환율 계산기</button>
+        <button class="btn" @click="refresh"><i class="fa-solid fa-rotate-right"></i> 새로고침</button>
+      </div>
     </header>
 
     <!-- 최신 환율 카드 -->
@@ -19,7 +22,7 @@
         <div class="rc-val num">{{ latest ? won(disp(latest[c.key], c.unit)) : "—" }}</div>
       </div>
     </div>
-    <p v-if="latest" class="asof num">기준일 {{ d(latest.date) }} · 출처 {{ latest.source }}</p>
+    <p v-if="latest" class="asof num">기준일 {{ d(latest.date) }}</p>
 
     <!-- 이력 -->
     <h3 class="sub">환율 이력</h3>
@@ -41,15 +44,51 @@
       </table>
     </div>
     <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reload" />
+
+    <!-- 환율 계산기 모달 -->
+    <div v-if="calcOpen" class="drawer" @click.self="calcOpen = false">
+      <div class="cmodal">
+        <button class="vclose" @click="calcOpen = false"><i class="fa-solid fa-xmark"></i></button>
+        <h3 class="cttl"><i class="fa-solid fa-calculator"></i> 환율 계산기</h3>
+        <p class="csub">원화 기준 · 선택한 일자의 환율로 계산됩니다</p>
+
+        <div class="crow">
+          <label class="cfld">
+            <span class="clbl">기준일</span>
+            <SearchSelect v-model="calc.dateId" :options="dateOptions" placeholder="일자 선택" search-placeholder="일자 검색…" />
+          </label>
+          <label class="cfld">
+            <span class="clbl">통화</span>
+            <SearchSelect v-model="calc.cur" :options="curOptions" placeholder="통화 선택" search-placeholder="통화 검색…" />
+          </label>
+        </div>
+
+        <div class="conv">
+          <div class="cbox">
+            <span class="ccap">{{ calc.dir === 'toKrw' ? curLabel : '원 (KRW)' }}</span>
+            <input v-model="calc.amount" type="number" class="camt" placeholder="0" />
+          </div>
+          <button class="swap" @click="swapDir" title="방향 전환"><i class="fa-solid fa-right-left"></i></button>
+          <div class="cbox result">
+            <span class="ccap">{{ calc.dir === 'toKrw' ? '원 (KRW)' : curLabel }}</span>
+            <div class="cres num">{{ resultText }}</div>
+          </div>
+        </div>
+
+        <p v-if="rate" class="crate num">💱 1 {{ curSymbol }} = {{ won(rate) }} <span class="crated">({{ dateLabel }})</span></p>
+        <p v-else class="crate warn">선택한 일자의 {{ curSymbol }} 환율이 없습니다.</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import Pager from "@/components/base/Pager.vue";
 import EmptyState from "@/components/base/EmptyState.vue";
+import SearchSelect from "@/components/base/SearchSelect.vue";
 import { exchangeRateApi } from "@/api/cs";
 
 const CUR = [
@@ -84,6 +123,34 @@ async function reload() {
   totalPages.value = res.totalPages || 1;
 }
 async function loadLatest() { latest.value = await exchangeRateApi.latest(); }
+
+/* ── 계산기 ── */
+const calcOpen = ref(false);
+const calc = reactive({ dateId: null, cur: "usd", amount: "", dir: "toKrw" });
+const dateOptions = computed(() => rows.value.map((r) => ({ value: r.id, label: d(r.date) })));
+const curOptions = computed(() => CUR.map((c) => ({ value: c.key, label: `${c.emoji} ${c.label} (${c.symbol})` })));
+const rateRow = computed(() => rows.value.find((r) => r.id === calc.dateId) || latest.value);
+const rate = computed(() => (rateRow.value ? rateRow.value[calc.cur] : null));
+const curMeta = computed(() => CUR.find((c) => c.key === calc.cur) || CUR[0]);
+const curLabel = computed(() => `${curMeta.value.emoji} ${curMeta.value.symbol}`);
+const curSymbol = computed(() => curMeta.value.symbol);
+const dateLabel = computed(() => (rateRow.value ? d(rateRow.value.date) : "-"));
+const result = computed(() => {
+  const amt = Number(calc.amount);
+  if (!rate.value || !isFinite(amt) || calc.amount === "") return null;
+  return calc.dir === "toKrw" ? amt * rate.value : amt / rate.value;
+});
+const resultText = computed(() => {
+  if (result.value == null) return "—";
+  if (calc.dir === "toKrw") return won(result.value);
+  return result.value.toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + " " + curSymbol.value;
+});
+function openCalc() {
+  calc.dateId = latest.value?.id ?? rows.value[0]?.id ?? null;
+  calc.cur = "usd"; calc.amount = ""; calc.dir = "toKrw";
+  calcOpen.value = true;
+}
+function swapDir() { calc.dir = calc.dir === "toKrw" ? "toCur" : "toKrw"; }
 async function refresh() {
   try { await exchangeRateApi.collect(); toast.success("최신 환율을 수집했습니다."); }
   catch (e) { toast.error(e?.message || "수집 실패"); }
@@ -117,4 +184,30 @@ onMounted(async () => { await Promise.all([loadLatest(), reload()]); });
 .tbl td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line); font-size: 0.85rem; color: var(--ink); }
 .tbl tbody tr:last-child td { border-bottom: none; }
 .r { text-align: right; } .dt { font-weight: 700; }
+.hbtns { display: flex; gap: 0.5rem; }
+
+/* 계산기 모달 */
+.drawer { position: fixed; inset: 0; z-index: 210; background: rgba(27, 29, 46, 0.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.cmodal { position: relative; width: 440px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-lg); padding: 1.5rem; }
+.vclose { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); box-shadow: 2px 2px 0 var(--line-hard); }
+.vclose:hover { background: var(--surface-2); }
+.cttl { font-family: var(--font-pixel); font-size: 1.1rem; color: var(--ink); display: flex; align-items: center; gap: 0.5rem; }
+.cttl i { color: var(--seal); }
+.csub { font-size: 0.8rem; color: var(--ink-muted); margin-top: 0.3rem; margin-bottom: 1.1rem; }
+.crow { display: flex; gap: 0.7rem; margin-bottom: 1rem; }
+.cfld { flex: 1; display: block; }
+.clbl { display: block; font-family: var(--font-pixel); font-size: 0.64rem; color: var(--ink-soft); margin-bottom: 0.35rem; }
+
+.conv { display: flex; align-items: stretch; gap: 0.6rem; }
+.cbox { flex: 1; min-width: 0; background: var(--surface-2); border: 2px solid var(--line-hard); border-radius: 3px; padding: 0.6rem 0.7rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.cbox.result { background: #ede9ff; }
+.ccap { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--ink-muted); }
+.camt { width: 100%; background: transparent; border: none; outline: none; font-family: var(--font-pixel); font-size: 1.05rem; color: var(--ink); }
+.cres { font-family: var(--font-pixel); font-size: 1.05rem; color: var(--seal-deep); word-break: break-all; }
+.swap { flex-shrink: 0; width: 38px; align-self: center; height: 38px; border: 2px solid var(--line-hard); border-radius: 3px; background: var(--surface); color: var(--seal); box-shadow: 2px 2px 0 var(--line-hard); transition: transform 0.08s; }
+.swap:hover { transform: translateY(-1px); }
+.swap:active { transform: translateY(1px); }
+.crate { margin-top: 1.1rem; text-align: center; font-size: 0.85rem; color: var(--ink); }
+.crate .crated { color: var(--ink-faint); font-size: 0.76rem; }
+.crate.warn { color: var(--danger); }
 </style>

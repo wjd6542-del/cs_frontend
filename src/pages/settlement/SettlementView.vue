@@ -117,7 +117,11 @@ const isVendor = computed(() => props.type === "VENDOR");
 const toast = useToast();
 
 const LIMIT = 15;
-const STATUS_OPTS = [{ value: "PENDING", label: "대기" }, { value: "PARTIAL", label: "부분정산" }, { value: "DONE", label: "완료" }];
+const STATUS_OPTS = [
+  { value: "PENDING", label: "대기", color: "#f59e0b" },
+  { value: "PARTIAL", label: "부분정산", color: "#7a5cff" },
+  { value: "DONE", label: "완료", color: "#0ea88f" },
+];
 const rows = ref([]);
 const page = ref(1);
 const total = ref(0);

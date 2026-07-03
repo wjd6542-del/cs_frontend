@@ -164,12 +164,16 @@ import { supportApi, vendorApi, gameCompanyApi } from "@/api/cs";
 const route = useRoute();
 
 const STATUS_OPTS = [
-  { value: "OPEN", label: "접수" },
-  { value: "IN_PROGRESS", label: "처리중" },
-  { value: "RESOLVED", label: "해결" },
-  { value: "CLOSED", label: "종료" },
+  { value: "OPEN", label: "접수", color: "#f59e0b" },
+  { value: "IN_PROGRESS", label: "처리중", color: "#7a5cff" },
+  { value: "RESOLVED", label: "해결", color: "#0ea88f" },
+  { value: "CLOSED", label: "종료", color: "#94a3b8" },
 ];
-const PRIO_OPTS = [{ value: 0, label: "보통" }, { value: 1, label: "높음" }, { value: 2, label: "긴급" }];
+const PRIO_OPTS = [
+  { value: 0, label: "보통", color: "#94a3b8" },
+  { value: 1, label: "높음", color: "#e07d16" },
+  { value: 2, label: "긴급", color: "#e23b46" },
+];
 
 const props = defineProps({ party: { type: String, default: "VENDOR" } });
 const isVendor = computed(() => props.party === "VENDOR");
