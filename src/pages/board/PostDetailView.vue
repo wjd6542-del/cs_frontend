@@ -8,8 +8,8 @@
         <span class="dot">·</span><span>{{ fmt(post.created_at) }}</span>
         <span class="dot">·</span><span>조회 {{ post.view_count }}</span>
         <div class="acts" v-if="canEdit">
-          <router-link :to="`/post/${post.id}/edit`" class="mini">수정</router-link>
-          <button class="mini danger" @click="removePost">삭제</button>
+          <router-link :to="`/post/${post.id}/edit`" class="btn btn-xs">수정</router-link>
+          <button class="btn btn-xs btn-danger" @click="removePost">삭제</button>
         </div>
       </div>
     </header>
@@ -45,7 +45,7 @@
       </ul>
       <div class="cwrite">
         <textarea v-model="newComment" rows="2" placeholder="댓글을 입력하세요" @keydown.meta.enter="addComment"></textarea>
-        <button class="csend" @click="addComment">등록</button>
+        <button class="btn btn-primary csend" @click="addComment">등록</button>
       </div>
     </section>
   </div>
@@ -119,8 +119,6 @@ watch(() => route.params.id, (id) => { if (id) load(id); });
 .meta .au { font-weight: 700; color: #5b607d; }
 .meta .dot { color: #b9bccf; }
 .acts { margin-left: auto; display: flex; gap: 0.35rem; }
-.mini { height: 28px; padding: 0 0.6rem; border-radius: 3px; font-size: 0.76rem; font-weight: 600; color: #5b607d; background: #f0f1f8; border: 1px solid #b9bccf; text-decoration: none; display: inline-flex; align-items: center; }
-.mini.danger { color: var(--seal); }
 .body { padding: 1.4rem 0; font-size: 0.98rem; line-height: 1.75; color: #1b1d2e; min-height: 80px; }
 .prose :deep(h2) { font-family: "Galmuri11", monospace; font-size: 1.3rem; font-weight: 700; margin: 1rem 0 0.4rem; color: var(--ink); }
 .prose :deep(p) { margin: 0.5rem 0; }
@@ -140,17 +138,17 @@ watch(() => route.params.id, (id) => { if (id) load(id); });
 .comments { margin-top: 1rem; border-top: 1px solid #d9dbe9; padding-top: 1.2rem; }
 .ch { font-family: "Galmuri11", monospace; font-weight: 700; color: var(--ink); margin-bottom: 0.9rem; }
 .clist { display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 1.1rem; }
-.citem { background: #ffffff; border: 1px solid #ece1c8; border-radius: 3px; padding: 0.7rem 0.85rem; }
+.citem { background: #ffffff; border: 2px solid var(--line-hard); border-radius: 3px; padding: 0.7rem 0.85rem; }
 .cinfo { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; }
 .cau { font-weight: 700; color: var(--ink); }
 .ctime { color: #9a9fbb; }
-.cdel { margin-left: auto; font-size: 0.72rem; color: var(--seal); }
+.cdel { margin-left: auto; font-size: 0.72rem; color: var(--danger); }
 .ctxt { margin-top: 0.35rem; font-size: 0.9rem; color: #1b1d2e; white-space: pre-wrap; }
 .cempty { color: #9a9fbb; font-size: 0.85rem; }
 .cwrite { display: flex; gap: 0.5rem; }
-.cwrite textarea { flex: 1; padding: 0.6rem 0.7rem; font-size: 0.9rem; border: 1px solid #b9bccf; border-radius: 3px; outline: none; resize: vertical; background: #ffffff; }
+.cwrite textarea { flex: 1; padding: 0.6rem 0.7rem; font-size: 0.9rem; border: 2px solid var(--line-hard); border-radius: 3px; outline: none; resize: vertical; background: #ffffff; }
 .cwrite textarea:focus { border-color: var(--seal); box-shadow: 0 0 0 3px rgba(122,92,255, 0.13); }
-.csend { flex-shrink: 0; padding: 0 1.1rem; border-radius: 3px; font-weight: 700; color: #ffffff; background: var(--seal); border: 1px solid #5f3fe0; }
-.err { color: var(--seal); text-align: center; padding: 2rem; }
+.csend { flex-shrink: 0; height: auto; }
+.err { color: var(--danger); text-align: center; padding: 2rem; }
 .loading { color: #5b607d; text-align: center; padding: 2rem; }
 </style>
