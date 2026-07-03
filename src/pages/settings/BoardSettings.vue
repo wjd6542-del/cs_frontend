@@ -2,7 +2,7 @@
   <div>
     <div class="head">
       <h3 class="h">게시판 <span class="c">{{ boards.length }}</span></h3>
-      <button class="add" @click="openNew">+ 게시판 추가</button>
+      <button class="btn btn-primary" @click="openNew"><i class="fa-solid fa-plus"></i> 게시판 추가</button>
     </div>
 
     <p class="hint">↑↓ 버튼으로 게시판 노출 순서를 바꿀 수 있습니다. 사이드 메뉴에도 이 순서로 표시됩니다.</p>
@@ -24,8 +24,8 @@
           <span v-if="b.allow_upload" class="tag on">첨부</span>
         </div>
         <div class="acts">
-          <button class="mini" @click="openEdit(b)">수정</button>
-          <button class="mini danger" @click="del(b)">삭제</button>
+          <button class="btn btn-xs" @click="openEdit(b)">수정</button>
+          <button class="btn btn-xs btn-danger" @click="del(b)">삭제</button>
         </div>
       </li>
       <li v-if="!boards.length"><EmptyState variant="board" title="게시판이 없어요" desc="게시판을 만들어 보세요." hint="＋ 게시판 추가" compact /></li>
@@ -52,8 +52,8 @@
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="pacts">
-          <button class="save" :disabled="saving" @click="submit">저장</button>
-          <button class="cancel" @click="showForm = false">취소</button>
+          <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
+          <button class="btn" @click="showForm = false">취소</button>
         </div>
       </div>
     </div>
@@ -139,14 +139,14 @@ onMounted(load);
 .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.9rem; }
 .h { font-family: "Galmuri11", monospace; font-weight: 700; color: var(--ink); }
 .c { color: var(--seal); margin-left: 0.25rem; }
-.add { height: 36px; padding: 0 0.9rem; border-radius: 3px; font-weight: 700; font-size: 0.82rem; color: #ffffff; background: var(--seal); border: 1px solid #5f3fe0; }
 .hint { font-size: 0.76rem; color: #5b607d; margin-bottom: 0.7rem; }
 .list { display: flex; flex-direction: column; gap: 0.5rem; }
 .row { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1rem; background: #ffffff; border: 2px solid var(--line-hard); border-radius: 4px; flex-wrap: wrap; }
-.order { display: flex; flex-direction: column; gap: 2px; }
-.ord { width: 24px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 3px; font-size: 0.66rem; color: #5b607d; background: #f0f1f8; border: 1px solid #b9bccf; }
-.ord:hover:not(:disabled) { color: var(--seal); background: #e7e8f1; }
-.ord:disabled { opacity: 0.35; cursor: default; }
+.order { display: flex; flex-direction: column; gap: 3px; }
+.ord { width: 26px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 3px; font-size: 0.66rem; color: var(--ink); background: #fff; border: 2px solid var(--line-hard); box-shadow: 2px 2px 0 var(--line-hard); transition: all 0.075s; }
+.ord:hover:not(:disabled) { color: var(--seal); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }
+.ord:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line-hard); }
+.ord:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
 .rinfo { display: flex; align-items: center; gap: 0.5rem; }
 .bn { font-weight: 700; color: var(--ink); }
 .slug { font-size: 0.75rem; color: #9a9fbb; }
@@ -155,8 +155,6 @@ onMounted(load);
 .tag { font-size: 0.68rem; font-weight: 700; color: #5b607d; background: #d9dbe9; padding: 0.1rem 0.5rem; border-radius: 3px; }
 .tag.on { color: var(--seal); background: rgba(122,92,255, 0.1); }
 .acts { margin-left: auto; display: flex; gap: 0.35rem; }
-.mini { height: 30px; padding: 0 0.7rem; border-radius: 3px; font-size: 0.78rem; font-weight: 600; color: #5b607d; background: #f0f1f8; border: 1px solid #b9bccf; }
-.mini.danger { color: var(--seal); }
 .empty { padding: 1.4rem; text-align: center; color: #9a9fbb; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(20, 16, 13, 0.45); display: flex; align-items: center; justify-content: center; padding: 1rem; }
@@ -166,10 +164,11 @@ onMounted(load);
 .col2 { grid-column: 1 / -1; }
 .fld { display: block; }
 .lbl { display: block; font-size: 0.72rem; font-weight: 700; color: #2c2f45; margin-bottom: 0.4rem; }
-.chk { display: flex; align-items: center; gap: 0.5rem; font-size: 0.86rem; color: #5b607d; }
-.chk input { accent-color: #7a5cff; }
-.msg.err { color: var(--seal); font-size: 0.82rem; margin-top: 0.7rem; font-weight: 600; }
+.chk { display: flex; align-items: center; gap: 0.5rem; font-size: 0.84rem; font-weight: 600; color: var(--ink-soft); cursor: pointer; user-select: none; }
+.chk input { appearance: none; -webkit-appearance: none; flex-shrink: 0; width: 18px; height: 18px; border: 2px solid var(--line-hard); border-radius: 3px; background: #fff; box-shadow: 2px 2px 0 var(--line-hard); cursor: pointer; position: relative; transition: all 0.075s; }
+.chk input:checked { background: var(--seal); }
+.chk input:checked::after { content: ""; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.chk input:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line-hard); }
+.msg.err { color: var(--danger); font-size: 0.82rem; margin-top: 0.7rem; font-weight: 600; }
 .pacts { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
-.save { height: 42px; padding: 0 1.3rem; border-radius: 3px; font-weight: 700; color: #ffffff; background: var(--seal-grad); border: 1px solid #5f3fe0; }
-.cancel { height: 42px; padding: 0 1.1rem; border-radius: 3px; font-weight: 600; color: #5b607d; background: #f0f1f8; border: 1px solid #b9bccf; }
 </style>
