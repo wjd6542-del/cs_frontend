@@ -2,8 +2,7 @@
   <div class="vtree">
     <div class="vt-head">
       <input v-model="kw" class="field field-xs" :placeholder="`${label} 명칭 검색`" />
-      <button class="btn btn-xs" :title="$t('전체 펼치기')" :disabled="!hasBranches" @click="expandAll"><i class="fa-solid fa-angles-down"></i></button>
-      <button class="btn btn-xs" :title="$t('전체 접기')" :disabled="!hasBranches" @click="collapseAll"><i class="fa-solid fa-angles-up"></i></button>
+      <button class="btn btn-xs" :title="allExpanded ? $t('전체 접기') : $t('전체 펼치기')" :disabled="!hasBranches" @click="toggleAllBranches"><i class="fa-solid" :class="allExpanded ? 'fa-angles-up' : 'fa-angles-down'"></i></button>
       <button class="btn btn-xs btn-primary" :title="`최상위 ${label} 추가`" @click="startAdd(null)">＋</button>
     </div>
 
@@ -108,8 +107,10 @@ function branchIds(nodes = roots.value, acc = []) {
   return acc;
 }
 const hasBranches = computed(() => branchIds().length > 0);
+const allExpanded = computed(() => { const ids = branchIds(); return ids.length > 0 && ids.every((id) => !collapsed[id]); });
 function expandAll() { for (const id of branchIds()) collapsed[id] = false; }
 function collapseAll() { for (const id of branchIds()) collapsed[id] = true; }
+function toggleAllBranches() { allExpanded.value ? collapseAll() : expandAll(); }
 
 function filterTree(nodes) {
   const k = kw.value.trim().toLowerCase();

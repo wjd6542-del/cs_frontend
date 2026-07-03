@@ -189,7 +189,7 @@ function onLogout() {
 /* 계정 트리거 */
 .acct-wrap { position: relative; }
 .acct {
-  display: flex; align-items: center; gap: 0.6rem; height: 44px; padding: 0 0.5rem 0 0.7rem;
+  display: flex; align-items: center; gap: 0.6rem; height: 40px; padding: 0 0.5rem 0 0.7rem;
   border: 2px solid var(--line-hard); border-radius: 3px; background: var(--surface);
   box-shadow: 2px 2px 0 var(--line-hard); transition: transform 0.08s, box-shadow 0.08s;
 }
