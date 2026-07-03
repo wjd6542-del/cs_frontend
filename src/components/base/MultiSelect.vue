@@ -17,6 +17,10 @@
 
     <div v-if="open" class="panel">
       <input ref="search" v-model="kw" class="msearch" :placeholder="searchPlaceholder" @click.stop />
+      <button v-if="options.length" class="selall" @click.stop="toggleAll">
+        <i class="fa-solid" :class="allSelected ? 'fa-square-check' : 'fa-square'"></i>
+        {{ allSelected ? "전체 해제" : "전체 선택" }}
+      </button>
       <div class="list">
         <label v-for="o in filtered" :key="o[valueKey]" class="opt" @click.stop>
           <input type="checkbox" :checked="isChecked(o[valueKey])" @change="toggleVal(o[valueKey])" />
@@ -60,6 +64,8 @@ const filtered = computed(() => {
   return props.options.filter((o) => String(o[props.labelKey]).toLowerCase().includes(k));
 });
 
+const allSelected = computed(() => props.options.length > 0 && props.options.every((o) => props.modelValue.includes(o[props.valueKey])));
+function toggleAll() { emitVals(allSelected.value ? [] : props.options.map((o) => o[props.valueKey])); }
 function isChecked(v) { return props.modelValue.includes(v); }
 function toggle() {
   open.value = !open.value;
@@ -100,6 +106,8 @@ onBeforeUnmount(() => document.removeEventListener("click", onOutside, true));
 
 .panel { position: absolute; left: 0; top: calc(100% + 4px); z-index: 50; width: 100%; min-width: 180px; background: #fff; border: 2px solid var(--line-hard); border-radius: 3px; box-shadow: 4px 4px 0 var(--line-hard); overflow: hidden; }
 .msearch { width: 100%; height: 30px; padding: 0 0.6rem; font-size: 0.78rem; border: none; border-bottom: 2px solid var(--line); outline: none; background: var(--surface-2); }
+.selall { width: 100%; display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.6rem; font-family: var(--font-pixel); font-size: 0.68rem; color: var(--seal-deep); background: #f6f4ff; border-bottom: 2px solid var(--line); text-align: left; }
+.selall:hover { background: #ede9ff; }
 .list { max-height: 220px; overflow-y: auto; }
 .opt { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.82rem; color: var(--ink); cursor: pointer; }
 .opt:hover { background: var(--surface-2); }

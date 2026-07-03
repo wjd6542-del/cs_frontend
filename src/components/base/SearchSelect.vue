@@ -64,8 +64,16 @@
               class="fa-solid fa-check text-[#7a5cff] text-[10px]"
             ></i>
           </div>
+          <button
+            v-if="canCreate"
+            type="button"
+            class="w-full px-3 py-2 text-xs text-left text-[#5f3fe0] bg-[#ede9ff] hover:bg-[#e0d9ff] border-t-2 border-[#1b1d2e] flex items-center gap-1.5"
+            @click="createItem"
+          >
+            <i class="fa-solid fa-plus"></i> "<b class="font-[var(--font-pixel)]">{{ keyword.trim() }}</b>" 추가
+          </button>
           <div
-            v-if="filteredOptions.length === 0"
+            v-if="filteredOptions.length === 0 && !canCreate"
             class="px-3 py-5 text-[#9a9fbb] text-center text-xs"
           >
             {{ emptyText }}
@@ -90,8 +98,9 @@ export default {
     searchPlaceholder: { type: String, default: "검색..." },
     emptyText: { type: String, default: "검색 결과가 없습니다" },
     colorKey: { type: String, default: "color" },
+    creatable: { type: Boolean, default: false },
   },
-  emits: ["update:modelValue", "change"],
+  emits: ["update:modelValue", "change", "create"],
   data() {
     return {
       open: false,
@@ -122,6 +131,14 @@ export default {
         String(o[this.labelKey])
           .toLowerCase()
           .includes(this.keyword.toLowerCase()),
+      );
+    },
+    // creatable 이고 검색어가 기존 옵션과 정확히 일치하지 않으면 추가 가능
+    canCreate() {
+      const k = this.keyword.trim();
+      if (!this.creatable || !k) return false;
+      return !this.options.some(
+        (o) => String(o[this.labelKey]).toLowerCase() === k.toLowerCase(),
       );
     },
     // 주입된 클래스에 큰 텍스트 크기가 포함됐는지 여부
@@ -196,6 +213,14 @@ export default {
       this.$emit("update:modelValue", item[this.valueKey]);
       this.$emit("change", item[this.valueKey]);
       this.open = false;
+    },
+    // 새 항목 추가: 부모가 create 이벤트를 받아 생성·선택을 처리한다
+    createItem() {
+      const name = this.keyword.trim();
+      if (!name) return;
+      this.$emit("create", name);
+      this.open = false;
+      this.keyword = "";
     },
     // 선택을 해제한다
     clear() {

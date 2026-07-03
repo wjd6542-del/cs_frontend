@@ -73,7 +73,7 @@
           <div class="frow">
             <div class="fld flex-1">
               <span class="form-label">분류</span>
-              <SearchSelect v-model="form.category" :options="catOptions" placeholder="분류 선택 (환경설정에서 관리)" search-placeholder="분류 검색…" />
+              <SearchSelect v-model="form.category" :options="catOptions" placeholder="분류 선택 · 없으면 추가" search-placeholder="분류 검색 또는 새 분류명…" creatable @create="createCategory" />
             </div>
             <div class="fld toggle">
               <span class="form-label">상단 고정</span>
@@ -167,6 +167,14 @@ async function reload() {
 }
 function search() { page.value = 1; reload(); }
 async function loadCats() { categories.value = await faqCategoryApi.list({ only_active: true }); }
+async function createCategory(name) {
+  try {
+    await faqCategoryApi.save({ name, sort: categories.value.length });
+    await loadCats();
+    form.category = name;
+    toast.success(`'${name}' 분류가 추가되었습니다.`);
+  } catch (e) { toast.error(e?.message || "분류 추가 실패"); }
+}
 async function loadPopular() { popular.value = await faqApi.popular({ limit: 10 }); }
 
 async function toggle(f) {
