@@ -7,9 +7,9 @@
       </div>
     </header>
 
-    <div class="split">
-      <!-- 좌측: 업체/게임사 트리 -->
-      <aside class="pane pcard left">
+    <div class="split" :class="{ 'no-tree': !treeOpen }">
+      <!-- 좌측: 대상 트리 (토글로 열기/접기) -->
+      <aside v-show="treeOpen" class="pane pcard left">
         <EntityTree
           :key="party"
           ref="treeRef"
@@ -25,13 +25,19 @@
       <section class="pane pcard right">
         <div class="r-head">
           <div class="r-title">
-            <span class="r-eye">{{ pmeta.label }}</span>
-            <h3 class="r-name">
-              {{ selected ? selected.name : "전체 " + pmeta.label + " 응대" }}
-              <button v-if="selected" class="allbtn" @click="clearSelected"><i class="fa-solid fa-xmark"></i> 전체 보기</button>
-            </h3>
+            <button class="treetgl" :title="treeOpen ? '대상 트리 접기' : '대상 트리 열기'" @click="treeOpen = !treeOpen">
+              <i class="fa-solid" :class="treeOpen ? 'fa-angles-left' : 'fa-sitemap'"></i>
+            </button>
+            <div>
+              <span class="r-eye">{{ pmeta.label }}</span>
+              <h3 class="r-name">
+                {{ selected ? selected.name : "전체 " + pmeta.label + " 응대" }}
+                <button v-if="selected" class="allbtn" @click="clearSelected"><i class="fa-solid fa-xmark"></i> 전체 보기</button>
+              </h3>
+            </div>
           </div>
           <div class="r-tools">
+            <div class="w-60 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" placeholder="등록일 기간" @change="onDateChange" /></div>
             <div class="w-44"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
             <div class="w-28 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" /></div>
             <button v-if="canEdit && selected" class="btn btn-primary" @click="openNew">+ 등록</button>
@@ -168,8 +174,10 @@ import EntityTree from "@/components/base/EntityTree.vue";
 import RichEditor from "@/components/base/RichEditor.vue";
 import TagSelect from "@/components/base/TagSelect.vue";
 import TagChips from "@/components/base/TagChips.vue";
+import DateRangePicker from "@/components/base/DateRangePicker.vue";
 import { supportApi, vendorApi, gameCompanyApi, solutionCompanyApi } from "@/api/cs";
 import { useAuthStore } from "@/stores/auth";
+import { formatDateOnly } from "@/utils/date";
 
 const route = useRoute();
 const auth = useAuthStore();
@@ -202,7 +210,9 @@ const tickets = ref([]);
 const page = ref(1);
 const total = ref(0);
 const totalPages = ref(1);
-const filter = reactive({ status: "" });
+const filter = reactive({ status: "", date_from: "", date_to: "" });
+const dateRange = ref({ start: null, end: null });
+const treeOpen = ref(true);
 const filterTags = ref([]);
 const detailTags = ref([]);
 const sel = ref([]);
@@ -240,6 +250,11 @@ function clearSelected() {
   reloadTickets();
 }
 function applyFilter() { page.value = 1; reloadTickets(); }
+function onDateChange(r) {
+  filter.date_from = r?.start ? formatDateOnly(r.start) : "";
+  filter.date_to = r?.end ? formatDateOnly(r.end) : "";
+  applyFilter();
+}
 
 function toggleAll() { sel.value = allChecked.value ? [] : tickets.value.map((t) => t.id); }
 function toggleRow(id) { sel.value = sel.value.includes(id) ? sel.value.filter((x) => x !== id) : [...sel.value, id]; }
@@ -262,6 +277,8 @@ async function reloadTickets() {
   const body = { party: props.party, page: page.value, limit: LIMIT };
   if (selected.value) body[pmeta.value.idField] = selected.value.id; // 선택 시 해당 항목만
   if (filter.status) body.status = filter.status;
+  if (filter.date_from) body.date_from = filter.date_from;
+  if (filter.date_to) body.date_to = filter.date_to;
   if (filterTags.value.length) body.tag_ids = filterTags.value;
   const res = await supportApi.list(body);
   tickets.value = res.rows || [];
@@ -363,6 +380,7 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
 
 .split { display: grid; grid-template-columns: 300px 1fr; gap: 1rem; align-items: stretch; }
+.split.no-tree { grid-template-columns: 1fr; }
 @media (max-width: 820px) { .split { grid-template-columns: 1fr; } .pane { height: auto; min-height: 320px; } }
 
 /* 좌우 동일 높이 카드 (상단 정렬 + 내부 스크롤) */
@@ -381,7 +399,10 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .pane-empty { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1rem; }
 
 .r-head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.65rem 0.85rem; border-bottom: 2px solid var(--line); flex-wrap: wrap; flex-shrink: 0; }
-.r-title { display: flex; flex-direction: column; line-height: 1.15; }
+.r-title { display: flex; flex-direction: row; align-items: center; gap: 0.5rem; line-height: 1.15; }
+.treetgl { flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); background: #fff; box-shadow: 2px 2px 0 var(--line-hard); transition: all 0.075s; }
+.treetgl:hover { color: var(--seal); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }
+.treetgl:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line-hard); }
 .r-eye { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--seal-deep); }
 .r-name { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .allbtn { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--seal-deep); background: #ede9ff; border: 1.5px solid var(--line-hard); border-radius: 3px; padding: 0.12rem 0.4rem; }
