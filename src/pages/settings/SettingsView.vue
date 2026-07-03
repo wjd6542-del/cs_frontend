@@ -1,7 +1,6 @@
 <template>
   <div class="settings">
     <header class="phead">
-      <p class="eyebrow">환경설정</p>
       <h1 class="ttl">환경설정</h1>
     </header>
 

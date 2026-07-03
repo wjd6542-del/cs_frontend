@@ -6,7 +6,11 @@
       <AppHeader @toggle="open = !open" />
       <main class="content">
         <div class="content-inner">
-          <router-view />
+          <router-view v-slot="{ Component, route }">
+            <transition name="page" mode="out-in">
+              <component :is="Component" :key="route.path" />
+            </transition>
+          </router-view>
         </div>
       </main>
     </div>
@@ -61,5 +65,32 @@ watch(isMobile, (m) => {
   inset: 0;
   z-index: 55;
   background: rgba(20, 16, 13, 0.45);
+}
+</style>
+
+<!-- 페이지 전환 트랜지션 (전역: 라우팅 컴포넌트 루트에 적용되므로 scoped 불가) -->
+<style>
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.18s ease, transform 0.2s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-leave-active {
+    transition: none;
+  }
+  .page-enter-from,
+  .page-leave-to {
+    opacity: 1;
+    transform: none;
+  }
 }
 </style>

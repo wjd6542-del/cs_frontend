@@ -2,7 +2,6 @@
   <div class="bview">
     <header class="phead">
       <div>
-        <p class="eyebrow">게시판</p>
         <h1 class="ttl">{{ board?.name }}</h1>
         <p v-if="board?.description" class="desc">{{ board.description }}</p>
       </div>

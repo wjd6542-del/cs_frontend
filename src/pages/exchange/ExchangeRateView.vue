@@ -2,7 +2,6 @@
   <div class="page">
     <header class="phead">
       <div>
-        <p class="eyebrow">환율 정보</p>
         <h1 class="ttl">환율 정보</h1>
         <p class="desc">기준 통화 <b>원(KRW)</b> · 매일 자동 수집 · 표기: 외화 1{{ '' }}단위 = 원</p>
       </div>

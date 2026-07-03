@@ -2,7 +2,6 @@
   <div class="page">
     <header class="phead">
       <div>
-        <p class="eyebrow">CS 관리</p>
         <h1 class="ttl">자주 하는 질문</h1>
       </div>
       <button v-if="canEdit" class="btn btn-primary" @click="openNew()">+ FAQ 추가</button>

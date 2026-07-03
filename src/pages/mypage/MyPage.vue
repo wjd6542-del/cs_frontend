@@ -1,7 +1,6 @@
 <template>
   <div class="mypage">
     <header class="phead">
-      <p class="eyebrow">MY PAGE</p>
       <h1 class="ttl">마이페이지</h1>
     </header>
 

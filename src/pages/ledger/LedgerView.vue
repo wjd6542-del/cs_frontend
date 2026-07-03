@@ -2,7 +2,6 @@
   <div class="page">
     <header class="phead">
       <div>
-        <p class="eyebrow">정산 관리</p>
         <h1 class="ttl">장부 관리</h1>
       </div>
       <button v-if="canEdit" class="btn btn-primary" @click="openNew()">+ 거래 등록</button>

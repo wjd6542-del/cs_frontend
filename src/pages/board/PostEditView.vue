@@ -1,7 +1,6 @@
 <template>
   <div class="pedit">
     <header class="phead">
-      <p class="eyebrow">{{ board?.name }}</p>
       <h1 class="ttl">{{ isNew ? "글쓰기" : "글 수정" }}</h1>
     </header>
 

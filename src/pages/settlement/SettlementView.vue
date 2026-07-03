@@ -2,7 +2,6 @@
   <div class="page">
     <header class="phead">
       <div>
-        <p class="eyebrow">정산 관리</p>
         <h1 class="ttl">{{ isVendor ? "업체 정산" : "게임사 정산" }}</h1>
         <p class="desc">{{ isVendor ? "업체별 사용대금 회수 정산을 관리합니다." : "게임사별 사용료 지급 정산을 관리합니다." }}</p>
       </div>

@@ -2,7 +2,6 @@
   <div class="page">
     <header class="phead">
       <div>
-        <p class="eyebrow">알림</p>
         <h1 class="ttl">미해결 응대 알림</h1>
         <p class="desc">해결·종료되지 않은 응대(접수·처리중)를 모아 보여줍니다.</p>
       </div>

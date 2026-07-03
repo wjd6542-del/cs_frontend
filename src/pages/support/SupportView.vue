@@ -2,7 +2,6 @@
   <div class="page">
     <header class="phead">
       <div>
-        <p class="eyebrow">CS 관리</p>
         <h1 class="ttl">{{ pmeta.title }}</h1>
       </div>
     </header>
