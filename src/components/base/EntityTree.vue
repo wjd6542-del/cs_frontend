@@ -42,6 +42,7 @@
         @drop.stop="onDrop(row.node)"
         @dragend="reset"
       >
+        <span class="grip" title="드래그하여 위치·순서 이동"><i class="fa-solid fa-grip-vertical"></i></span>
         <button v-if="row.hasChildren" class="caret" @click.stop="toggle(row.node.id)">
           <i class="fa-solid" :class="isCollapsed(row.node.id) ? 'fa-caret-right' : 'fa-caret-down'"></i>
         </button>
@@ -269,6 +270,9 @@ onMounted(reload);
 
 .vt-row { display: flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.4rem; border-radius: 3px; cursor: pointer; font-size: 0.86rem; }
 .vt-row:hover { background: var(--surface-2); }
+.grip { flex-shrink: 0; width: 12px; display: grid; place-items: center; color: var(--ink-faint); font-size: 0.72rem; cursor: grab; opacity: 0.35; }
+.vt-row:hover .grip { opacity: 0.9; }
+.grip:active { cursor: grabbing; }
 .vt-row.on { background: #ede9ff; box-shadow: inset 0 0 0 2px var(--seal); }
 .vt-row.dim .nm { color: var(--ink-faint); text-decoration: line-through; }
 .vt-row.dragging { opacity: 0.45; }
