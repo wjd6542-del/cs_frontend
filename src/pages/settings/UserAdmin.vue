@@ -40,7 +40,7 @@
           </template>
           <label class="fld toggle">
             <span class="lbl">{{ $t("상태") }}</span>
-            <span class="sw" :class="{ on: form.is_active }" @click="form.is_active = !form.is_active"><span class="knob"></span></span>
+            <BaseToggle v-model="form.is_active" />
             <span class="sh">{{ form.is_active ? "활성" : "정지" }}</span>
           </label>
         </div>
@@ -57,6 +57,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import BaseToggle from "@/components/base/BaseToggle.vue";
 import EmptyState from "@/components/base/EmptyState.vue";
 import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";

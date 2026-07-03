@@ -32,7 +32,7 @@
           <BaseInput v-model="form.sort" :label="$t('정렬순서')" type="number" />
           <label class="fld toggle col2">
             <span class="form-label">{{ $t("활성") }}</span>
-            <span class="sw" :class="{ on: form.is_active }" @click="form.is_active = !form.is_active"><span class="knob"></span></span>
+            <BaseToggle v-model="form.is_active" />
           </label>
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import BaseToggle from "@/components/base/BaseToggle.vue";
 import { ref, reactive, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";

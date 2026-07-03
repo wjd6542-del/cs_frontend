@@ -52,7 +52,7 @@
           <div class="r-body">
             <label class="iptoggle">
               <span class="lbl"><i class="fa-solid fa-shield-halved"></i> {{ $t("IP 접근 제한") }}</span>
-              <span class="sw" :class="{ on: ipRestrict }" @click="ipRestrict = !ipRestrict"><span class="knob"></span></span>
+              <BaseToggle v-model="ipRestrict" />
               <span class="sh">{{ ipRestrict ? $t("사용 · 허용 IP만 접근") : $t("미사용") }}</span>
             </label>
 
@@ -65,7 +65,7 @@
               <div v-for="(r, i) in rows" :key="r._k" class="iprow">
                 <input v-model="r.ip" class="ipin" placeholder="203.0.113.5" />
                 <input v-model="r.memo" class="ipin memo" :placeholder="$t('메모(회사/재택 등)')" />
-                <span class="sw sm" :class="{ on: r.is_active }" @click="r.is_active = !r.is_active" :title="$t('활성')"><span class="knob"></span></span>
+                <BaseToggle v-model="r.is_active" size="sm" :title="$t('활성')" />
                 <button class="ipdel" @click="removeRow(i)"><i class="fa-solid fa-xmark"></i></button>
               </div>
               <p class="iphint">{{ $t("저장 후 다음 로그인부터 적용됩니다.") }}</p>
@@ -79,6 +79,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import BaseToggle from "@/components/base/BaseToggle.vue";
 import { ref, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import EmptyState from "@/components/base/EmptyState.vue";

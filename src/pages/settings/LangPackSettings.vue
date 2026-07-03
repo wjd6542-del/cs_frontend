@@ -28,7 +28,7 @@
             <td><input v-model="r.name.zh" class="cell" placeholder="中文" /></td>
             <td class="c"><button class="btn btn-xs" :disabled="!r.name.ko || r._t" @click="translate(r)">{{ r._t ? "…" : "🌍" }}</button></td>
             <td class="c">
-              <span class="sw" :class="{ on: r.is_active }" @click="r.is_active = !r.is_active"><span class="knob"></span></span>
+              <BaseToggle v-model="r.is_active" />
             </td>
             <td class="c"><button class="btn btn-xs btn-danger" @click="removeRow(r)">{{ $t("삭제") }}</button></td>
           </tr>
@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import BaseToggle from "@/components/base/BaseToggle.vue";
 import { ref, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";

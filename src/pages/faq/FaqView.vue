@@ -76,7 +76,7 @@
             </div>
             <div class="fld toggle">
               <span class="form-label">{{ $t("상단 고정") }}</span>
-              <span class="sw" :class="{ on: form.is_pinned }" @click="form.is_pinned = !form.is_pinned"><span class="knob"></span></span>
+              <BaseToggle v-model="form.is_pinned" />
             </div>
           </div>
           <div class="fld">
@@ -113,6 +113,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
+import BaseToggle from "@/components/base/BaseToggle.vue";
 import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";

@@ -1,0 +1,44 @@
+<template>
+  <button
+    type="button"
+    class="tgl"
+    :class="[size, { on: modelValue, dis: disabled }]"
+    role="switch"
+    :aria-checked="modelValue"
+    :disabled="disabled"
+    @click.stop="onClick"
+  >
+    <span class="knob"></span>
+  </button>
+</template>
+
+<script setup lang="ts">
+// @ts-nocheck
+const props = defineProps({
+  modelValue: { type: Boolean, default: false },
+  size: { type: String, default: "md" }, // md | sm
+  disabled: { type: Boolean, default: false },
+});
+const emit = defineEmits(["update:modelValue"]);
+function onClick() { if (!props.disabled) emit("update:modelValue", !props.modelValue); }
+</script>
+
+<style scoped>
+.tgl {
+  flex-shrink: 0; display: inline-block; position: relative; padding: 0;
+  border: 2px solid var(--line-hard); border-radius: 3px; background: var(--surface-2);
+  cursor: pointer; transition: background 0.18s; vertical-align: middle;
+}
+.tgl.md { width: 44px; height: 24px; }
+.tgl.sm { width: 38px; height: 22px; }
+.tgl.on { background: var(--flow-in); }
+.knob {
+  position: absolute; top: 2px; left: 2px; border-radius: 2px;
+  background: #fff; border: 1px solid var(--line-hard); transition: transform 0.18s;
+}
+.tgl.md .knob { width: 16px; height: 16px; }
+.tgl.sm .knob { width: 14px; height: 14px; }
+.tgl.md.on .knob { transform: translateX(20px); }
+.tgl.sm.on .knob { transform: translateX(16px); }
+.tgl.dis { opacity: 0.5; cursor: not-allowed; }
+</style>
