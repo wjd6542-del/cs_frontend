@@ -8,26 +8,17 @@
     </header>
 
     <div class="split">
-      <!-- 좌측: 업체 트리 / 게임사 리스트 -->
+      <!-- 좌측: 업체/게임사 트리 -->
       <aside class="pane pcard left">
-        <VendorTree v-if="isVendor" ref="treeRef" :selected-id="selected?.id" @select="onSelect" />
-        <div v-else class="glist">
-          <div class="gl-head">
-            <input v-model="gkw" class="field field-xs" placeholder="게임사 검색" />
-          </div>
-          <div class="gl-body">
-            <div v-if="!filteredGamecos.length"><EmptyState variant="gameco" compact /></div>
-            <div
-              v-for="g in filteredGamecos"
-              :key="g.id"
-              class="gl-row"
-              :class="{ on: g.id === selected?.id }"
-              @click="onSelect({ id: g.id, name: g.name })"
-            >
-              <span class="nm">{{ g.name }}</span>
-            </div>
-          </div>
-        </div>
+        <EntityTree
+          :key="party"
+          ref="treeRef"
+          :api="isVendor ? vendorApi : gameCompanyApi"
+          :label="isVendor ? '업체' : '게임사'"
+          :empty-icon="isVendor ? '🏪' : '🎮'"
+          :selected-id="selected?.id"
+          @select="onSelect"
+        />
       </aside>
 
       <!-- 우측: 선택 대상 응대 -->
@@ -164,11 +155,11 @@ import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
 import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
-import VendorTree from "@/components/base/VendorTree.vue";
+import EntityTree from "@/components/base/EntityTree.vue";
 import RichEditor from "@/components/base/RichEditor.vue";
 import TagSelect from "@/components/base/TagSelect.vue";
 import TagChips from "@/components/base/TagChips.vue";
-import { supportApi, gameCompanyApi } from "@/api/cs";
+import { supportApi, vendorApi, gameCompanyApi } from "@/api/cs";
 
 const route = useRoute();
 
@@ -199,13 +190,6 @@ const bulking = ref(false);
 const allChecked = computed(() => tickets.value.length > 0 && tickets.value.every((t) => sel.value.includes(t.id)));
 
 const treeRef = ref(null);
-const gamecos = ref([]);
-const gkw = ref("");
-const filteredGamecos = computed(() => {
-  const k = gkw.value.trim().toLowerCase();
-  if (!k) return gamecos.value;
-  return gamecos.value.filter((g) => g.name.toLowerCase().includes(k) || (g.code || "").toLowerCase().includes(k));
-});
 
 const showForm = ref(false);
 const saving = ref(false);
@@ -260,7 +244,6 @@ async function reloadTickets() {
 async function loadLeft() {
   selected.value = null;
   tickets.value = [];
-  if (!isVendor.value) gamecos.value = await gameCompanyApi.options();
 }
 
 function openNew() {
@@ -342,7 +325,7 @@ async function handleOpenQuery() {
   } catch (e) { /* 없는 티켓이면 무시 */ }
 }
 
-watch(() => props.party, async () => { detail.value = null; gkw.value = ""; await loadLeft(); await handleOpenQuery(); });
+watch(() => props.party, async () => { detail.value = null; await loadLeft(); await handleOpenQuery(); });
 watch(() => route.query.open, handleOpenQuery);
 onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 </script>

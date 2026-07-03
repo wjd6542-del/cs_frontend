@@ -8,47 +8,85 @@
       <button class="btn btn-primary" @click="openNew()">+ FAQ 추가</button>
     </header>
 
-    <!-- 검색 영역 -->
-    <div class="filterbar">
-      <input v-model="q" class="field !w-56" placeholder="질문·답변 검색" @keyup.enter="search" />
-      <div class="msbox"><MultiSelect v-model="cats" :options="catOptions" placeholder="분류(다중 선택)" search-placeholder="분류 검색…" @change="search" /></div>
-      <div class="msbox"><TagSelect v-model="ftags" placeholder="태그 필터" @change="search" /></div>
+    <div class="faq-grid">
+      <!-- 메인: 검색 + 목록 -->
+      <div class="main">
+        <div class="filterbar">
+          <input v-model="q" class="field !w-56" placeholder="질문·답변 검색" @keyup.enter="search" />
+          <div class="msbox"><MultiSelect v-model="cats" :options="catOptions" placeholder="분류(다중 선택)" search-placeholder="분류 검색…" @change="search" /></div>
+          <div class="msbox"><TagSelect v-model="ftags" placeholder="태그 필터" @change="search" /></div>
+        </div>
+
+        <div v-if="!rows.length" class="listcard"><EmptyState variant="faq" /></div>
+        <ul v-else class="list">
+          <li v-for="f in rows" :key="f.id" class="item" :class="{ pinned: f.is_pinned }">
+            <div class="q" @click="toggle(f)">
+              <i v-if="f.is_pinned" class="fa-solid fa-thumbtack pin" title="상단 고정"></i>
+              <span class="cat" v-if="f.category">{{ f.category }}</span>
+              <span class="qt">{{ f.question }}</span>
+              <TagChips :tags="f.tags" />
+              <span class="vc num">👁 {{ f.view_count }}</span>
+              <i class="fa-solid fa-chevron-down chev" :class="{ up: open[f.id] }"></i>
+            </div>
+            <div v-if="open[f.id]" class="a">
+              <div v-if="f.question_body" class="qbody">
+                <span class="blk">질문</span>
+                <div class="prose" v-html="f.question_body"></div>
+              </div>
+              <div class="ans">
+                <span class="blk ansblk">답변</span>
+                <div class="atext prose" v-html="f.answer"></div>
+              </div>
+              <div class="itools">
+                <button class="btn btn-xs" @click="openEdit(f)">수정</button>
+                <button class="btn btn-xs btn-danger" @click="remove(f)">삭제</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reload" />
+      </div>
+
+      <!-- 사이드: 인기 FAQ -->
+      <aside class="aside">
+        <div class="pcard pop">
+          <div class="pop-head"><i class="fa-solid fa-fire"></i> 많이 본 질문</div>
+          <ul class="pop-list">
+            <li v-if="!popular.length" class="pop-empty">아직 조회 이력이 없어요.</li>
+            <li v-for="(p, i) in popular" :key="p.id" class="pop-row" @click="openView(p.id)">
+              <span class="rank" :class="'r' + (i + 1)">{{ i + 1 }}</span>
+              <span class="pop-q">{{ p.question }}</span>
+              <span class="pop-v num">{{ p.view_count }}</span>
+            </li>
+          </ul>
+        </div>
+      </aside>
     </div>
 
-    <!-- 목록 영역 -->
-    <div v-if="!rows.length" class="listcard"><EmptyState variant="faq" /></div>
-    <ul v-else class="list">
-      <li v-for="f in rows" :key="f.id" class="item">
-        <div class="q" @click="toggle(f.id)">
-          <span class="cat" v-if="f.category">{{ f.category }}</span>
-          <span class="qt">{{ f.question }}</span>
-          <TagChips :tags="f.tags" />
-          <i class="fa-solid fa-chevron-down chev" :class="{ up: open[f.id] }"></i>
-        </div>
-        <div v-if="open[f.id]" class="a">
-          <div class="atext prose" v-html="f.answer"></div>
-          <div class="itools">
-            <button class="btn btn-xs" @click="openEdit(f)">수정</button>
-            <button class="btn btn-xs btn-danger" @click="remove(f)">삭제</button>
-          </div>
-        </div>
-      </li>
-    </ul>
-
-    <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reload" />
-
+    <!-- 등록/수정 -->
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
         <h4 class="ph">{{ editing ? "FAQ 수정" : "FAQ 추가" }}</h4>
         <div class="fcol">
-          <label class="fld">
-            <span class="form-label">분류</span>
-            <SearchSelect v-model="form.category" :options="catOptions" placeholder="분류 선택 (환경설정에서 관리)" search-placeholder="분류 검색…" />
-          </label>
-          <BaseInput v-model="form.question" label="질문" />
+          <div class="frow">
+            <label class="fld flex-1">
+              <span class="form-label">분류</span>
+              <SearchSelect v-model="form.category" :options="catOptions" placeholder="분류 선택 (환경설정에서 관리)" search-placeholder="분류 검색…" />
+            </label>
+            <label class="fld toggle">
+              <span class="form-label">상단 고정</span>
+              <span class="sw" :class="{ on: form.is_pinned }" @click="form.is_pinned = !form.is_pinned"><span class="knob"></span></span>
+            </label>
+          </div>
           <label class="fld">
             <span class="form-label">태그</span>
             <TagSelect v-model="form.tag_ids" />
+          </label>
+          <BaseInput v-model="form.question" label="질문 제목" placeholder="한 줄 요약 제목" />
+          <label class="fld">
+            <span class="form-label">질문 내용 (선택)</span>
+            <RichEditor v-model="form.question_body" placeholder="질문 상세 내용" />
           </label>
           <label class="fld">
             <span class="form-label">답변</span>
@@ -61,6 +99,18 @@
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
           <button class="btn" @click="showForm = false">취소</button>
         </div>
+      </div>
+    </div>
+
+    <!-- 인기글 보기 모달 -->
+    <div v-if="viewing" class="drawer" @click.self="viewing = null">
+      <div class="panel vmodal">
+        <button class="vclose" @click="viewing = null"><i class="fa-solid fa-xmark"></i></button>
+        <span class="cat" v-if="viewing.category">{{ viewing.category }}</span>
+        <h3 class="vtitle">{{ viewing.question }}</h3>
+        <TagChips :tags="viewing.tags" />
+        <div v-if="viewing.question_body" class="qbody"><span class="blk">질문</span><div class="prose" v-html="viewing.question_body"></div></div>
+        <div class="ans"><span class="blk ansblk">답변</span><div class="atext prose" v-html="viewing.answer"></div></div>
       </div>
     </div>
   </div>
@@ -76,9 +126,9 @@ import Pager from "@/components/base/Pager.vue";
 import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import MultiSelect from "@/components/base/MultiSelect.vue";
-import RichEditor from "@/components/base/RichEditor.vue";
 import TagSelect from "@/components/base/TagSelect.vue";
 import TagChips from "@/components/base/TagChips.vue";
+import RichEditor from "@/components/base/RichEditor.vue";
 import { faqApi, faqCategoryApi } from "@/api/cs";
 
 const LIMIT = 10;
@@ -88,10 +138,12 @@ const page = ref(1);
 const total = ref(0);
 const totalPages = ref(1);
 const categories = ref([]);
+const popular = ref([]);
 const open = reactive({});
 const q = ref("");
 const cats = ref([]);
 const ftags = ref([]);
+const viewing = ref(null);
 
 const catOptions = computed(() => categories.value.map((c) => ({ value: c.name, label: c.name })));
 
@@ -99,7 +151,7 @@ const showForm = ref(false);
 const editing = ref(false);
 const saving = ref(false);
 const msg = ref("");
-const form = reactive({ id: null, category: "", question: "", answer: "", sort: 0, tag_ids: [] });
+const form = reactive({ id: null, category: "", question: "", question_body: "", answer: "", sort: 0, is_pinned: false, tag_ids: [] });
 
 async function reload() {
   const res = await faqApi.list({
@@ -115,61 +167,114 @@ async function reload() {
 }
 function search() { page.value = 1; reload(); }
 async function loadCats() { categories.value = await faqCategoryApi.list({ only_active: true }); }
-function toggle(id) { open[id] = !open[id]; }
+async function loadPopular() { popular.value = await faqApi.popular({ limit: 10 }); }
+
+async function toggle(f) {
+  const willOpen = !open[f.id];
+  open[f.id] = willOpen;
+  if (willOpen) {
+    // 조회수 증가(백엔드) + 로컬 반영
+    try { const full = await faqApi.get(f.id); f.view_count = full.view_count; loadPopular(); } catch (e) { /* noop */ }
+  }
+}
+async function openView(id) {
+  try { viewing.value = await faqApi.get(id); loadPopular(); } catch (e) { toast.error("불러오기 실패"); }
+}
+
 function openNew() {
   editing.value = false;
-  Object.assign(form, { id: null, category: "", question: "", answer: "", sort: 0, tag_ids: [] });
+  Object.assign(form, { id: null, category: "", question: "", question_body: "", answer: "", sort: 0, is_pinned: false, tag_ids: [] });
   msg.value = ""; showForm.value = true;
 }
 function openEdit(f) {
   editing.value = true;
-  Object.assign(form, { id: f.id, category: f.category || "", question: f.question, answer: f.answer, sort: f.sort, tag_ids: (f.tags || []).map((t) => t.id) });
+  Object.assign(form, { id: f.id, category: f.category || "", question: f.question, question_body: f.question_body || "", answer: f.answer, sort: f.sort, is_pinned: !!f.is_pinned, tag_ids: (f.tags || []).map((t) => t.id) });
   msg.value = ""; showForm.value = true;
 }
 async function submit() {
   msg.value = ""; saving.value = true;
   try {
-    await faqApi.save({ id: form.id || undefined, category: form.category || null, question: form.question, answer: form.answer, sort: Number(form.sort) || 0, is_active: true, tag_ids: form.tag_ids });
-    toast.success("저장되었습니다."); showForm.value = false; await reload();
+    await faqApi.save({
+      id: form.id || undefined, category: form.category || null,
+      question: form.question, question_body: form.question_body || null, answer: form.answer,
+      sort: Number(form.sort) || 0, is_pinned: form.is_pinned, is_active: true, tag_ids: form.tag_ids,
+    });
+    toast.success("저장되었습니다."); showForm.value = false; await Promise.all([reload(), loadCats()]);
   } catch (e) { msg.value = e?.message || "저장 실패"; }
   finally { saving.value = false; }
 }
 async function remove(f) {
   if (!await confirmDelete("이 FAQ를 삭제할까요?")) return;
-  try { await faqApi.remove(f.id); toast.success("삭제되었습니다."); await reload(); }
+  try { await faqApi.remove(f.id); toast.success("삭제되었습니다."); await Promise.all([reload(), loadPopular()]); }
   catch (e) { toast.error(e?.message || "삭제 실패"); }
 }
-onMounted(async () => { await Promise.all([reload(), loadCats()]); });
+onMounted(async () => { await Promise.all([reload(), loadCats(), loadPopular()]); });
 </script>
 
 <style scoped>
-.page { max-width: 860px; margin: 0 auto; }
+.page { max-width: 1120px; margin: 0 auto; }
 .phead { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.1rem; }
 .eyebrow { font-family: var(--font-pixel); font-size: 0.66rem; letter-spacing: 0.16em; color: var(--seal); }
 .ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
+
+.faq-grid { display: grid; grid-template-columns: 1fr 300px; gap: 1rem; align-items: start; }
+@media (max-width: 860px) { .faq-grid { grid-template-columns: 1fr; } .aside { order: -1; } }
+.main { min-width: 0; }
 .msbox { width: 12rem; }
 
 .listcard { background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); }
 .list { display: flex; flex-direction: column; gap: 0.5rem; }
 .item { background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); overflow: hidden; }
+.item.pinned { border-color: var(--seal); }
 .q { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1rem; cursor: pointer; }
 .q:hover { background: var(--surface-2); }
+.pin { color: var(--seal); font-size: 0.8rem; transform: rotate(20deg); }
 .cat { font-family: var(--font-pixel); font-size: 0.64rem; color: var(--seal-deep); background: #ede9ff; border: 1px solid var(--line-hard); padding: 0.1rem 0.45rem; border-radius: 3px; flex-shrink: 0; }
-.qt { font-weight: 600; color: var(--ink); flex: 1; }
+.qt { font-weight: 600; color: var(--ink); flex: 1; min-width: 0; }
+.vc { font-size: 0.72rem; color: var(--ink-faint); flex-shrink: 0; }
 .chev { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }
 .chev.up { transform: rotate(180deg); }
 .a { padding: 0 1rem 1rem; border-top: 1px solid var(--line); }
-.atext { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.6; padding-top: 0.8rem; }
-.atext :deep(img) { max-width: 100%; border-radius: 3px; }
-.atext :deep(ul), .atext :deep(ol) { padding-left: 1.3rem; margin: 0.3rem 0; }
-.atext :deep(a) { color: var(--seal); text-decoration: underline; }
-.itools { display: flex; gap: 0.4rem; margin-top: 0.8rem; }
+.blk { display: inline-block; font-family: var(--font-pixel); font-size: 0.62rem; color: var(--ink-muted); background: var(--surface-2); border: 1px solid var(--line-hard); border-radius: 3px; padding: 0.05rem 0.4rem; margin: 0.8rem 0 0.4rem; }
+.blk.ansblk { color: var(--seal-deep); background: #ede9ff; }
+.qbody .prose, .atext { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.6; }
+.prose :deep(img), .atext :deep(img) { max-width: 100%; border-radius: 3px; }
+.prose :deep(ul), .prose :deep(ol), .atext :deep(ul), .atext :deep(ol) { padding-left: 1.3rem; margin: 0.3rem 0; }
+.prose :deep(a), .atext :deep(a) { color: var(--seal); text-decoration: underline; }
+.itools { display: flex; gap: 0.4rem; margin-top: 0.9rem; }
+
+/* 인기 FAQ */
+.aside { min-width: 0; }
+.pop { position: sticky; top: 1rem; }
+.pop-head { font-family: var(--font-pixel); font-size: 0.82rem; color: var(--ink); padding: 0.8rem 0.9rem; border-bottom: 2px solid var(--line); display: flex; align-items: center; gap: 0.45rem; }
+.pop-head i { color: #ff6b2c; }
+.pop-list { display: flex; flex-direction: column; }
+.pop-empty { padding: 1.2rem 0.9rem; text-align: center; color: var(--ink-faint); font-size: 0.82rem; }
+.pop-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--line); cursor: pointer; }
+.pop-row:last-child { border-bottom: none; }
+.pop-row:hover { background: var(--surface-2); }
+.pop-row:hover .pop-q { color: var(--seal); }
+.rank { flex-shrink: 0; width: 20px; height: 20px; display: grid; place-items: center; font-family: var(--font-pixel); font-size: 0.66rem; color: #fff; background: var(--ink-faint); border: 1px solid var(--line-hard); border-radius: 3px; }
+.rank.r1 { background: #f5a623; } .rank.r2 { background: #9aa4b2; } .rank.r3 { background: #cd7f32; }
+.pop-q { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.84rem; font-weight: 600; color: var(--ink); }
+.pop-v { font-size: 0.68rem; color: var(--ink-faint); flex-shrink: 0; }
 
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(27, 29, 46, 0.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.panel { width: 560px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
+.panel { width: 600px; max-width: 100%; max-height: 88vh; overflow-y: auto; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
 .ph { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); margin-bottom: 1rem; }
 .fcol { display: flex; flex-direction: column; gap: 0.9rem; }
-.fld { display: block; }
+.frow { display: flex; gap: 0.9rem; align-items: flex-end; }
+.fld { display: block; } .flex-1 { flex: 1; }
+.toggle { display: flex; flex-direction: column; gap: 0.4rem; }
+.sw { width: 44px; height: 24px; border-radius: 3px; background: #cbd5e1; position: relative; cursor: pointer; transition: background 0.18s; border: 2px solid var(--line-hard); }
+.sw.on { background: var(--seal); }
+.sw .knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 2px; background: #fff; transition: transform 0.18s; }
+.sw.on .knob { transform: translateX(20px); }
 .msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; } .msg.err { color: var(--danger); }
 .acts { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
+
+.vmodal { position: relative; }
+.vclose { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); box-shadow: 2px 2px 0 var(--line-hard); }
+.vclose:hover { background: var(--surface-2); }
+.vtitle { font-family: var(--font-pixel); font-size: 1.15rem; color: var(--ink); margin: 0.4rem 0; }
 </style>

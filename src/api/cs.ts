@@ -4,6 +4,7 @@ import api from "@/api/api";
 // 게임사 (환경설정)
 export const gameCompanyApi = {
   list: (body = {}) => api.post("/gameCompany/list", body).then((r) => r.data),
+  tree: () => api.post("/gameCompany/tree", {}).then((r) => r.data),
   options: () => api.post("/gameCompany/options", {}).then((r) => r.data),
   get: (id) => api.post("/gameCompany/get", { id }).then((r) => r.data),
   save: (body) => api.post("/gameCompany/save", body).then((r) => r.data),
@@ -51,6 +52,7 @@ export const supportApi = {
 // FAQ
 export const faqApi = {
   list: (body = {}) => api.post("/faq/list", body).then((r) => r.data),
+  popular: (body = {}) => api.post("/faq/popular", body).then((r) => r.data),
   categories: () => api.post("/faq/categories", {}).then((r) => r.data),
   get: (id) => api.post("/faq/get", { id }).then((r) => r.data),
   save: (body) => api.post("/faq/save", body).then((r) => r.data),

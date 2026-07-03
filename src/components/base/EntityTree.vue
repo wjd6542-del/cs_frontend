@@ -1,20 +1,20 @@
 <template>
   <div class="vtree">
     <div class="vt-head">
-      <input v-model="kw" class="field field-xs" placeholder="업체 명칭 검색" />
-      <button class="btn btn-xs btn-primary" title="최상위 업체 추가" @click="startAdd(null)">＋</button>
+      <input v-model="kw" class="field field-xs" :placeholder="`${label} 명칭 검색`" />
+      <button class="btn btn-xs btn-primary" :title="`최상위 ${label} 추가`" @click="startAdd(null)">＋</button>
     </div>
 
     <!-- 추가 입력 바 -->
     <div v-if="adding" class="vt-edit">
       <span class="vt-under" v-if="adding.parent_name">↳ {{ adding.parent_name }} 하위</span>
-      <input ref="addInput" v-model="addName" class="field field-xs" placeholder="업체명" @keyup.enter="confirmAdd" @keyup.esc="adding = null" />
+      <input ref="addInput" v-model="addName" class="field field-xs" :placeholder="`${label}명`" @keyup.enter="confirmAdd" @keyup.esc="adding = null" />
       <button class="btn btn-xs btn-primary" @click="confirmAdd">저장</button>
       <button class="btn btn-xs" @click="adding = null">취소</button>
     </div>
 
     <div class="vt-body">
-      <div v-if="!flat.length"><EmptyState variant="vendor" compact /></div>
+      <div v-if="!flat.length"><EmptyState :icon="emptyIcon" :title="`${label}가 없어요`" :desc="`${label}를 추가해 보세요.`" hint="＋ 로 추가!" compact /></div>
       <div
         v-for="row in flat"
         :key="row.node.id"
@@ -51,10 +51,14 @@
 import { ref, reactive, computed, onMounted, nextTick } from "vue";
 import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
-import { vendorApi } from "@/api/cs";
 import EmptyState from "@/components/base/EmptyState.vue";
 
-const props = defineProps({ selectedId: { type: Number, default: null } });
+const props = defineProps({
+  api: { type: Object, required: true }, // { tree, save, remove }
+  label: { type: String, default: "항목" },
+  emptyIcon: { type: String, default: "🏪" },
+  selectedId: { type: Number, default: null },
+});
 const emit = defineEmits(["select", "change"]);
 const toast = useToast();
 
@@ -62,7 +66,7 @@ const roots = ref([]);
 const collapsed = reactive({});
 const kw = ref("");
 
-const adding = ref(null); // { parent_id, parent_name }
+const adding = ref(null);
 const addName = ref("");
 const addInput = ref(null);
 const editId = ref(null);
@@ -71,7 +75,6 @@ const editName = ref("");
 function isCollapsed(id) { return !!collapsed[id]; }
 function toggle(id) { collapsed[id] = !collapsed[id]; }
 
-// 검색어로 가지치기 (매칭 노드 + 조상 유지)
 function filterTree(nodes) {
   const k = kw.value.trim().toLowerCase();
   if (!k) return nodes;
@@ -101,9 +104,7 @@ const flat = computed(() => {
   return out;
 });
 
-async function reload() {
-  roots.value = await vendorApi.tree();
-}
+async function reload() { roots.value = await props.api.tree(); }
 function select(node) { emit("select", { id: node.id, name: node.name, code: node.code }); }
 
 function startAdd(parent) {
@@ -116,12 +117,12 @@ async function confirmAdd() {
   const name = addName.value.trim();
   if (!name) return;
   try {
-    await vendorApi.save({ name, parent_id: adding.value.parent_id });
+    await props.api.save({ name, parent_id: adding.value.parent_id });
     if (adding.value.parent_id) collapsed[adding.value.parent_id] = false;
     adding.value = null;
     await reload();
     emit("change");
-    toast.success("업체가 등록되었습니다.");
+    toast.success(`${props.label}가 등록되었습니다.`);
   } catch (e) { toast.error(e?.message || "등록 실패"); }
 }
 
@@ -134,7 +135,7 @@ async function confirmEdit() {
   const name = editName.value.trim();
   if (!name) return;
   try {
-    await vendorApi.save({ id: editId.value, name });
+    await props.api.save({ id: editId.value, name });
     editId.value = null;
     await reload();
     emit("change");
@@ -143,9 +144,9 @@ async function confirmEdit() {
 }
 
 async function remove(node) {
-  if (!await confirmDelete(`'${node.name}' 업체를 삭제할까요?`)) return;
+  if (!await confirmDelete(`'${node.name}' ${props.label}를 삭제할까요?`)) return;
   try {
-    await vendorApi.remove(node.id);
+    await props.api.remove(node.id);
     await reload();
     emit("change");
     toast.success("삭제되었습니다.");
@@ -163,7 +164,6 @@ onMounted(reload);
 .vt-edit { display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 0.6rem; background: var(--surface-2); border-bottom: 2px solid var(--line); flex-wrap: wrap; }
 .vt-under { font-size: 0.68rem; color: var(--seal-deep); font-family: var(--font-pixel); width: 100%; }
 .vt-body { flex: 1; overflow-y: auto; padding: 0.3rem; }
-.vt-empty { text-align: center; color: var(--ink-faint); padding: 1.4rem 0; font-size: 0.85rem; }
 
 .vt-row { display: flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.4rem; border-radius: 3px; cursor: pointer; font-size: 0.86rem; }
 .vt-row:hover { background: var(--surface-2); }
@@ -172,7 +172,6 @@ onMounted(reload);
 .caret { width: 18px; height: 18px; flex-shrink: 0; display: grid; place-items: center; color: var(--ink-muted); font-size: 0.75rem; }
 .caret.ph { visibility: hidden; }
 .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: var(--ink); }
-.code { font-size: 0.66rem; color: var(--ink-faint); flex-shrink: 0; }
 .acts { display: none; gap: 0.1rem; flex-shrink: 0; }
 .vt-row:hover .acts { display: flex; }
 .ico { width: 24px; height: 22px; display: grid; place-items: center; border-radius: 3px; font-size: 0.72rem; color: var(--ink-muted); }
