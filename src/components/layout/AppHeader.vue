@@ -31,6 +31,21 @@
         </div>
       </div>
 
+      <!-- 언어 스위처 -->
+      <div ref="langWrap" class="lang-wrap">
+        <button class="lang-btn" :class="{ on: langOpen }" title="언어 / Language" @click="toggleLang">
+          <span class="lang-flag">{{ curLang.flag }}</span>
+          <span class="lang-code">{{ curLang.value.toUpperCase() }}</span>
+          <i class="fa-solid fa-chevron-down lang-chev" :class="{ up: langOpen }"></i>
+        </button>
+        <div v-if="langOpen" class="dropdown lang-dd">
+          <button v-for="l in LANGS" :key="l.value" class="lang-item" :class="{ sel: l.value === i18n.locale }" @click="pickLang(l.value)">
+            <span class="lf">{{ l.flag }}</span><span class="ll">{{ l.label }}</span>
+            <i v-if="l.value === i18n.locale" class="fa-solid fa-check ck"></i>
+          </button>
+        </div>
+      </div>
+
       <!-- 계정 드롭다운 -->
       <div ref="acctWrap" class="acct-wrap">
         <button class="acct" :class="{ on: acctOpen }" @click="toggleAcct">
@@ -64,14 +79,23 @@ import { computed, ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useAlertsStore } from "@/stores/alerts";
+import { useI18nStore, LANGS } from "@/stores/i18n";
 
 const emit = defineEmits(["toggle"]);
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const alerts = useAlertsStore();
+const i18n = useI18nStore();
 
-const title = computed(() => route.meta?.title || "CS");
+const title = computed(() => i18n.t(route.meta?.title || "CS"));
+
+// 언어 스위처
+const langOpen = ref(false);
+const langWrap = ref(null);
+const curLang = computed(() => LANGS.find((l) => l.value === i18n.locale) || LANGS[0]);
+function toggleLang() { langOpen.value = !langOpen.value; bellOpen.value = false; acctOpen.value = false; }
+function pickLang(code) { i18n.setLocale(code); langOpen.value = false; }
 const roleLabel = computed(() => auth.user?.role?.name || (auth.user?.is_super ? "슈퍼관리자" : "회원"));
 const initial = computed(() => (auth.user?.name || auth.user?.username || "?").slice(0, 1));
 
@@ -89,6 +113,7 @@ function openTicket(t) {
 function onOutside(e) {
   if (bellWrap.value && !bellWrap.value.contains(e.target)) bellOpen.value = false;
   if (acctWrap.value && !acctWrap.value.contains(e.target)) acctOpen.value = false;
+  if (langWrap.value && !langWrap.value.contains(e.target)) langOpen.value = false;
 }
 
 onMounted(() => {
@@ -118,6 +143,24 @@ function onLogout() {
 .ttl { font-family: var(--font-pixel); font-size: 1.05rem; color: var(--ink); letter-spacing: 0.02em; white-space: nowrap; }
 
 .right { display: flex; align-items: center; gap: 0.7rem; }
+
+/* 언어 스위처 */
+.lang-wrap { position: relative; }
+.lang-btn { display: flex; align-items: center; gap: 0.3rem; height: 40px; padding: 0 0.6rem; border: 2px solid var(--line-hard); border-radius: 3px; background: var(--surface); color: var(--ink); box-shadow: 2px 2px 0 var(--line-hard); transition: transform 0.08s, box-shadow 0.08s; }
+.lang-btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }
+.lang-btn.on { border-color: var(--seal); }
+.lang-flag { font-size: 1rem; line-height: 1; }
+.lang-code { font-family: var(--font-pixel); font-size: 0.66rem; color: var(--ink-muted); }
+.lang-chev { font-size: 0.6rem; color: var(--ink-faint); transition: transform 0.2s; }
+.lang-chev.up { transform: rotate(180deg); }
+.lang-dd { width: 160px; }
+.lang-item { width: 100%; display: flex; align-items: center; gap: 0.55rem; padding: 0.55rem 0.8rem; font-size: 0.86rem; font-weight: 600; color: var(--ink); background: #fff; border-bottom: 1px solid var(--line); }
+.lang-item:last-child { border-bottom: none; }
+.lang-item:hover { background: var(--surface-2); }
+.lang-item.sel { color: var(--seal-deep); background: #f6f4ff; }
+.lang-item .lf { font-size: 1rem; }
+.lang-item .ll { flex: 1; text-align: left; }
+.lang-item .ck { font-size: 0.72rem; color: var(--seal); }
 
 /* 알림 벨 */
 .bell-wrap { position: relative; }

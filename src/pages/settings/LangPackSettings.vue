@@ -1,0 +1,137 @@
+<template>
+  <div>
+    <div class="head">
+      <h3 class="h">번역팩 <span class="c">{{ rows.length }}</span></h3>
+      <div class="tools">
+        <input v-model="q" class="field !w-48" placeholder="한국어 검색" />
+        <button class="btn" @click="addRow"><i class="fa-solid fa-plus"></i> 행 추가</button>
+        <button class="btn btn-primary" :disabled="saving" @click="saveAll">{{ saving ? "저장 중…" : "전체 저장" }}</button>
+      </div>
+    </div>
+
+    <p class="hint">한국어(ko)를 <b>키</b>로 사용합니다. 화면의 <code>$t("한국어")</code> 가 현재 언어의 번역으로 치환돼요. 🌍 버튼으로 자동 번역(설정 시).</p>
+
+    <div class="tablewrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>🇰🇷 한국어(키)</th><th>🇺🇸 English</th><th>🇯🇵 日本語</th><th>🇨🇳 中文</th>
+            <th class="c w-act">번역</th><th class="c w-st">활성</th><th class="c w-del">삭제</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!filtered.length"><td colspan="7"><EmptyState icon="🌐" title="번역팩이 없어요" desc="행을 추가해 다국어 문구를 등록해요." hint="＋ 행 추가" compact /></td></tr>
+          <tr v-for="(r, i) in filtered" :key="r._k">
+            <td><input v-model="r.name.ko" class="cell" placeholder="한국어" /></td>
+            <td><input v-model="r.name.en" class="cell" placeholder="English" /></td>
+            <td><input v-model="r.name.ja" class="cell" placeholder="日本語" /></td>
+            <td><input v-model="r.name.zh" class="cell" placeholder="中文" /></td>
+            <td class="c"><button class="btn btn-xs" :disabled="!r.name.ko || r._t" @click="translate(r)">{{ r._t ? "…" : "🌍" }}</button></td>
+            <td class="c">
+              <span class="sw" :class="{ on: r.is_active }" @click="r.is_active = !r.is_active"><span class="knob"></span></span>
+            </td>
+            <td class="c"><button class="btn btn-xs btn-danger" @click="removeRow(r)">삭제</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+// @ts-nocheck
+import { ref, computed, onMounted } from "vue";
+import { useToast } from "vue-toastification";
+import { confirmDelete } from "@/lib/ui";
+import EmptyState from "@/components/base/EmptyState.vue";
+import { langPackApi } from "@/api/cs";
+import { useI18nStore } from "@/stores/i18n";
+
+const toast = useToast();
+const i18n = useI18nStore();
+const rows = ref([]);
+const q = ref("");
+const saving = ref(false);
+let keySeq = 0;
+
+const filtered = computed(() => {
+  const k = q.value.trim().toLowerCase();
+  if (!k) return rows.value;
+  return rows.value.filter((r) => (r.name.ko || "").toLowerCase().includes(k));
+});
+
+function blank() {
+  return { _k: `n${keySeq++}`, id: null, name: { ko: "", en: "", ja: "", zh: "" }, is_active: true };
+}
+async function load() {
+  const list = await langPackApi.list({});
+  rows.value = (list || []).map((r) => ({
+    _k: `r${r.id}`,
+    id: r.id,
+    name: { ko: r.name?.ko || "", en: r.name?.en || "", ja: r.name?.ja || "", zh: r.name?.zh || "" },
+    is_active: !!r.is_active,
+  }));
+}
+function addRow() { rows.value.unshift(blank()); }
+
+async function translate(r) {
+  if (!r.name.ko) { toast.error("한국어를 입력하세요"); return; }
+  r._t = true;
+  try {
+    const res = await langPackApi.translateText(r.name.ko);
+    r.name.en = res.en || r.name.en;
+    r.name.ja = res.ja || r.name.ja;
+    r.name.zh = res.zh || r.name.zh;
+  } catch (e) { toast.error(e?.message || "자동 번역을 사용할 수 없습니다"); }
+  finally { r._t = false; }
+}
+
+async function saveAll() {
+  const payload = rows.value
+    .filter((r) => r.name.ko.trim())
+    .map((r) => ({ ...(r.id ? { id: r.id } : {}), name: r.name, is_active: r.is_active }));
+  if (!payload.length) { toast.error("저장할 항목이 없습니다"); return; }
+  saving.value = true;
+  try {
+    await langPackApi.batchSave(payload);
+    toast.success("저장되었습니다.");
+    await load();
+    await i18n.loadLangPacks();
+  } catch (e) { toast.error(e?.message || "저장 실패"); }
+  finally { saving.value = false; }
+}
+
+async function removeRow(r) {
+  if (!r.id) { rows.value = rows.value.filter((x) => x._k !== r._k); return; }
+  if (!await confirmDelete(`'${r.name.ko}' 번역을 삭제할까요?`)) return;
+  try {
+    await langPackApi.remove(r.id);
+    toast.success("삭제되었습니다.");
+    await load();
+    await i18n.loadLangPacks();
+  } catch (e) { toast.error(e?.message || "삭제 실패"); }
+}
+
+onMounted(load);
+</script>
+
+<style scoped>
+.head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+.h { font-weight: 700; color: var(--ink); }
+.c { color: var(--seal); }
+.tools { display: flex; gap: 0.5rem; align-items: center; }
+.hint { font-size: 0.78rem; color: var(--ink-muted); margin-bottom: 0.8rem; }
+.hint code { font-family: var(--font-pixel); font-size: 0.72rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: 3px; padding: 0.02rem 0.3rem; }
+.tablewrap { border: 2px solid var(--line-hard); border-radius: 4px; overflow-x: auto; background: var(--surface); box-shadow: var(--shadow-hard); }
+.tbl { width: 100%; border-collapse: collapse; min-width: 860px; }
+.tbl th { text-align: left; padding: 0.55rem 0.7rem; background: var(--surface-2); border-bottom: 2px solid var(--line-strong); font-family: var(--font-pixel); font-size: 0.72rem; color: var(--ink-muted); white-space: nowrap; }
+.tbl td { padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--line); }
+.tbl tbody tr:last-child td { border-bottom: none; }
+.c { text-align: center; } .w-act { width: 60px; } .w-st { width: 60px; } .w-del { width: 72px; }
+.cell { width: 100%; height: 30px; padding: 0 0.5rem; font-size: 0.84rem; border: 2px solid var(--line); border-radius: 3px; outline: none; background: #fff; }
+.cell:focus { border-color: var(--seal); box-shadow: 0 0 0 2px rgba(122,92,255,0.15); }
+.sw { display: inline-block; width: 40px; height: 22px; border-radius: 3px; background: var(--surface-2); border: 2px solid var(--line-hard); position: relative; cursor: pointer; transition: background 0.18s; }
+.sw.on { background: #2e7d43; }
+.sw .knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 2px; background: #fff; border: 1px solid var(--line-hard); transition: transform 0.18s; }
+.sw.on .knob { transform: translateX(18px); }
+</style>

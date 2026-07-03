@@ -35,6 +35,7 @@ import BoardSettings from "@/pages/settings/BoardSettings.vue";
 import FaqCategorySettings from "@/pages/settings/FaqCategorySettings.vue";
 import TagSettings from "@/pages/settings/TagSettings.vue";
 import AccountSettings from "@/pages/settings/AccountSettings.vue";
+import LangPackSettings from "@/pages/settings/LangPackSettings.vue";
 import { useAuthStore } from "@/stores/auth";
 
 const auth = useAuthStore();
@@ -46,6 +47,7 @@ const tabs = [
   { key: "faqcat", label: "FAQ 분류", icon: "fa-tags", perm: "faq.view", comp: markRaw(FaqCategorySettings), desc: "자주 하는 질문의 분류를 등록·관리합니다. FAQ 작성 시 이 분류를 선택합니다." },
   { key: "tag", label: "태그", icon: "fa-tag", perm: ["support.view", "faq.view"], comp: markRaw(TagSettings), desc: "CS 응대·FAQ에 붙이는 공통 태그를 등록·관리합니다. 검색 중 없으면 즉시 만들 수도 있습니다." },
   { key: "account", label: "계정·권한", icon: "fa-users-gear", perm: ["usermanager.view", "permission.user.view"], comp: markRaw(AccountSettings), desc: "계정을 만들고 역할별 권한을 지정합니다." },
+  { key: "lang", label: "다국어", icon: "fa-language", superOnly: true, comp: markRaw(LangPackSettings), desc: "화면 문구의 다국어 번역팩을 등록·관리합니다. 한국어를 키로 사용합니다." },
 ];
 function allowed(t) {
   if (t.superOnly) return !!auth.user?.is_super;

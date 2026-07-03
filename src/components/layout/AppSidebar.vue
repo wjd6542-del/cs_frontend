@@ -20,13 +20,13 @@
           @click="isMobile && emit('close')"
         >
           <i class="fa-solid ic" :class="m.icon"></i>
-          <span v-if="open" class="lbl">{{ m.label }}</span>
+          <span v-if="open" class="lbl">{{ $t(m.label) }}</span>
         </RouterLink>
 
         <template v-else>
           <div class="item group" :class="{ on: groupActive(m) }" :title="m.label" @click="toggle(m)">
             <i class="fa-solid ic" :class="m.icon"></i>
-            <span v-if="open" class="lbl">{{ m.label }}</span>
+            <span v-if="open" class="lbl">{{ $t(m.label) }}</span>
             <i v-if="open" class="fa-solid fa-chevron-down chev" :class="{ up: expanded[m.label] }"></i>
           </div>
           <div v-if="open && expanded[m.label]" class="children">
@@ -38,7 +38,7 @@
               :class="{ on: isActive(c) }"
               @click="isMobile && emit('close')"
             >
-              <span class="dot"></span>{{ c.label }}
+              <span class="dot"></span>{{ $t(c.label) }}
             </RouterLink>
             <div v-if="!m.children.length" class="child empty">항목 없음</div>
           </div>
