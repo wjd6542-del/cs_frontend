@@ -65,7 +65,7 @@
               <div v-for="(r, i) in rows" :key="r._k" class="iprow">
                 <input v-model="r.ip" class="ipin" placeholder="203.0.113.5" />
                 <input v-model="r.memo" class="ipin memo" :placeholder="$t('메모(회사/재택 등)')" />
-                <BaseToggle v-model="r.is_active" size="sm" :title="$t('활성')" />
+                <BaseToggle v-model="r.is_active" :title="$t('활성')" />
                 <button class="ipdel" @click="removeRow(i)"><i class="fa-solid fa-xmark"></i></button>
               </div>
               <p class="iphint">{{ $t("저장 후 다음 로그인부터 적용됩니다.") }}</p>
@@ -204,6 +204,6 @@ onMounted(load);
 .ipin { height: 34px; padding: 0 0.6rem; font-size: 0.85rem; border: 2px solid var(--line-strong); border-radius: 3px; outline: none; background: var(--surface); color: var(--ink); width: 160px; flex-shrink: 0; }
 .ipin.memo { flex: 1; width: auto; }
 .ipin:focus { border-color: var(--seal); box-shadow: 0 0 0 2px rgba(122,92,255,0.15); }
-.ipdel { width: 30px; height: 30px; flex-shrink: 0; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--danger); background: var(--surface); box-shadow: 2px 2px 0 var(--line-hard); }
+.ipdel { width: 34px; height: 34px; flex-shrink: 0; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--danger); background: var(--surface); box-shadow: 2px 2px 0 var(--line-hard); }
 .iphint { margin-top: 0.7rem; font-size: 0.74rem; color: var(--ink-faint); }
 </style>
