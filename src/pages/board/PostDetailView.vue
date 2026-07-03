@@ -126,6 +126,8 @@ watch(() => route.params.id, (id) => { if (id) load(id); });
 .prose :deep(ul), .prose :deep(ol) { padding-left: 1.5rem; margin: 0.5rem 0; }
 .prose :deep(a) { color: var(--seal); text-decoration: underline; }
 .prose :deep(img) { max-width: 100%; border-radius: 3px; margin: 0.5rem 0; }
+.prose :deep(table) { border-collapse: collapse; width: 100%; margin: 0.6rem 0; }
+.prose :deep(td), .prose :deep(th) { border: 1px solid #b9bccf; padding: 6px 8px; min-width: 40px; }
 
 .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.6rem; margin-bottom: 1rem; }
 .gitem { display: block; border-radius: 3px; overflow: hidden; border: 2px solid var(--line-hard); }

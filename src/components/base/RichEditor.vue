@@ -14,6 +14,18 @@
       <span class="sep"></span>
       <button type="button" @mousedown.prevent="addLink" title="링크"><i class="fa-solid fa-link"></i></button>
       <button v-if="upload" type="button" @mousedown.prevent="pickImage" title="이미지"><i class="fa-solid fa-image"></i></button>
+      <div class="tblwrap" ref="tblWrap">
+        <button type="button" :class="{ act: tableMenu }" @mousedown.prevent="tableMenu = !tableMenu" title="표 삽입"><i class="fa-solid fa-table-cells"></i></button>
+        <div v-if="tableMenu" class="tablepick" @mousedown.prevent>
+          <div class="tpgrid" @mouseleave="hoverR = 0; hoverC = 0">
+            <div v-for="r in 8" :key="r" class="tprow">
+              <span v-for="c in 8" :key="c" class="tpcell" :class="{ hot: r <= hoverR && c <= hoverC }"
+                @mouseover="hoverR = r; hoverC = c" @mousedown.prevent="insertTable(r, c)"></span>
+            </div>
+          </div>
+          <div class="tplabel">{{ hoverR ? hoverR + " × " + hoverC : "표 크기 선택" }}</div>
+        </div>
+      </div>
       <span v-if="uploading" class="uprog">업로드 중…</span>
       <input ref="fileInput" type="file" accept="image/*" hidden @change="onImage" />
     </div>
@@ -31,7 +43,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useToast } from "vue-toastification";
 import { boardApi, mediaUrl } from "@/api/board";
 
@@ -47,6 +59,29 @@ const editable = ref(null);
 const fileInput = ref(null);
 const uploading = ref(false);
 const focused = ref(false);
+
+/* 표 삽입 그리드 피커 */
+const tblWrap = ref(null);
+const tableMenu = ref(false);
+const hoverR = ref(0);
+const hoverC = ref(0);
+function insertTable(rows, cols) {
+  let html = '<table class="re-table" style="border-collapse:collapse;width:100%;margin:8px 0;">';
+  for (let r = 0; r < rows; r++) {
+    html += "<tr>";
+    for (let c = 0; c < cols; c++) {
+      html += '<td style="border:1px solid #b9bccf;padding:6px 8px;min-width:40px;">&nbsp;</td>';
+    }
+    html += "</tr>";
+  }
+  html += "</table><p><br></p>";
+  cmd("insertHTML", html);
+  tableMenu.value = false;
+  hoverR.value = hoverC.value = 0;
+}
+function onOutside(e) { if (tblWrap.value && !tblWrap.value.contains(e.target)) tableMenu.value = false; }
+onMounted(() => document.addEventListener("mousedown", onOutside, true));
+onBeforeUnmount(() => document.removeEventListener("mousedown", onOutside, true));
 
 onMounted(() => { if (editable.value) editable.value.innerHTML = props.modelValue || ""; });
 watch(() => props.modelValue, (v) => {
@@ -78,14 +113,6 @@ async function onImage(e) {
   } catch (err) { toast.error(err?.message || "이미지 업로드 실패"); }
   finally { uploading.value = false; e.target.value = ""; }
 }
-
-// 포커스 추적 (외부 값 반영 시 커서 튐 방지)
-onMounted(() => {
-  const el = editable.value;
-  if (!el) return;
-  el.addEventListener("focus", () => (focused = true));
-  el.addEventListener("blur", () => (focused = false));
-});
 </script>
 
 <style scoped>
@@ -94,7 +121,17 @@ onMounted(() => {
 .rtoolbar button { min-width: 30px; height: 28px; padding: 0 0.5rem; border-radius: 6px; font-size: 0.8rem; color: #6b5f4b; background: transparent; transition: background 0.12s; }
 .rtoolbar button:hover { background: #e7e8f1; }
 .sep { width: 1px; height: 18px; background: #b9bccf; margin: 0 4px; }
+.rtoolbar button.act { background: #e0d9ff; color: var(--seal-deep); }
 .uprog { font-size: 0.72rem; color: var(--seal); margin-left: 0.3rem; }
+
+/* 표 삽입 그리드 피커 */
+.tblwrap { position: relative; display: inline-flex; }
+.tablepick { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; background: #fff; border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: 4px 4px 0 var(--line-hard); padding: 0.5rem; }
+.tpgrid { display: flex; flex-direction: column; gap: 3px; }
+.tprow { display: flex; gap: 3px; }
+.tpcell { width: 16px; height: 16px; border: 1px solid var(--line-strong); border-radius: 2px; background: #fff; cursor: pointer; }
+.tpcell.hot { background: var(--seal); border-color: var(--seal-deep); }
+.tplabel { margin-top: 0.4rem; text-align: center; font-family: var(--font-pixel); font-size: 0.64rem; color: var(--ink-muted); }
 .rcontent {
   min-height: 240px; max-height: 60vh; overflow-y: auto;
   padding: 0.9rem 1rem; font-size: 0.95rem; line-height: 1.7; color: var(--ink); outline: none;
@@ -105,4 +142,6 @@ onMounted(() => {
 .rcontent :deep(ul), .rcontent :deep(ol) { padding-left: 1.4rem; margin: 0.4rem 0; }
 .rcontent :deep(a) { color: var(--seal); text-decoration: underline; }
 .rcontent :deep(img) { max-width: 100%; border-radius: 8px; }
+.rcontent :deep(table) { border-collapse: collapse; width: 100%; margin: 8px 0; }
+.rcontent :deep(td), .rcontent :deep(th) { border: 1px solid #b9bccf; padding: 6px 8px; min-width: 40px; }
 </style>
