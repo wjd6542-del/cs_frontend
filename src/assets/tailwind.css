@@ -257,6 +257,35 @@
   .badge-muted { @apply text-[color:var(--ink-faint)] font-normal border-transparent; }
 }
 
+/* ── 전역 퀄리티 폴리시 (스코프 컴포넌트의 공용 클래스에도 적용) ── */
+
+/* 모달·드로어 등장 애니메이션 */
+@keyframes cs-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cs-panel-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.drawer, .pmodal { animation: cs-overlay-in 0.14s ease; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.drawer > .panel,
+.drawer > .cmodal,
+.pmodal > .pbox {
+  animation: cs-panel-in 0.2s cubic-bezier(0.2, 0.85, 0.25, 1);
+}
+
+/* 테이블 행 부드러운 상호작용 */
+.tbl tbody tr { transition: background-color 0.12s ease; }
+
+/* 카드에 은은한 깊이 (호버형 카드는 각자 처리, 여기선 정적 카드 테두리 대비만) */
+.pcard { transition: box-shadow 0.12s ease, transform 0.08s ease; }
+
+/* 다크 모드 스크롤바 */
+html.dark * { scrollbar-color: #3a3f63 transparent; }
+html.dark *::-webkit-scrollbar-thumb { background: #3a3f63; border: 2px solid transparent; background-clip: padding-box; }
+html.dark *::-webkit-scrollbar-thumb:hover { background: #4b5180; background-clip: padding-box; }
+
+/* 포커스 링을 폼 컨트롤에서 더 은은하게(픽셀 보더와 이중 겹침 방지) */
+.field:focus-visible, .field-auto:focus-visible, .cell-input:focus-visible { outline: none; }
+
 @media print {
   html, body { height: auto !important; overflow: visible !important; background: white !important; }
   body > *:not(#voucher-print-clone) { display: none !important; }
