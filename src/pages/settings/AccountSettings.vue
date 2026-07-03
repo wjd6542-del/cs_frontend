@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="account">
     <div class="subtabs">
       <button class="st" :class="{ on: sub === 'user' }" @click="sub = 'user'"><i class="fa-solid fa-user"></i> {{ $t("계정") }}</button>
       <button class="st" :class="{ on: sub === 'role' }" @click="sub = 'role'"><i class="fa-solid fa-user-shield"></i> {{ $t("역할·권한") }}</button>
@@ -19,6 +19,7 @@ const sub = ref("user");
 </script>
 
 <style scoped>
+.account { max-width: 940px; margin: 0 auto; }
 .subtabs { display: flex; gap: 0.4rem; margin-bottom: 1.1rem; }
 .st {
   display: inline-flex; align-items: center; gap: 0.4rem;
