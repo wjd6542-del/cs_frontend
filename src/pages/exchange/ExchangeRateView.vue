@@ -41,21 +41,40 @@
     </div>
     <p v-if="latest" class="asof num">기준일 {{ d(latest.date) }} · 통화 {{ FIAT.length }} · 코인 {{ COINS.length }}</p>
 
-    <!-- 이력 -->
-    <h3 class="sub">환율 이력</h3>
+    <!-- 이력 : 법정통화 / 코인 분리 -->
+    <h3 class="sub"><span class="dot fiat"></span> 법정통화 이력</h3>
     <div class="tablewrap">
       <table class="tbl">
         <thead>
           <tr>
             <th class="num">일자</th>
-            <th v-for="c in ALL" :key="c.key" class="r">{{ c.emoji }} {{ c.coin ? c.symbol : (c.unit > 1 ? c.unit + c.symbol : c.symbol) }}</th>
+            <th v-for="c in FIAT" :key="c.key" class="r">{{ c.emoji }} {{ c.unit > 1 ? c.unit + c.symbol : c.symbol }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td :colspan="ALL.length + 1"><EmptyState icon="💱" title="환율 이력이 없어요" desc="자동 수집을 기다리거나 새로고침 하세요." hint="매일 자동 수집" compact /></td></tr>
+          <tr v-if="!rows.length"><td :colspan="FIAT.length + 1"><EmptyState icon="💱" title="환율 이력이 없어요" desc="자동 수집을 기다리거나 새로고침 하세요." hint="매일 자동 수집" compact /></td></tr>
           <tr v-for="r in rows" :key="r.id">
             <td class="num dt">{{ d(r.date) }}</td>
-            <td v-for="c in ALL" :key="c.key" class="r num">{{ won(disp(r[c.key], c.unit)) }}</td>
+            <td v-for="c in FIAT" :key="c.key" class="r num">{{ won(disp(r[c.key], c.unit)) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub"><span class="dot coin"></span> 코인 이력</h3>
+    <div class="tablewrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th class="num">일자</th>
+            <th v-for="c in COINS" :key="c.key" class="r">{{ c.emoji }} {{ c.symbol }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!rows.length"><td :colspan="COINS.length + 1"><EmptyState icon="🪙" title="코인 이력이 없어요" desc="자동 수집을 기다리거나 새로고침 하세요." hint="매일 자동 수집" compact /></td></tr>
+          <tr v-for="r in rows" :key="r.id">
+            <td class="num dt">{{ d(r.date) }}</td>
+            <td v-for="c in COINS" :key="c.key" class="r num">{{ won(disp(r[c.key], c.unit)) }}</td>
           </tr>
         </tbody>
       </table>
@@ -128,11 +147,18 @@ const COINS = [
   { key: "btc", label: "비트코인", emoji: "🟠", symbol: "BTC", unit: 1, coin: true },
   { key: "eth", label: "이더리움", emoji: "🔷", symbol: "ETH", unit: 1, coin: true },
   { key: "usdt", label: "테더", emoji: "🟢", symbol: "USDT", unit: 1, coin: true },
+  { key: "bnb", label: "바이낸스 코인", emoji: "🟡", symbol: "BNB", unit: 1, coin: true },
+  { key: "xrp", label: "리플", emoji: "🔵", symbol: "XRP", unit: 1, coin: true },
+  { key: "sol", label: "솔라나", emoji: "🟣", symbol: "SOL", unit: 1, coin: true },
+  { key: "usdc", label: "USD Coin", emoji: "💵", symbol: "USDC", unit: 1, coin: true },
+  { key: "doge", label: "도지코인", emoji: "🐕", symbol: "DOGE", unit: 1, coin: true },
+  { key: "ada", label: "카르다노", emoji: "🔺", symbol: "ADA", unit: 1, coin: true },
+  { key: "trx", label: "트론", emoji: "🔻", symbol: "TRX", unit: 1, coin: true },
 ];
 const ALL = [...FIAT, ...COINS];
 // 마퀴 무한 루프용: 각 목록을 두 벌 이어붙임
 const fiatItems = [...FIAT, ...FIAT];
-const coinItems = Array.from({ length: 6 }, () => COINS).flat();
+const coinItems = [...COINS, ...COINS];
 
 const toast = useToast();
 const latest = ref(null);
