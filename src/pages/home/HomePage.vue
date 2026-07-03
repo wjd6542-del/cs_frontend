@@ -51,6 +51,27 @@
       </router-link>
     </div>
 
+    <!-- CS 항목별 처리중 문의 (각 최근 5개) -->
+    <div class="csgrid">
+      <section v-for="p in CS_PARTIES" :key="p.key" class="csbox pcard">
+        <div class="cshead">
+          <h2 class="cst"><i class="fa-solid fa-headset"></i> {{ p.label }} · <span class="prog">처리중</span> <em class="cnt">{{ progress[p.key].length }}</em></h2>
+          <router-link :to="p.to" class="more">전체보기 ›</router-link>
+        </div>
+        <ul class="cslist">
+          <li v-for="t in progress[p.key]" :key="t.id" class="csitem" @click="$router.push(p.to)">
+            <span class="pdot" :class="'pr-' + t.priority"></span>
+            <span class="cstitle">{{ t.title }}</span>
+            <span class="csname">{{ t[p.nameField] || "미지정" }}</span>
+            <span class="csdate num">{{ fmt(t.created_at) }}</span>
+          </li>
+          <li v-if="!progress[p.key].length" class="cs-empty">
+            <EmptyState icon="✅" title="처리중 문의가 없어요" desc="새 문의가 접수되면 여기 표시돼요." hint="깔끔하네요!" compact />
+          </li>
+        </ul>
+      </section>
+    </div>
+
     <!-- 공지 + 바로가기 -->
     <div class="cols">
       <section class="notice pcard">
@@ -112,6 +133,12 @@ const totals = reactive({ PAYMENT: 0, COLLECTION: 0 });
 const pendingCount = ref(0);
 const openTickets = ref(0);
 
+const CS_PARTIES = [
+  { key: "VENDOR", label: "업체 응대", to: "/support/vendor", nameField: "vendor_name" },
+  { key: "GAME_COMPANY", label: "게임사 응대", to: "/support/gameco", nameField: "game_company_name" },
+];
+const progress = reactive({ VENDOR: [], GAME_COMPANY: [] });
+
 const net = computed(() => totals.COLLECTION - totals.PAYMENT);
 const maxFlow = computed(() => Math.max(totals.PAYMENT, totals.COLLECTION, 1));
 const barIn = computed(() => Math.round((totals.COLLECTION / maxFlow.value) * 100));
@@ -146,6 +173,14 @@ onMounted(async () => {
       supportApi.list({ status: "IN_PROGRESS", limit: 1 }),
     ]);
     openTickets.value = (o.total || 0) + (ip.total || 0);
+  } catch (e) { /* skip */ }
+  try {
+    const [pv, pg] = await Promise.all([
+      supportApi.list({ party: "VENDOR", status: "IN_PROGRESS", limit: 5 }),
+      supportApi.list({ party: "GAME_COMPANY", status: "IN_PROGRESS", limit: 5 }),
+    ]);
+    progress.VENDOR = pv.rows || [];
+    progress.GAME_COMPANY = pg.rows || [];
   } catch (e) { /* skip */ }
 });
 </script>
@@ -189,6 +224,28 @@ onMounted(async () => {
 .s-val em { font-style: normal; font-size: 0.8rem; color: var(--ink-muted); margin-left: 1px; }
 .s-val.in { color: var(--flow-in); } .s-val.out { color: var(--flow-out); }
 @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+/* ── CS 항목별 처리중 ── */
+.csgrid { margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 720px) { .csgrid { grid-template-columns: 1fr; } }
+.csbox { padding: 1.1rem 1.2rem; }
+.cshead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem; }
+.cst { font-family: var(--font-pixel); font-size: 0.9rem; color: var(--ink); display: flex; align-items: center; gap: 0.4rem; }
+.cst i { color: var(--seal); font-size: 0.82rem; }
+.cst .prog { font-size: 0.66rem; color: var(--seal-deep); background: #ede9ff; border: 1px solid var(--line-hard); padding: 0.05rem 0.35rem; border-radius: 3px; }
+.cst .cnt { font-style: normal; font-size: 0.7rem; color: #fff; background: var(--seal); border: 1px solid var(--line-hard); border-radius: 999px; padding: 0.02rem 0.42rem; }
+.cslist { display: flex; flex-direction: column; }
+.csitem { display: flex; align-items: center; gap: 0.55rem; padding: 0.5rem 0.1rem; border-bottom: 1px solid var(--line); cursor: pointer; font-size: 0.86rem; }
+.csitem:last-child { border-bottom: none; }
+.csitem:hover .cstitle { color: var(--seal); }
+.pdot { width: 8px; height: 8px; flex-shrink: 0; border-radius: 2px; border: 1px solid var(--line-hard); background: var(--line-strong); }
+.pdot.pr-1 { background: var(--gold); }
+.pdot.pr-2 { background: var(--flow-out); }
+.pdot.pr-3 { background: var(--danger); }
+.cstitle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-weight: 600; }
+.csname { flex-shrink: 0; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.76rem; color: var(--ink-muted); }
+.csdate { flex-shrink: 0; color: var(--ink-faint); font-size: 0.72rem; }
+.cs-empty { padding: 0.4rem 0; }
 
 /* ── 공지 + 바로가기 ── */
 .cols { margin-top: 1rem; display: grid; grid-template-columns: 1.6fr 1fr; gap: 1rem; }
