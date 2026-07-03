@@ -13,7 +13,7 @@
       </div>
 
       <!-- 넷플로우 바 (회수 ▲ vs 지급 ▼) -->
-      <div class="flow">
+      <div v-if="canMoney" class="flow">
         <div class="flow-row">
           <span class="flow-lbl in">▲ 회수</span>
           <div class="track"><i class="fill in" :style="{ width: barIn + '%' }"></i></div>
@@ -32,27 +32,27 @@
     </section>
 
     <!-- HUD 스탯 -->
-    <div class="stats">
-      <router-link to="/ledger" class="stat">
+    <div v-if="showStats" class="stats">
+      <router-link v-if="canLedger" to="/ledger" class="stat">
         <span class="s-ic in"><i class="fa-solid fa-arrow-down-long"></i></span>
         <div><span class="s-lbl">이번 달 회수</span><strong class="s-val in num">{{ won(totals.COLLECTION) }}</strong></div>
       </router-link>
-      <router-link to="/ledger" class="stat">
+      <router-link v-if="canLedger" to="/ledger" class="stat">
         <span class="s-ic out"><i class="fa-solid fa-arrow-up-long"></i></span>
         <div><span class="s-lbl">이번 달 지급</span><strong class="s-val out num">{{ won(totals.PAYMENT) }}</strong></div>
       </router-link>
-      <router-link to="/settlement/vendor" class="stat">
+      <router-link v-if="canSettlement" to="/settlement/vendor" class="stat">
         <span class="s-ic warn"><i class="fa-solid fa-hourglass-half"></i></span>
         <div><span class="s-lbl">미정산</span><strong class="s-val num">{{ pendingCount }}<em>건</em></strong></div>
       </router-link>
-      <router-link to="/support/vendor" class="stat">
+      <router-link v-if="canSupport" to="/support/vendor" class="stat">
         <span class="s-ic acc"><i class="fa-solid fa-headset"></i></span>
         <div><span class="s-lbl">진행중 응대</span><strong class="s-val num">{{ openTickets }}<em>건</em></strong></div>
       </router-link>
     </div>
 
     <!-- CS 상황판 : 항목별 미해결(접수·처리중) 문의 최근 5건 -->
-    <section class="csboard pcard">
+    <section v-if="canSupport" class="csboard pcard">
       <div class="cb-head">
         <h2 class="cb-ttl"><i class="fa-solid fa-satellite-dish"></i> CS 상황판</h2>
         <span class="cb-sub">항목별 미해결 문의 · 최근 5건</span>
@@ -84,8 +84,8 @@
       </div>
     </section>
 
-    <!-- 공지 + 바로가기 -->
-    <div class="cols">
+    <!-- 공지 + 알림 게시판 -->
+    <div v-if="canBoard" class="cols">
       <section class="notice pcard">
         <div class="nhead">
           <h2 class="nt"><i class="fa-solid fa-bullhorn"></i> 공지사항</h2>
@@ -179,6 +179,12 @@ import { formatDateDot as fmt } from "@/utils/date";
 
 const auth = useAuthStore();
 const canManageCs = computed(() => auth.hasPermission("support.edit"));
+const canLedger = computed(() => auth.hasPermission("ledger.view"));
+const canSettlement = computed(() => auth.hasPermission("settlement.view"));
+const canSupport = computed(() => auth.hasPermission("support.view"));
+const canBoard = computed(() => auth.hasPermission("board.view"));
+const canMoney = computed(() => canLedger.value || canSettlement.value);
+const showStats = computed(() => canLedger.value || canSettlement.value || canSupport.value);
 const csDetail = ref(null);
 async function openCs(id) { try { csDetail.value = await supportApi.get(id); } catch (e) { /* noop */ } }
 const noticeBoard = ref(null);
@@ -216,36 +222,36 @@ function monthStart() { const dt = new Date(); return new Date(dt.getFullYear(),
 async function openPost(id) { try { modalPost.value = await boardApi.postGet(id); } catch (e) { /* noop */ } }
 
 onMounted(async () => {
-  try {
+  if (canBoard.value) try {
     noticeBoard.value = await boardApi.get("notice");
     const res = await boardApi.postList(noticeBoard.value.id, 1, 5);
     notices.value = [...(res.notices || []), ...(res.rows || [])].slice(0, 5);
   } catch (e) { /* skip */ }
-  try {
+  if (canBoard.value) try {
     alarmBoard.value = await boardApi.get("alarm");
     const res = await boardApi.postList(alarmBoard.value.id, 1, 5);
     alarmPosts.value = [...(res.notices || []), ...(res.rows || [])].slice(0, 5);
   } catch (e) { /* skip */ }
-  try {
+  if (canLedger.value) try {
     const led = await ledgerApi.list({ date_from: monthStart(), limit: 1 });
     totals.PAYMENT = led.totals?.PAYMENT || 0;
     totals.COLLECTION = led.totals?.COLLECTION || 0;
   } catch (e) { /* skip */ }
-  try {
+  if (canSettlement.value) try {
     const [v, g] = await Promise.all([
       settlementApi.list({ type: "VENDOR", status: "PENDING", limit: 1 }),
       settlementApi.list({ type: "GAME_COMPANY", status: "PENDING", limit: 1 }),
     ]);
     pendingCount.value = (v.total || 0) + (g.total || 0);
   } catch (e) { /* skip */ }
-  try {
+  if (canSupport.value) try {
     const [o, ip] = await Promise.all([
       supportApi.list({ status: "OPEN", limit: 1 }),
       supportApi.list({ status: "IN_PROGRESS", limit: 1 }),
     ]);
     openTickets.value = (o.total || 0) + (ip.total || 0);
   } catch (e) { /* skip */ }
-  try {
+  if (canSupport.value) try {
     await Promise.all(CS_PARTIES.map(async (p) => {
       const [op, pr] = await Promise.all([
         supportApi.list({ party: p.key, status: "OPEN", limit: 5 }),

@@ -43,17 +43,18 @@ const tabs = [
   { key: "gameco", label: "게임사", icon: "fa-gamepad", perm: "gameCompany.view", comp: markRaw(GameCompanySettings), desc: "사용료를 지급하는 게임사를 등록·관리합니다. 정산·응대에서 이 목록을 사용합니다." },
   { key: "vendor", label: "업체", icon: "fa-store", perm: "vendor.view", comp: markRaw(VendorSettings), desc: "사용대금을 회수하는 업체를 등록·관리합니다." },
   { key: "solution", label: "솔루션사", icon: "fa-puzzle-piece", perm: "gameCompany.view", comp: markRaw(SolutionCompanySettings), desc: "솔루션 응대 대상인 솔루션사를 등록·관리합니다. 솔루션 응대에서 이 목록을 사용합니다." },
-  { key: "board", label: "게시판", icon: "fa-clipboard-list", perm: "board.view", comp: markRaw(BoardSettings), desc: "게시판을 만들고 권한(읽기/쓰기)·댓글·첨부 허용을 설정합니다." },
+  { key: "board", label: "게시판", icon: "fa-clipboard-list", superOnly: true, comp: markRaw(BoardSettings), desc: "게시판을 만들고 권한(읽기/쓰기)·댓글·첨부 허용을 설정합니다." },
   { key: "faqcat", label: "FAQ 분류", icon: "fa-tags", perm: "faq.view", comp: markRaw(FaqCategorySettings), desc: "자주 하는 질문의 분류를 등록·관리합니다. FAQ 작성 시 이 분류를 선택합니다." },
   { key: "tag", label: "태그", icon: "fa-tag", perm: ["support.view", "faq.view"], comp: markRaw(TagSettings), desc: "CS 응대·FAQ에 붙이는 공통 태그를 등록·관리합니다. 검색 중 없으면 즉시 만들 수도 있습니다." },
   { key: "account", label: "계정·권한", icon: "fa-users-gear", perm: ["usermanager.view", "permission.user.view"], comp: markRaw(AccountSettings), desc: "계정을 만들고 역할별 권한을 지정합니다." },
 ];
-function allowed(perm) {
-  if (!perm) return true;
-  const codes = Array.isArray(perm) ? perm : [perm];
+function allowed(t) {
+  if (t.superOnly) return !!auth.user?.is_super;
+  if (!t.perm) return true;
+  const codes = Array.isArray(t.perm) ? t.perm : [t.perm];
   return codes.some((c) => auth.hasPermission(c));
 }
-const visibleTabs = computed(() => tabs.filter((t) => allowed(t.perm)));
+const visibleTabs = computed(() => tabs.filter((t) => allowed(t)));
 
 const active = ref(visibleTabs.value[0]?.key || "gameco");
 const activeTab = computed(() => visibleTabs.value.find((t) => t.key === active.value) || visibleTabs.value[0]);
