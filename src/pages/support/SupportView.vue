@@ -21,61 +21,61 @@
         />
       </aside>
 
-      <!-- 우측: 선택 대상 응대 -->
+      <!-- 우측: 응대 목록 (선택 없으면 전체, 선택 시 해당 항목만) -->
       <section class="pane pcard right">
-        <div v-if="!selected" class="pane-empty">
-          <EmptyState variant="select" :desc="`좌측에서 ${pmeta.label}를 선택하면 응대가 여기에 표시돼요.`" />
+        <div class="r-head">
+          <div class="r-title">
+            <span class="r-eye">{{ pmeta.label }}</span>
+            <h3 class="r-name">
+              {{ selected ? selected.name : "전체 " + pmeta.label + " 응대" }}
+              <button v-if="selected" class="allbtn" @click="clearSelected"><i class="fa-solid fa-xmark"></i> 전체 보기</button>
+            </h3>
+          </div>
+          <div class="r-tools">
+            <div class="w-44"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
+            <div class="w-28 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" /></div>
+            <button v-if="canEdit && selected" class="btn btn-primary" @click="openNew">+ 등록</button>
+          </div>
         </div>
 
-        <template v-else>
-          <div class="r-head">
-            <div class="r-title">
-              <span class="r-eye">{{ pmeta.label }}</span>
-              <h3 class="r-name">{{ selected.name }}</h3>
-            </div>
-            <div class="r-tools">
-              <div class="w-44"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
-              <div class="w-28 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" /></div>
-              <button v-if="canEdit" class="btn btn-primary" @click="openNew">+ 등록</button>
-            </div>
-          </div>
+        <!-- 일괄 상태 변경 바 -->
+        <div v-if="canEdit && sel.length" class="bulkbar">
+          <span class="bcount">✔ {{ sel.length }}건 선택</span>
+          <span class="barrow">→</span>
+          <div class="w-28 shrink-0"><SearchSelect v-model="bulkVal" :options="STATUS_OPTS" placeholder="변경할 상태" /></div>
+          <button class="btn btn-xs btn-primary" :disabled="!bulkVal || bulking" @click="applyBulk">{{ bulking ? "적용 중…" : "일괄 적용" }}</button>
+          <button class="btn btn-xs" @click="clearSel">선택 해제</button>
+        </div>
 
-          <!-- 일괄 상태 변경 바 -->
-          <div v-if="canEdit && sel.length" class="bulkbar">
-            <span class="bcount">✔ {{ sel.length }}건 선택</span>
-            <span class="barrow">→</span>
-            <div class="w-28 shrink-0"><SearchSelect v-model="bulkVal" :options="STATUS_OPTS" placeholder="변경할 상태" /></div>
-            <button class="btn btn-xs btn-primary" :disabled="!bulkVal || bulking" @click="applyBulk">{{ bulking ? "적용 중…" : "일괄 적용" }}</button>
-            <button class="btn btn-xs" @click="clearSel">선택 해제</button>
-          </div>
+        <div class="r-body">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th v-if="canEdit" class="c cbx"><input type="checkbox" :checked="allChecked" @change="toggleAll" /></th>
+                <th class="c">상태</th><th>제목</th>
+                <th v-if="!selected">{{ pmeta.label }}</th>
+                <th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!tickets.length"><td :colspan="colCount"><EmptyState variant="support" compact /></td></tr>
+              <tr v-for="t in tickets" :key="t.id" class="row" :class="{ sel: sel.includes(t.id) }" @click="openDetail(t.id)">
+                <td v-if="canEdit" class="c cbx" @click.stop><input type="checkbox" :checked="sel.includes(t.id)" @change="toggleRow(t.id)" /></td>
+                <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
+                <td class="nm">{{ t.title }} <TagChips :tags="t.tags" /></td>
+                <td v-if="!selected" class="muted">{{ t[pmeta.nameField] || "-" }}</td>
+                <td class="muted">{{ t.category || "-" }}</td>
+                <td class="c"><span class="pri" :class="'p' + t.priority">{{ priLabel(t.priority) }}</span></td>
+                <td class="c muted">{{ t.message_count }}</td>
+                <td class="muted xs num">{{ d(t.created_at) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-          <div class="r-body">
-            <table class="tbl">
-              <thead>
-                <tr>
-                  <th v-if="canEdit" class="c cbx"><input type="checkbox" :checked="allChecked" @change="toggleAll" /></th>
-                  <th class="c">상태</th><th>제목</th><th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="!tickets.length"><td :colspan="canEdit ? 7 : 6"><EmptyState variant="support" compact /></td></tr>
-                <tr v-for="t in tickets" :key="t.id" class="row" :class="{ sel: sel.includes(t.id) }" @click="openDetail(t.id)">
-                  <td v-if="canEdit" class="c cbx" @click.stop><input type="checkbox" :checked="sel.includes(t.id)" @change="toggleRow(t.id)" /></td>
-                  <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
-                  <td class="nm">{{ t.title }} <TagChips :tags="t.tags" /></td>
-                  <td class="muted">{{ t.category || "-" }}</td>
-                  <td class="c"><span class="pri" :class="'p' + t.priority">{{ priLabel(t.priority) }}</span></td>
-                  <td class="c muted">{{ t.message_count }}</td>
-                  <td class="muted xs num">{{ d(t.created_at) }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="r-foot">
-            <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reloadTickets" />
-          </div>
-        </template>
+        <div class="r-foot">
+          <Pager v-model:page="page" :total-pages="totalPages" :total="total" @change="reloadTickets" />
+        </div>
       </section>
     </div>
 
@@ -209,6 +209,8 @@ const sel = ref([]);
 const bulkVal = ref("");
 const bulking = ref(false);
 const allChecked = computed(() => tickets.value.length > 0 && tickets.value.every((t) => sel.value.includes(t.id)));
+// 표 컬럼 수: 상태·제목·분류·우선·댓글·등록(6) + 체크박스 + 대상(전체 보기 시)
+const colCount = computed(() => 6 + (canEdit.value ? 1 : 0) + (selected.value ? 0 : 1));
 
 const treeRef = ref(null);
 
@@ -232,6 +234,11 @@ function onSelect(entity) {
   filterTags.value = [];
   reloadTickets();
 }
+function clearSelected() {
+  selected.value = null;
+  page.value = 1;
+  reloadTickets();
+}
 function applyFilter() { page.value = 1; reloadTickets(); }
 
 function toggleAll() { sel.value = allChecked.value ? [] : tickets.value.map((t) => t.id); }
@@ -252,9 +259,8 @@ async function applyBulk() {
 async function reloadTickets() {
   sel.value = [];
   if (treeRef.value?.reload) treeRef.value.reload(); // 트리 미해결 카운트 갱신
-  if (!selected.value) { tickets.value = []; total.value = 0; totalPages.value = 1; return; }
   const body = { party: props.party, page: page.value, limit: LIMIT };
-  body[pmeta.value.idField] = selected.value.id;
+  if (selected.value) body[pmeta.value.idField] = selected.value.id; // 선택 시 해당 항목만
   if (filter.status) body.status = filter.status;
   if (filterTags.value.length) body.tag_ids = filterTags.value;
   const res = await supportApi.list(body);
@@ -265,7 +271,7 @@ async function reloadTickets() {
 
 async function loadLeft() {
   selected.value = null;
-  tickets.value = [];
+  await reloadTickets();
 }
 
 function openNew() {
@@ -377,7 +383,9 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .r-head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.65rem 0.85rem; border-bottom: 2px solid var(--line); flex-wrap: wrap; flex-shrink: 0; }
 .r-title { display: flex; flex-direction: column; line-height: 1.15; }
 .r-eye { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--seal-deep); }
-.r-name { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); }
+.r-name { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.allbtn { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--seal-deep); background: #ede9ff; border: 1.5px solid var(--line-hard); border-radius: 3px; padding: 0.12rem 0.4rem; }
+.allbtn:hover { background: #e0d9ff; }
 .r-tools { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
 .r-body { flex: 1; overflow-y: auto; }
 .r-foot { flex-shrink: 0; padding: 0.4rem 0.85rem; border-top: 2px solid var(--line); }
