@@ -1,59 +1,59 @@
 <template>
   <div>
     <div class="head">
-      <h3 class="h">게시판 <span class="c">{{ boards.length }}</span></h3>
-      <button class="btn btn-primary" @click="openNew"><i class="fa-solid fa-plus"></i> 게시판 추가</button>
+      <h3 class="h">{{ $t("게시판") }} <span class="c">{{ boards.length }}</span></h3>
+      <button class="btn btn-primary" @click="openNew"><i class="fa-solid fa-plus"></i> {{ $t("게시판 추가") }}</button>
     </div>
 
-    <p class="hint">↑↓ 버튼으로 게시판 노출 순서를 바꿀 수 있습니다. 사이드 메뉴에도 이 순서로 표시됩니다.</p>
+    <p class="hint">{{ $t("↑↓ 버튼으로 게시판 노출 순서를 바꿀 수 있습니다. 사이드 메뉴에도 이 순서로 표시됩니다.") }}</p>
     <ul class="list">
       <li v-for="(b, i) in boards" :key="b.id" class="row">
         <div class="order">
-          <button class="ord" :disabled="i === 0 || reordering" title="위로" @click="move(i, -1)"><i class="fa-solid fa-chevron-up"></i></button>
-          <button class="ord" :disabled="i === boards.length - 1 || reordering" title="아래로" @click="move(i, 1)"><i class="fa-solid fa-chevron-down"></i></button>
+          <button class="ord" :disabled="i === 0 || reordering" :title="$t('위로')" @click="move(i, -1)"><i class="fa-solid fa-chevron-up"></i></button>
+          <button class="ord" :disabled="i === boards.length - 1 || reordering" :title="$t('아래로')" @click="move(i, 1)"><i class="fa-solid fa-chevron-down"></i></button>
         </div>
         <div class="rinfo">
           <span class="bn">{{ b.name }}</span>
           <code class="slug">/{{ b.slug }}</code>
-          <span v-if="!b.is_active" class="off">비활성</span>
+          <span v-if="!b.is_active" class="off">{{ $t("비활성") }}</span>
         </div>
         <div class="rtags">
           <span class="tag">읽기 {{ lv(b.read_level) }}</span>
           <span class="tag">쓰기 {{ lv(b.write_level) }}</span>
-          <span v-if="b.allow_comment" class="tag on">댓글</span>
-          <span v-if="b.allow_upload" class="tag on">첨부</span>
+          <span v-if="b.allow_comment" class="tag on">{{ $t("댓글") }}</span>
+          <span v-if="b.allow_upload" class="tag on">{{ $t("첨부") }}</span>
         </div>
         <div class="acts">
-          <button class="btn btn-xs" @click="openEdit(b)">수정</button>
-          <button class="btn btn-xs btn-danger" @click="del(b)">삭제</button>
+          <button class="btn btn-xs" @click="openEdit(b)">{{ $t("수정") }}</button>
+          <button class="btn btn-xs btn-danger" @click="del(b)">{{ $t("삭제") }}</button>
         </div>
       </li>
-      <li v-if="!boards.length"><EmptyState variant="board" title="게시판이 없어요" desc="게시판을 만들어 보세요." hint="＋ 게시판 추가" compact /></li>
+      <li v-if="!boards.length"><EmptyState variant="board" :title="$t('게시판이 없어요')" :desc="$t('게시판을 만들어 보세요.')" :hint="$t('＋ 게시판 추가')" compact /></li>
     </ul>
 
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
         <h4 class="ph">{{ editing ? "게시판 수정" : "게시판 추가" }}</h4>
         <div class="grid">
-          <BaseInput v-model="form.name" label="게시판명" />
-          <BaseInput v-model="form.slug" label="슬러그(영문)" :disabled="editing" placeholder="예: notice" />
-          <div class="col2"><BaseInput v-model="form.description" label="설명" /></div>
+          <BaseInput v-model="form.name" :label="$t('게시판명')" />
+          <BaseInput v-model="form.slug" :label="$t('슬러그(영문)')" :disabled="editing" :placeholder="$t('예: notice')" />
+          <div class="col2"><BaseInput v-model="form.description" :label="$t('설명')" /></div>
           <div class="fld">
-            <label class="lbl">읽기 권한</label>
+            <label class="lbl">{{ $t("읽기 권한") }}</label>
             <SearchSelect v-model="form.read_level" :options="levelOpts" />
           </div>
           <div class="fld">
-            <label class="lbl">쓰기 권한</label>
+            <label class="lbl">{{ $t("쓰기 권한") }}</label>
             <SearchSelect v-model="form.write_level" :options="levelOpts" />
           </div>
-          <label class="chk"><input type="checkbox" v-model="form.allow_comment" /> 댓글 허용</label>
-          <label class="chk"><input type="checkbox" v-model="form.allow_upload" /> 파일·이미지 첨부 허용</label>
-          <label class="chk"><input type="checkbox" v-model="form.is_active" /> 활성</label>
+          <label class="chk"><input type="checkbox" v-model="form.allow_comment" /> {{ $t("댓글 허용") }}</label>
+          <label class="chk"><input type="checkbox" v-model="form.allow_upload" /> {{ $t("파일·이미지 첨부 허용") }}</label>
+          <label class="chk"><input type="checkbox" v-model="form.is_active" /> {{ $t("활성") }}</label>
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="pacts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
-          <button class="btn" @click="showForm = false">취소</button>
+          <button class="btn" @click="showForm = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>

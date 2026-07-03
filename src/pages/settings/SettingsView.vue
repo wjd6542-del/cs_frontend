@@ -1,7 +1,7 @@
 <template>
   <div class="settings">
     <header class="phead">
-      <h1 class="ttl">환경설정</h1>
+      <h1 class="ttl">{{ $t("환경설정") }}</h1>
     </header>
 
     <div class="tabs" role="tablist">

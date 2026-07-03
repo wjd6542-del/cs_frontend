@@ -2,8 +2,8 @@
   <div class="vtree">
     <div class="vt-head">
       <input v-model="kw" class="field field-xs" :placeholder="`${label} 명칭 검색`" />
-      <button class="btn btn-xs" title="전체 펼치기" :disabled="!hasBranches" @click="expandAll"><i class="fa-solid fa-angles-down"></i></button>
-      <button class="btn btn-xs" title="전체 접기" :disabled="!hasBranches" @click="collapseAll"><i class="fa-solid fa-angles-up"></i></button>
+      <button class="btn btn-xs" :title="$t('전체 펼치기')" :disabled="!hasBranches" @click="expandAll"><i class="fa-solid fa-angles-down"></i></button>
+      <button class="btn btn-xs" :title="$t('전체 접기')" :disabled="!hasBranches" @click="collapseAll"><i class="fa-solid fa-angles-up"></i></button>
       <button class="btn btn-xs btn-primary" :title="`최상위 ${label} 추가`" @click="startAdd(null)">＋</button>
     </div>
 
@@ -11,16 +11,16 @@
     <div v-if="adding" class="vt-edit">
       <span class="vt-under" v-if="adding.parent_name">↳ {{ adding.parent_name }} 하위</span>
       <input ref="addInput" v-model="addName" class="field field-xs" :placeholder="`${label}명`" @keyup.enter="confirmAdd" @keyup.esc="adding = null" />
-      <button class="btn btn-xs btn-primary" @click="confirmAdd">저장</button>
-      <button class="btn btn-xs" @click="adding = null">취소</button>
+      <button class="btn btn-xs btn-primary" @click="confirmAdd">{{ $t("저장") }}</button>
+      <button class="btn btn-xs" @click="adding = null">{{ $t("취소") }}</button>
     </div>
 
     <div class="vt-body">
-      <div v-if="!flat.length"><EmptyState :icon="emptyIcon" :title="`${label}가 없어요`" :desc="`${label}를 추가해 보세요.`" hint="＋ 로 추가!" compact /></div>
+      <div v-if="!flat.length"><EmptyState :icon="emptyIcon" :title="`${label}가 없어요`" :desc="`${label}를 추가해 보세요.`" :hint="$t('＋ 로 추가!')" compact /></div>
 
       <!-- 최상위로 이동 드롭존 (드래그 중에만) -->
       <div v-if="dragId" class="rootdrop" :class="{ over: dragOverRoot }">
-        ⤒ 여기에 놓으면 최상위로 이동
+        {{ $t("⤒ 여기에 놓으면 최상위로 이동") }}
       </div>
 
       <div
@@ -39,7 +39,7 @@
         :data-node-id="row.node.id"
         @click="select(row.node)"
       >
-        <span class="grip" title="드래그하여 위치·순서 이동" @mousedown.stop="onGripDown(row.node, $event)"><i class="fa-solid fa-grip-vertical"></i></span>
+        <span class="grip" :title="$t('드래그하여 위치·순서 이동')" @mousedown.stop="onGripDown(row.node, $event)"><i class="fa-solid fa-grip-vertical"></i></span>
         <button v-if="row.hasChildren" class="caret" @click.stop="toggle(row.node.id)">
           <i class="fa-solid" :class="isCollapsed(row.node.id) ? 'fa-caret-right' : 'fa-caret-down'"></i>
         </button>
@@ -55,9 +55,9 @@
           <span v-if="row.node.open_count" class="cnt open" :title="`접수 ${row.node.open_count}건`">{{ row.node.open_count }}</span>
           <span v-if="row.node.progress_count" class="cnt prog" :title="`처리중 ${row.node.progress_count}건`">{{ row.node.progress_count }}</span>
           <span class="acts">
-            <button class="ico" title="하위 추가" @click.stop="startAdd(row.node)"><i class="fa-solid fa-plus"></i></button>
-            <button class="ico" title="명칭 수정" @click.stop="startEdit(row.node)"><i class="fa-solid fa-pen"></i></button>
-            <button class="ico del" title="삭제" @click.stop="remove(row.node)"><i class="fa-solid fa-trash"></i></button>
+            <button class="ico" :title="$t('하위 추가')" @click.stop="startAdd(row.node)"><i class="fa-solid fa-plus"></i></button>
+            <button class="ico" :title="$t('명칭 수정')" @click.stop="startEdit(row.node)"><i class="fa-solid fa-pen"></i></button>
+            <button class="ico del" :title="$t('삭제')" @click.stop="remove(row.node)"><i class="fa-solid fa-trash"></i></button>
           </span>
         </template>
       </div>

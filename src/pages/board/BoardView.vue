@@ -5,28 +5,28 @@
         <h1 class="ttl">{{ board?.name }}</h1>
         <p v-if="board?.description" class="desc">{{ board.description }}</p>
       </div>
-      <router-link v-if="canWrite" :to="`/board/${slug}/write`" class="btn btn-primary"><i class="fa-solid fa-pen"></i> 글쓰기</router-link>
+      <router-link v-if="canWrite" :to="`/board/${slug}/write`" class="btn btn-primary"><i class="fa-solid fa-pen"></i> {{ $t("글쓰기") }}</router-link>
     </header>
 
     <div class="tablewrap">
       <table class="tbl">
         <thead>
           <tr>
-            <th class="c w-no">번호</th>
-            <th>제목</th>
-            <th class="c w-au">작성자</th>
-            <th class="c w-vc">조회</th>
-            <th class="c w-dt">작성일</th>
+            <th class="c w-no">{{ $t("번호") }}</th>
+            <th>{{ $t("제목") }}</th>
+            <th class="c w-au">{{ $t("작성자") }}</th>
+            <th class="c w-vc">{{ $t("조회") }}</th>
+            <th class="c w-dt">{{ $t("작성일") }}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="!loading && !notices.length && !rows.length">
-            <td colspan="5"><EmptyState variant="board" hint="＋ 글쓰기로 첫 글을 남겨보세요" compact /></td>
+            <td colspan="5"><EmptyState variant="board" :hint="$t('＋ 글쓰기로 첫 글을 남겨보세요')" compact /></td>
           </tr>
 
           <!-- 공지 (1페이지 상단 고정) -->
           <tr v-for="p in notices" :key="'n' + p.id" class="row notice" @click="open(p.id)">
-            <td class="c"><span class="badge badge-indigo">공지</span></td>
+            <td class="c"><span class="badge badge-indigo">{{ $t("공지") }}</span></td>
             <td class="ti">{{ p.title }}<span v-if="p.comment_count" class="cc">[{{ p.comment_count }}]</span></td>
             <td class="c muted">{{ p.author }}</td>
             <td class="c muted num">{{ p.view_count }}</td>

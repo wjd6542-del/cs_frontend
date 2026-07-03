@@ -40,7 +40,7 @@
             >
               <span class="dot"></span>{{ $t(c.label) }}
             </RouterLink>
-            <div v-if="!m.children.length" class="child empty">항목 없음</div>
+            <div v-if="!m.children.length" class="child empty">{{ $t("항목 없음") }}</div>
           </div>
         </template>
       </template>

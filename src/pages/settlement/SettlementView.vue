@@ -5,12 +5,12 @@
         <h1 class="ttl">{{ isVendor ? "업체 정산" : "게임사 정산" }}</h1>
         <p class="desc">{{ isVendor ? "업체별 사용대금 회수 정산을 관리합니다." : "게임사별 사용료 지급 정산을 관리합니다." }}</p>
       </div>
-      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">+ 정산 등록</button>
+      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">{{ $t("+ 정산 등록") }}</button>
     </header>
 
     <div class="filterbar">
-      <div class="w-72 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" placeholder="정산 기간 선택" @change="onDateChange" /></div>
-      <div class="w-36 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="search" /></div>
+      <div class="w-72 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" :placeholder="$t('정산 기간 선택')" @change="onDateChange" /></div>
+      <div class="w-36 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" :placeholder="$t('전체 상태')" @change="search" /></div>
       <div class="w-52 shrink-0"><SearchSelect
         class="!w-52"
         v-model="filter.party_id"
@@ -18,7 +18,7 @@
         label-key="name"
         value-key="id"
         :placeholder="isVendor ? '전체 업체' : '전체 게임사'"
-        search-placeholder="이름 검색…"
+        :search-placeholder="$t('이름 검색…')"
         @change="search"
       /></div>
     </div>
@@ -27,9 +27,9 @@
       <table class="tbl">
         <thead>
           <tr>
-            <th>{{ isVendor ? "업체" : "게임사" }}</th><th>기간</th>
-            <th class="r">정산액</th><th class="r">{{ isVendor ? "회수액" : "지급액" }}</th><th class="r">잔액</th>
-            <th class="c">상태</th><th class="c w-act">관리</th>
+            <th>{{ isVendor ? "업체" : "게임사" }}</th><th>{{ $t("기간") }}</th>
+            <th class="r">{{ $t("정산액") }}</th><th class="r">{{ isVendor ? "회수액" : "지급액" }}</th><th class="r">{{ $t("잔액") }}</th>
+            <th class="c">{{ $t("상태") }}</th><th class="c w-act">{{ $t("관리") }}</th>
           </tr>
         </thead>
         <tbody>
@@ -44,8 +44,8 @@
             <td class="c">
               <template v-if="canEdit">
                 <button v-if="s.status !== 'DONE'" class="btn btn-xs btn-primary" @click="openSettle(s)">{{ isVendor ? "입금처리" : "지급처리" }}</button>
-                <button class="btn btn-xs" @click="openEdit(s)">수정</button>
-                <button class="btn btn-xs btn-danger" @click="remove(s)">삭제</button>
+                <button class="btn btn-xs" @click="openEdit(s)">{{ $t("수정") }}</button>
+                <button class="btn btn-xs btn-danger" @click="remove(s)">{{ $t("삭제") }}</button>
               </template>
               <span v-else class="muted xs">—</span>
             </td>
@@ -63,24 +63,24 @@
         <div class="grid">
           <label class="fld col2">
             <span class="form-label">{{ isVendor ? "업체" : "게임사" }}</span>
-            <SearchSelect v-model="form.party_id" :options="parties" label-key="name" value-key="id" placeholder="선택하세요" search-placeholder="이름 검색…" />
+            <SearchSelect v-model="form.party_id" :options="parties" label-key="name" value-key="id" :placeholder="$t('선택하세요')" :search-placeholder="$t('이름 검색…')" />
           </label>
           <label class="fld col2">
-            <span class="form-label">정산 월 <span class="hint">· 선택하면 1일~말일 자동</span></span>
+            <span class="form-label">{{ $t("정산 월") }} <span class="hint">{{ $t("· 선택하면 1일~말일 자동") }}</span></span>
             <input type="month" v-model="form.period_month" class="field" @change="applyMonth" />
           </label>
-          <BaseInput v-model="form.period_start" label="기간 시작" type="date" />
-          <BaseInput v-model="form.period_end" label="기간 종료" type="date" />
-          <BaseInput v-model="form.amount" label="정산 금액(원)" type="number" />
+          <BaseInput v-model="form.period_start" :label="$t('기간 시작')" type="date" />
+          <BaseInput v-model="form.period_end" :label="$t('기간 종료')" type="date" />
+          <BaseInput v-model="form.amount" :label="$t('정산 금액(원)')" type="number" />
           <label class="fld col2">
-            <span class="form-label">메모</span>
+            <span class="form-label">{{ $t("메모") }}</span>
             <textarea v-model="form.memo" class="field-auto" rows="2"></textarea>
           </label>
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
-          <button class="btn" @click="showForm = false">취소</button>
+          <button class="btn" @click="showForm = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>
@@ -95,13 +95,13 @@
         </p>
         <div class="grid">
           <BaseInput v-model="settleForm.amount" :label="`${isVendor ? '회수' : '지급'} 금액(원)`" type="number" />
-          <BaseInput v-model="settleForm.entry_date" label="처리 일자" type="date" />
+          <BaseInput v-model="settleForm.entry_date" :label="$t('처리 일자')" type="date" />
         </div>
         <p class="hint">처리 시 장부에 {{ isVendor ? "회수" : "지급" }} 거래가 자동 기록됩니다.</p>
         <p v-if="settleMsg" class="msg err">{{ settleMsg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="settling" @click="doSettle">{{ settling ? "처리 중…" : "처리" }}</button>
-          <button class="btn" @click="showSettle = false">취소</button>
+          <button class="btn" @click="showSettle = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>

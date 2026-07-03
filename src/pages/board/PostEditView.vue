@@ -5,15 +5,15 @@
     </header>
 
     <form class="card" @submit.prevent="submit">
-      <input v-model="form.title" class="title" placeholder="제목" />
-      <RichEditor v-model="form.content" :upload="!!board?.allow_upload" placeholder="내용을 입력하세요" />
+      <input v-model="form.title" class="title" :placeholder="$t('제목')" />
+      <RichEditor v-model="form.content" :upload="!!board?.allow_upload" :placeholder="$t('내용을 입력하세요')" />
 
       <div v-if="board?.allow_upload" class="uploads">
         <label class="ubtn">
-          <i class="fa-solid fa-paperclip"></i> 이미지·파일 첨부
+          <i class="fa-solid fa-paperclip"></i> {{ $t("이미지·파일 첨부") }}
           <input type="file" multiple hidden @change="onFiles" />
         </label>
-        <span v-if="uploading" class="uprog">업로드 중…</span>
+        <span v-if="uploading" class="uprog">{{ $t("업로드 중…") }}</span>
         <div v-if="form.attachments.length" class="ulist">
           <div v-for="(a, i) in form.attachments" :key="i" class="uitem">
             <img v-if="a.is_image" :src="mediaUrl(a.path)" class="uthumb" />
@@ -25,13 +25,13 @@
       </div>
 
       <label v-if="auth.user?.is_super" class="notice-toggle">
-        <input type="checkbox" v-model="form.is_notice" /> 공지로 고정 (관리자)
+        <input type="checkbox" v-model="form.is_notice" /> {{ $t("공지로 고정 (관리자)") }}
       </label>
 
       <p v-if="msg" class="msg err">{{ msg }}</p>
       <div class="acts">
         <button type="submit" class="btn btn-primary" :disabled="saving">{{ saving ? "저장 중…" : "등록" }}</button>
-        <router-link :to="`/board/${slug}`" class="btn">취소</router-link>
+        <router-link :to="`/board/${slug}`" class="btn">{{ $t("취소") }}</router-link>
       </div>
     </form>
   </div>

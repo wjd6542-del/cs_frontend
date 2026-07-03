@@ -1,21 +1,21 @@
 <template>
   <div class="reditor">
     <div class="rtoolbar">
-      <button type="button" @mousedown.prevent="cmd('bold')" title="굵게"><b>B</b></button>
-      <button type="button" @mousedown.prevent="cmd('italic')" title="기울임"><i>I</i></button>
-      <button type="button" @mousedown.prevent="cmd('underline')" title="밑줄"><u>U</u></button>
-      <button type="button" @mousedown.prevent="cmd('strikeThrough')" title="취소선"><s>S</s></button>
+      <button type="button" @mousedown.prevent="cmd('bold')" :title="$t('굵게')"><b>B</b></button>
+      <button type="button" @mousedown.prevent="cmd('italic')" :title="$t('기울임')"><i>I</i></button>
+      <button type="button" @mousedown.prevent="cmd('underline')" :title="$t('밑줄')"><u>U</u></button>
+      <button type="button" @mousedown.prevent="cmd('strikeThrough')" :title="$t('취소선')"><s>S</s></button>
       <span class="sep"></span>
-      <button type="button" @mousedown.prevent="cmd('formatBlock', 'H2')" title="제목">제목</button>
-      <button type="button" @mousedown.prevent="cmd('formatBlock', 'P')" title="본문">본문</button>
-      <button type="button" @mousedown.prevent="cmd('insertUnorderedList')" title="글머리 목록">• 목록</button>
-      <button type="button" @mousedown.prevent="cmd('insertOrderedList')" title="번호 목록">1. 목록</button>
-      <button type="button" @mousedown.prevent="cmd('formatBlock', 'BLOCKQUOTE')" title="인용">❝ 인용</button>
+      <button type="button" @mousedown.prevent="cmd('formatBlock', 'H2')" :title="$t('제목')">{{ $t("제목") }}</button>
+      <button type="button" @mousedown.prevent="cmd('formatBlock', 'P')" :title="$t('본문')">{{ $t("본문") }}</button>
+      <button type="button" @mousedown.prevent="cmd('insertUnorderedList')" :title="$t('글머리 목록')">{{ $t("• 목록") }}</button>
+      <button type="button" @mousedown.prevent="cmd('insertOrderedList')" :title="$t('번호 목록')">{{ $t("1. 목록") }}</button>
+      <button type="button" @mousedown.prevent="cmd('formatBlock', 'BLOCKQUOTE')" :title="$t('인용')">{{ $t("❝ 인용") }}</button>
       <span class="sep"></span>
-      <button type="button" @mousedown.prevent="addLink" title="링크"><i class="fa-solid fa-link"></i></button>
-      <button v-if="upload" type="button" @mousedown.prevent="pickImage" title="이미지"><i class="fa-solid fa-image"></i></button>
+      <button type="button" @mousedown.prevent="addLink" :title="$t('링크')"><i class="fa-solid fa-link"></i></button>
+      <button v-if="upload" type="button" @mousedown.prevent="pickImage" :title="$t('이미지')"><i class="fa-solid fa-image"></i></button>
       <div class="tblwrap" ref="tblWrap">
-        <button type="button" :class="{ act: tableMenu }" @mousedown.prevent="tableMenu = !tableMenu" title="표 삽입"><i class="fa-solid fa-table-cells"></i></button>
+        <button type="button" :class="{ act: tableMenu }" @mousedown.prevent="tableMenu = !tableMenu" :title="$t('표 삽입')"><i class="fa-solid fa-table-cells"></i></button>
         <div v-if="tableMenu" class="tablepick" @mousedown.prevent>
           <div class="tpgrid" @mouseleave="hoverR = 0; hoverC = 0">
             <div v-for="r in 8" :key="r" class="tprow">
@@ -26,7 +26,7 @@
           <div class="tplabel">{{ hoverR ? hoverR + " × " + hoverC : "표 크기 선택" }}</div>
         </div>
       </div>
-      <span v-if="uploading" class="uprog">업로드 중…</span>
+      <span v-if="uploading" class="uprog">{{ $t("업로드 중…") }}</span>
       <input ref="fileInput" type="file" accept="image/*" hidden @change="onImage" />
     </div>
     <div

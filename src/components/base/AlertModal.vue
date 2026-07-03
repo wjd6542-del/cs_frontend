@@ -45,14 +45,14 @@
             class="btn btn-xs"
             @click="emit('cancel')"
           >
-            취소
+            {{ $t("취소") }}
           </button>
           <button
             class="btn btn-xs text-white"
             :class="theme.okBtn"
             @click="emit('ok')"
           >
-            확인
+            {{ $t("확인") }}
           </button>
         </div>
       </div>

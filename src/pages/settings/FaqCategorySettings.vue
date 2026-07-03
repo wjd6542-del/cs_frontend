@@ -1,20 +1,20 @@
 <template>
   <div>
     <div class="head">
-      <h3 class="h">FAQ 분류 <span class="c">{{ rows.length }}</span></h3>
+      <h3 class="h">{{ $t("FAQ 분류") }} <span class="c">{{ rows.length }}</span></h3>
       <div class="addbar">
-        <input v-model="newName" class="field !w-48" placeholder="새 분류명" @keyup.enter="add" />
-        <button class="btn btn-primary" :disabled="!newName.trim() || saving" @click="add">+ 추가</button>
+        <input v-model="newName" class="field !w-48" :placeholder="$t('새 분류명')" @keyup.enter="add" />
+        <button class="btn btn-primary" :disabled="!newName.trim() || saving" @click="add">{{ $t("+ 추가") }}</button>
       </div>
     </div>
 
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>분류명</th><th class="c w-sort">정렬</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
+          <tr><th>{{ $t("분류명") }}</th><th class="c w-sort">{{ $t("정렬") }}</th><th class="c">{{ $t("상태") }}</th><th class="c w-act">{{ $t("관리") }}</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="4"><EmptyState icon="🏷️" title="분류가 없어요" desc="FAQ 분류를 추가해 보세요." hint="위에서 분류명을 입력!" compact /></td></tr>
+          <tr v-if="!rows.length"><td colspan="4"><EmptyState icon="🏷️" :title="$t('분류가 없어요')" :desc="$t('FAQ 분류를 추가해 보세요.')" :hint="$t('위에서 분류명을 입력!')" compact /></td></tr>
           <tr v-for="c in rows" :key="c.id">
             <td>
               <template v-if="editId === c.id">
@@ -26,13 +26,13 @@
             <td class="c"><span class="st" :class="c.is_active ? 'on' : 'off'">{{ c.is_active ? "사용" : "중지" }}</span></td>
             <td class="c">
               <template v-if="editId === c.id">
-                <button class="btn btn-xs btn-primary" @click="saveEdit(c)">저장</button>
-                <button class="btn btn-xs" @click="editId = null">취소</button>
+                <button class="btn btn-xs btn-primary" @click="saveEdit(c)">{{ $t("저장") }}</button>
+                <button class="btn btn-xs" @click="editId = null">{{ $t("취소") }}</button>
               </template>
               <template v-else>
-                <button class="btn btn-xs" @click="startEdit(c)">수정</button>
+                <button class="btn btn-xs" @click="startEdit(c)">{{ $t("수정") }}</button>
                 <button class="btn btn-xs" @click="toggleActive(c)">{{ c.is_active ? '중지' : '사용' }}</button>
-                <button class="btn btn-xs btn-danger" @click="remove(c)">삭제</button>
+                <button class="btn btn-xs btn-danger" @click="remove(c)">{{ $t("삭제") }}</button>
               </template>
             </td>
           </tr>

@@ -1,17 +1,17 @@
 <template>
   <div>
     <div class="head">
-      <h3 class="h">게임사 <span class="c">{{ total }}</span></h3>
+      <h3 class="h">{{ $t("게임사") }} <span class="c">{{ total }}</span></h3>
       <div class="tools">
-        <input v-model="q" class="field !w-48" placeholder="게임사·코드 검색" @keyup.enter="search" />
-        <button class="btn btn-primary" @click="openNew">+ 게임사 추가</button>
+        <input v-model="q" class="field !w-48" :placeholder="$t('게임사·코드 검색')" @keyup.enter="search" />
+        <button class="btn btn-primary" @click="openNew">{{ $t("+ 게임사 추가") }}</button>
       </div>
     </div>
 
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>게임사명</th><th class="r">요율</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
+          <tr><th>{{ $t("게임사명") }}</th><th class="r">{{ $t("요율") }}</th><th class="c">{{ $t("상태") }}</th><th class="c w-act">{{ $t("관리") }}</th></tr>
         </thead>
         <tbody>
           <tr v-if="!rows.length"><td colspan="4"><EmptyState variant="gameco" compact /></td></tr>
@@ -20,8 +20,8 @@
             <td class="r">{{ g.fee_rate != null ? g.fee_rate + "%" : "-" }}</td>
             <td class="c"><span class="st" :class="g.is_active ? 'on' : 'off'">{{ g.is_active ? "사용" : "중지" }}</span></td>
             <td class="c">
-              <button class="btn btn-xs" @click="openEdit(g)">수정</button>
-              <button class="btn btn-xs btn-danger" @click="remove(g)">삭제</button>
+              <button class="btn btn-xs" @click="openEdit(g)">{{ $t("수정") }}</button>
+              <button class="btn btn-xs btn-danger" @click="remove(g)">{{ $t("삭제") }}</button>
             </td>
           </tr>
         </tbody>
@@ -34,14 +34,14 @@
       <div class="panel">
         <h4 class="ph">{{ editing ? "게임사 수정" : "게임사 추가" }}</h4>
         <div class="grid">
-          <BaseInput v-model="form.name" label="게임사명" />
-          <BaseInput v-model="form.fee_rate" label="요율(%)" type="number" placeholder="예: 15" />
+          <BaseInput v-model="form.name" :label="$t('게임사명')" />
+          <BaseInput v-model="form.fee_rate" :label="$t('요율(%)')" type="number" :placeholder="$t('예: 15')" />
           <label class="fld col2">
-            <span class="form-label">메모</span>
+            <span class="form-label">{{ $t("메모") }}</span>
             <textarea v-model="form.memo" class="field-auto" rows="2"></textarea>
           </label>
           <label class="fld toggle">
-            <span class="form-label">상태</span>
+            <span class="form-label">{{ $t("상태") }}</span>
             <span class="sw" :class="{ on: form.is_active }" @click="form.is_active = !form.is_active"><span class="knob"></span></span>
             <span class="sh">{{ form.is_active ? "사용" : "중지" }}</span>
           </label>
@@ -49,7 +49,7 @@
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
-          <button class="btn" @click="showForm = false">취소</button>
+          <button class="btn" @click="showForm = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>

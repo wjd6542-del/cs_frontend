@@ -12,17 +12,17 @@
       </div>
 
       <div class="mid">
-        <h2 class="headline">고객센터<br />관리 시스템</h2>
-        <p class="lead">지급 · 회수 정산부터 업체 · 게임사 응대까지<br />하나의 콘솔에서.</p>
+        <h2 class="headline">{{ $t("고객센터") }}<br />{{ $t("관리 시스템") }}</h2>
+        <p class="lead">{{ $t("지급 · 회수 정산부터 업체 · 게임사 응대까지") }}<br />{{ $t("하나의 콘솔에서.") }}</p>
 
         <!-- HUD: 넷플로우 미니 -->
         <div class="hud">
           <div class="hud-row">
-            <span class="hud-lbl in">▲ 회수</span>
+            <span class="hud-lbl in">{{ $t("▲ 회수") }}</span>
             <span class="hud-bar"><i class="fill in" style="width:72%"></i></span>
           </div>
           <div class="hud-row">
-            <span class="hud-lbl out">▼ 지급</span>
+            <span class="hud-lbl out">{{ $t("▼ 지급") }}</span>
             <span class="hud-bar"><i class="fill out" style="width:48%"></i></span>
           </div>
         </div>
@@ -37,23 +37,23 @@
         <div class="m-brand"><span class="logo-mark sm">CS</span></div>
 
         <p class="eyebrow">SYSTEM LOGIN</p>
-        <h1 class="title">로그인</h1>
-        <p class="hint">관리자 계정으로 로그인하세요.</p>
+        <h1 class="title">{{ $t("로그인") }}</h1>
+        <p class="hint">{{ $t("관리자 계정으로 로그인하세요.") }}</p>
 
         <form class="form" @submit.prevent="onSubmit">
           <label class="fld">
-            <span class="lbl">아이디</span>
+            <span class="lbl">{{ $t("아이디") }}</span>
             <div class="inputwrap">
               <i class="fa-solid fa-user ico"></i>
-              <input v-model="username" autocomplete="username" placeholder="아이디를 입력하세요" @keyup.enter="onSubmit" />
+              <input v-model="username" autocomplete="username" :placeholder="$t('아이디를 입력하세요')" @keyup.enter="onSubmit" />
             </div>
           </label>
 
           <label class="fld">
-            <span class="lbl">비밀번호</span>
+            <span class="lbl">{{ $t("비밀번호") }}</span>
             <div class="inputwrap">
               <i class="fa-solid fa-lock ico"></i>
-              <input v-model="password" :type="show ? 'text' : 'password'" autocomplete="current-password" placeholder="비밀번호를 입력하세요" @keyup.enter="onSubmit" />
+              <input v-model="password" :type="show ? 'text' : 'password'" autocomplete="current-password" :placeholder="$t('비밀번호를 입력하세요')" @keyup.enter="onSubmit" />
               <button type="button" class="eye" tabindex="-1" @click="show = !show"><i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i></button>
             </div>
           </label>
@@ -61,12 +61,12 @@
           <p v-if="error" class="err" role="alert"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>
 
           <button class="enter" type="submit" :disabled="loading">
-            <span v-if="loading"><i class="fa-solid fa-spinner fa-spin"></i> 접속 중…</span>
-            <span v-else>▶ 접속</span>
+            <span v-if="loading"><i class="fa-solid fa-spinner fa-spin"></i> {{ $t("접속 중…") }}</span>
+            <span v-else>{{ $t("▶ 접속") }}</span>
           </button>
         </form>
 
-        <p class="foot">계정이 없으면 관리자에게 문의하세요.</p>
+        <p class="foot">{{ $t("계정이 없으면 관리자에게 문의하세요.") }}</p>
       </div>
     </section>
   </div>

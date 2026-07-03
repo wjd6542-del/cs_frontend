@@ -15,17 +15,17 @@
       <!-- 넷플로우 바 (회수 ▲ vs 지급 ▼) -->
       <div v-if="canMoney" class="flow">
         <div class="flow-row">
-          <span class="flow-lbl in">▲ 회수</span>
+          <span class="flow-lbl in">{{ $t("▲ 회수") }}</span>
           <div class="track"><i class="fill in" :style="{ width: barIn + '%' }"></i></div>
           <span class="flow-val in num">{{ won(totals.COLLECTION) }}</span>
         </div>
         <div class="flow-row">
-          <span class="flow-lbl out">▼ 지급</span>
+          <span class="flow-lbl out">{{ $t("▼ 지급") }}</span>
           <div class="track"><i class="fill out" :style="{ width: barOut + '%' }"></i></div>
           <span class="flow-val out num">{{ won(totals.PAYMENT) }}</span>
         </div>
         <div class="flow-net">
-          <span class="net-lbl">NET (회수−지급)</span>
+          <span class="net-lbl">{{ $t("NET (회수−지급)") }}</span>
           <strong class="net-val num" :class="net >= 0 ? 'pos' : 'neg'">{{ won(net) }}</strong>
         </div>
       </div>
@@ -35,19 +35,19 @@
     <div v-if="showStats" class="stats">
       <router-link v-if="canLedger" to="/ledger" class="stat">
         <span class="s-ic in"><i class="fa-solid fa-arrow-down-long"></i></span>
-        <div><span class="s-lbl">이번 달 회수</span><strong class="s-val in num">{{ won(totals.COLLECTION) }}</strong></div>
+        <div><span class="s-lbl">{{ $t("이번 달 회수") }}</span><strong class="s-val in num">{{ won(totals.COLLECTION) }}</strong></div>
       </router-link>
       <router-link v-if="canLedger" to="/ledger" class="stat">
         <span class="s-ic out"><i class="fa-solid fa-arrow-up-long"></i></span>
-        <div><span class="s-lbl">이번 달 지급</span><strong class="s-val out num">{{ won(totals.PAYMENT) }}</strong></div>
+        <div><span class="s-lbl">{{ $t("이번 달 지급") }}</span><strong class="s-val out num">{{ won(totals.PAYMENT) }}</strong></div>
       </router-link>
       <router-link v-if="canSettlement" to="/settlement/vendor" class="stat">
         <span class="s-ic warn"><i class="fa-solid fa-hourglass-half"></i></span>
-        <div><span class="s-lbl">미정산</span><strong class="s-val num">{{ pendingCount }}<em>건</em></strong></div>
+        <div><span class="s-lbl">{{ $t("미정산") }}</span><strong class="s-val num">{{ pendingCount }}<em>{{ $t("건") }}</em></strong></div>
       </router-link>
       <router-link v-if="canSupport" to="/support/vendor" class="stat">
         <span class="s-ic acc"><i class="fa-solid fa-headset"></i></span>
-        <div><span class="s-lbl">진행중 응대</span><strong class="s-val num">{{ openTickets }}<em>건</em></strong></div>
+        <div><span class="s-lbl">{{ $t("진행중 응대") }}</span><strong class="s-val num">{{ openTickets }}<em>{{ $t("건") }}</em></strong></div>
       </router-link>
     </div>
 
@@ -55,25 +55,25 @@
     <section v-if="canSettlement" class="chartcard pcard">
       <div class="ch-head">
         <h2 class="ch-ttl"><i class="fa-solid fa-chart-column"></i> {{ chart.year }}년 정산 처리</h2>
-        <span class="ch-sub">1월~이번 달 · 회수(업체) vs 지급(게임사)</span>
+        <span class="ch-sub">{{ $t("1월~이번 달 · 회수(업체) vs 지급(게임사)") }}</span>
       </div>
       <v-chart v-if="!chartEmpty" class="chart" :option="chartOption" autoresize />
-      <EmptyState v-else icon="📊" title="정산 처리 내역이 없어요" desc="정산을 처리하면 월별 그래프가 표시돼요." hint="정산 관리에서 처리" compact />
+      <EmptyState v-else icon="📊" :title="$t('정산 처리 내역이 없어요')" :desc="$t('정산을 처리하면 월별 그래프가 표시돼요.')" :hint="$t('정산 관리에서 처리')" compact />
     </section>
 
     <!-- CS 상황판 : 항목별 미해결(접수·처리중) 문의 최근 5건 -->
     <section v-if="canSupport" class="csboard pcard">
       <div class="cb-head">
-        <h2 class="cb-ttl"><i class="fa-solid fa-satellite-dish"></i> CS 상황판</h2>
-        <span class="cb-sub">항목별 미해결 문의 · 최근 5건</span>
+        <h2 class="cb-ttl"><i class="fa-solid fa-satellite-dish"></i> {{ $t("CS 상황판") }}</h2>
+        <span class="cb-sub">{{ $t("항목별 미해결 문의 · 최근 5건") }}</span>
       </div>
       <div class="cb-cols">
         <div v-for="p in CS_PARTIES" :key="p.key" class="cb-col">
           <div class="cbc-head">
             <span class="cbc-name"><i :class="p.icon"></i> {{ p.label }}</span>
             <div class="cbc-chips">
-              <span class="chip open">접수 <em>{{ progress[p.key].open }}</em></span>
-              <span class="chip prog">처리중 <em>{{ progress[p.key].prog }}</em></span>
+              <span class="chip open">{{ $t("접수") }} <em>{{ progress[p.key].open }}</em></span>
+              <span class="chip prog">{{ $t("처리중") }} <em>{{ progress[p.key].prog }}</em></span>
             </div>
           </div>
           <ul class="cbc-list">
@@ -83,10 +83,10 @@
                 <span class="ci-title">{{ t.title }}</span>
                 <span class="ci-meta">{{ t[p.nameField] || "미지정" }} · {{ fmt(t.created_at) }}</span>
               </div>
-              <i v-if="t.priority >= 2" class="ci-flag fa-solid fa-flag" :class="'pr-' + t.priority" title="우선순위 높음"></i>
+              <i v-if="t.priority >= 2" class="ci-flag fa-solid fa-flag" :class="'pr-' + t.priority" :title="$t('우선순위 높음')"></i>
             </li>
             <li v-if="!progress[p.key].rows.length" class="cbc-empty">
-              <EmptyState icon="✅" title="미해결 문의 없음" desc="새 문의가 오면 여기 떠요." hint="청정 상태" compact />
+              <EmptyState icon="✅" :title="$t('미해결 문의 없음')" :desc="$t('새 문의가 오면 여기 떠요.')" :hint="$t('청정 상태')" compact />
             </li>
           </ul>
           <router-link :to="p.to" class="cbc-more">{{ p.label }} 전체보기 ›</router-link>
@@ -98,31 +98,31 @@
     <div v-if="canBoard" class="cols">
       <section class="notice pcard">
         <div class="nhead">
-          <h2 class="nt"><i class="fa-solid fa-bullhorn"></i> 공지사항</h2>
-          <router-link v-if="noticeBoard" :to="`/board/${noticeBoard.slug}`" class="more">전체보기 ›</router-link>
+          <h2 class="nt"><i class="fa-solid fa-bullhorn"></i> {{ $t("공지사항") }}</h2>
+          <router-link v-if="noticeBoard" :to="`/board/${noticeBoard.slug}`" class="more">{{ $t("전체보기 ›") }}</router-link>
         </div>
         <ul class="nlist">
           <li v-for="p in notices" :key="p.id" class="nitem" @click="openPost(p.id)">
-            <span v-if="p.is_notice" class="pin">공지</span>
+            <span v-if="p.is_notice" class="pin">{{ $t("공지") }}</span>
             <span class="npt">{{ p.title }}</span>
             <span class="ndate num">{{ fmt(p.created_at) }}</span>
           </li>
-          <li v-if="!notices.length"><EmptyState icon="📭" title="공지가 없어요" desc="등록된 공지사항이 없어요." hint="관리자만 등록할 수 있어요" compact /></li>
+          <li v-if="!notices.length"><EmptyState icon="📭" :title="$t('공지가 없어요')" :desc="$t('등록된 공지사항이 없어요.')" :hint="$t('관리자만 등록할 수 있어요')" compact /></li>
         </ul>
       </section>
 
       <section class="notice pcard">
         <div class="nhead">
           <h2 class="nt"><i class="fa-solid fa-bell"></i> {{ alarmBoard?.name || "알림" }}</h2>
-          <router-link v-if="alarmBoard" :to="`/board/${alarmBoard.slug}`" class="more">전체보기 ›</router-link>
+          <router-link v-if="alarmBoard" :to="`/board/${alarmBoard.slug}`" class="more">{{ $t("전체보기 ›") }}</router-link>
         </div>
         <ul class="nlist">
           <li v-for="p in alarmPosts" :key="p.id" class="nitem" @click="openPost(p.id)">
-            <span v-if="p.is_notice" class="pin">공지</span>
+            <span v-if="p.is_notice" class="pin">{{ $t("공지") }}</span>
             <span class="npt">{{ p.title }}</span>
             <span class="ndate num">{{ fmt(p.created_at) }}</span>
           </li>
-          <li v-if="!alarmPosts.length"><EmptyState icon="🔔" title="알림이 없어요" desc="등록된 알림 글이 없어요." hint="게시판에서 작성해요" compact /></li>
+          <li v-if="!alarmPosts.length"><EmptyState icon="🔔" :title="$t('알림이 없어요')" :desc="$t('등록된 알림 글이 없어요.')" :hint="$t('게시판에서 작성해요')" compact /></li>
         </ul>
       </section>
     </div>
@@ -131,7 +131,7 @@
     <div v-if="modalPost" class="pmodal" @click.self="modalPost = null">
       <div class="pbox pcard">
         <button class="pclose" @click="modalPost = null"><i class="fa-solid fa-xmark"></i></button>
-        <p class="peyebrow">공지사항</p>
+        <p class="peyebrow">{{ $t("공지사항") }}</p>
         <h3 class="ptitle">{{ modalPost.title }}</h3>
         <div class="pmeta">
           <span>{{ modalPost.user?.name || modalPost.user?.username || "-" }}</span>
@@ -139,7 +139,7 @@
           <span class="dot">·</span><span>조회 {{ modalPost.view_count }}</span>
         </div>
         <div class="pcontent prose" v-html="modalPost.content"></div>
-        <router-link :to="`/post/${modalPost.id}`" class="pfull">게시판에서 열기 ›</router-link>
+        <router-link :to="`/post/${modalPost.id}`" class="pfull">{{ $t("게시판에서 열기 ›") }}</router-link>
       </div>
     </div>
 
@@ -160,17 +160,17 @@
         <TagChips v-if="csDetail.tags?.length" :tags="csDetail.tags" class="ro-tags" />
 
         <div class="ro-thread">
-          <div v-if="!csDetail.messages?.length"><EmptyState icon="✉️" title="등록된 대화가 없어요" desc="아직 남긴 메시지가 없어요." compact /></div>
+          <div v-if="!csDetail.messages?.length"><EmptyState icon="✉️" :title="$t('등록된 대화가 없어요')" :desc="$t('아직 남긴 메시지가 없어요.')" compact /></div>
           <div v-for="m in csDetail.messages" :key="m.id" class="ro-msg" :class="{ internal: m.is_internal }">
-            <div class="ro-mmeta"><span v-if="m.is_internal" class="ro-ib">내부</span>{{ fmt(m.created_at) }}</div>
+            <div class="ro-mmeta"><span v-if="m.is_internal" class="ro-ib">{{ $t("내부") }}</span>{{ fmt(m.created_at) }}</div>
             <div class="ro-mbody prose" v-html="m.content"></div>
           </div>
         </div>
 
         <div class="ro-foot">
-          <router-link v-if="canManageCs" :to="partyPath(csDetail.party)" class="btn btn-primary">응대 관리 페이지 ›</router-link>
-          <span v-else class="ro-note"><i class="fa-solid fa-lock"></i> 조회 권한 · 읽기 전용</span>
-          <button class="btn" @click="csDetail = null">닫기</button>
+          <router-link v-if="canManageCs" :to="partyPath(csDetail.party)" class="btn btn-primary">{{ $t("응대 관리 페이지 ›") }}</router-link>
+          <span v-else class="ro-note"><i class="fa-solid fa-lock"></i> {{ $t("조회 권한 · 읽기 전용") }}</span>
+          <button class="btn" @click="csDetail = null">{{ $t("닫기") }}</button>
         </div>
       </div>
     </div>

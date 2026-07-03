@@ -1,26 +1,26 @@
 <template>
   <div>
     <div class="head">
-      <h3 class="h">솔루션사 <span class="c">{{ total }}</span></h3>
+      <h3 class="h">{{ $t("솔루션사") }} <span class="c">{{ total }}</span></h3>
       <div class="tools">
-        <input v-model="q" class="field !w-48" placeholder="솔루션사·코드 검색" @keyup.enter="search" />
-        <button class="btn btn-primary" @click="openNew"><i class="fa-solid fa-plus"></i> 솔루션사 추가</button>
+        <input v-model="q" class="field !w-48" :placeholder="$t('솔루션사·코드 검색')" @keyup.enter="search" />
+        <button class="btn btn-primary" @click="openNew"><i class="fa-solid fa-plus"></i> {{ $t("솔루션사 추가") }}</button>
       </div>
     </div>
 
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>솔루션사명</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
+          <tr><th>{{ $t("솔루션사명") }}</th><th class="c">{{ $t("상태") }}</th><th class="c w-act">{{ $t("관리") }}</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="3"><EmptyState icon="🧩" title="솔루션사가 없어요" desc="솔루션 응대 대상 솔루션사를 등록해요." hint="＋ 솔루션사 추가" compact /></td></tr>
+          <tr v-if="!rows.length"><td colspan="3"><EmptyState icon="🧩" :title="$t('솔루션사가 없어요')" :desc="$t('솔루션 응대 대상 솔루션사를 등록해요.')" :hint="$t('＋ 솔루션사 추가')" compact /></td></tr>
           <tr v-for="s in rows" :key="s.id">
             <td class="nm">{{ s.name }}</td>
             <td class="c"><span class="st" :class="s.is_active ? 'on' : 'off'">{{ s.is_active ? "사용" : "중지" }}</span></td>
             <td class="c">
-              <button class="btn btn-xs" @click="openEdit(s)">수정</button>
-              <button class="btn btn-xs btn-danger" @click="remove(s)">삭제</button>
+              <button class="btn btn-xs" @click="openEdit(s)">{{ $t("수정") }}</button>
+              <button class="btn btn-xs btn-danger" @click="remove(s)">{{ $t("삭제") }}</button>
             </td>
           </tr>
         </tbody>
@@ -33,14 +33,14 @@
       <div class="panel">
         <h4 class="ph">{{ editing ? "솔루션사 수정" : "솔루션사 추가" }}</h4>
         <div class="grid">
-          <BaseInput v-model="form.name" label="솔루션사명" />
-          <BaseInput v-model="form.contact_email" label="이메일" />
+          <BaseInput v-model="form.name" :label="$t('솔루션사명')" />
+          <BaseInput v-model="form.contact_email" :label="$t('이메일')" />
           <label class="fld col2">
-            <span class="form-label">메모</span>
+            <span class="form-label">{{ $t("메모") }}</span>
             <textarea v-model="form.memo" class="field-auto" rows="2"></textarea>
           </label>
           <label class="fld toggle">
-            <span class="form-label">상태</span>
+            <span class="form-label">{{ $t("상태") }}</span>
             <span class="sw" :class="{ on: form.is_active }" @click="form.is_active = !form.is_active"><span class="knob"></span></span>
             <span class="sh">{{ form.is_active ? "사용" : "중지" }}</span>
           </label>
@@ -48,7 +48,7 @@
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
-          <button class="btn" @click="showForm = false">취소</button>
+          <button class="btn" @click="showForm = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>

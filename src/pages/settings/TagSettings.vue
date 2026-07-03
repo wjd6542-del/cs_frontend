@@ -1,23 +1,23 @@
 <template>
   <div>
     <div class="head">
-      <h3 class="h">태그 <span class="c">{{ rows.length }}</span></h3>
+      <h3 class="h">{{ $t("태그") }} <span class="c">{{ rows.length }}</span></h3>
       <div class="addbar">
-        <span class="swatch" :style="{ background: newColor }" @click="cycleColor" title="색상 변경"></span>
-        <input v-model="newName" class="field !w-44" placeholder="새 태그명" @keyup.enter="add" />
-        <button class="btn btn-primary" :disabled="!newName.trim() || saving" @click="add">+ 추가</button>
+        <span class="swatch" :style="{ background: newColor }" @click="cycleColor" :title="$t('색상 변경')"></span>
+        <input v-model="newName" class="field !w-44" :placeholder="$t('새 태그명')" @keyup.enter="add" />
+        <button class="btn btn-primary" :disabled="!newName.trim() || saving" @click="add">{{ $t("+ 추가") }}</button>
       </div>
     </div>
 
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th class="c w-sw">색</th><th>태그명</th><th class="c w-sort">정렬</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
+          <tr><th class="c w-sw">{{ $t("색") }}</th><th>{{ $t("태그명") }}</th><th class="c w-sort">{{ $t("정렬") }}</th><th class="c">{{ $t("상태") }}</th><th class="c w-act">{{ $t("관리") }}</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="5"><EmptyState icon="🏷️" title="태그가 없어요" desc="CS 응대·FAQ에 붙일 태그를 추가해 보세요." hint="위에서 태그명 입력!" compact /></td></tr>
+          <tr v-if="!rows.length"><td colspan="5"><EmptyState icon="🏷️" :title="$t('태그가 없어요')" :desc="$t('CS 응대·FAQ에 붙일 태그를 추가해 보세요.')" :hint="$t('위에서 태그명 입력!')" compact /></td></tr>
           <tr v-for="t in rows" :key="t.id">
-            <td class="c"><span class="swatch sm" :style="{ background: t.color }" @click="cycleRowColor(t)" title="색상 변경"></span></td>
+            <td class="c"><span class="swatch sm" :style="{ background: t.color }" @click="cycleRowColor(t)" :title="$t('색상 변경')"></span></td>
             <td>
               <template v-if="editId === t.id">
                 <input v-model="editName" class="field field-xs !w-44" @keyup.enter="saveEdit(t)" @keyup.esc="editId = null" />
@@ -28,13 +28,13 @@
             <td class="c"><span class="st" :class="t.is_active ? 'on' : 'off'">{{ t.is_active ? "사용" : "중지" }}</span></td>
             <td class="c">
               <template v-if="editId === t.id">
-                <button class="btn btn-xs btn-primary" @click="saveEdit(t)">저장</button>
-                <button class="btn btn-xs" @click="editId = null">취소</button>
+                <button class="btn btn-xs btn-primary" @click="saveEdit(t)">{{ $t("저장") }}</button>
+                <button class="btn btn-xs" @click="editId = null">{{ $t("취소") }}</button>
               </template>
               <template v-else>
-                <button class="btn btn-xs" @click="startEdit(t)">수정</button>
+                <button class="btn btn-xs" @click="startEdit(t)">{{ $t("수정") }}</button>
                 <button class="btn btn-xs" @click="toggleActive(t)">{{ t.is_active ? '중지' : '사용' }}</button>
-                <button class="btn btn-xs btn-danger" @click="remove(t)">삭제</button>
+                <button class="btn btn-xs btn-danger" @click="remove(t)">{{ $t("삭제") }}</button>
               </template>
             </td>
           </tr>

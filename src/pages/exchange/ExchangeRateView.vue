@@ -2,17 +2,17 @@
   <div class="page">
     <header class="phead">
       <div>
-        <h1 class="ttl">환율 정보</h1>
-        <p class="desc">기준 통화 <b>원(KRW)</b> · 매일 자동 수집 · 표기: 외화 1{{ '' }}단위 = 원</p>
+        <h1 class="ttl">{{ $t("환율 정보") }}</h1>
+        <p class="desc">{{ $t("기준 통화") }} <b>{{ $t("원(KRW)") }}</b> · 매일 자동 수집 · 표기: 외화 1{{ '' }}단위 = 원</p>
       </div>
       <div class="hbtns">
-        <button class="btn btn-primary" @click="openCalc"><i class="fa-solid fa-calculator"></i> 환율 계산기</button>
-        <button class="btn" @click="refresh"><i class="fa-solid fa-rotate-right"></i> 새로고침</button>
+        <button class="btn btn-primary" @click="openCalc"><i class="fa-solid fa-calculator"></i> {{ $t("환율 계산기") }}</button>
+        <button class="btn" @click="refresh"><i class="fa-solid fa-rotate-right"></i> {{ $t("새로고침") }}</button>
       </div>
     </header>
 
     <!-- 최신 환율 (법정통화) — 가로 자동 스크롤 · 마우스 올리면 멈춤 -->
-    <div class="secttl"><span class="dot fiat"></span> 법정통화 <em class="cnt">{{ FIAT.length }}</em></div>
+    <div class="secttl"><span class="dot fiat"></span> {{ $t("법정통화") }} <em class="cnt">{{ FIAT.length }}</em></div>
     <div class="marquee">
       <div class="track">
         <div v-for="(c, i) in fiatItems" :key="c.key + '-' + i" class="rcard pcard">
@@ -26,7 +26,7 @@
     </div>
 
     <!-- 코인 시세 (하단 분리) — 가로 자동 스크롤 · 마우스 올리면 멈춤 -->
-    <div class="secttl"><span class="dot coin"></span> 코인 시세 <em class="cnt">{{ COINS.length }}</em></div>
+    <div class="secttl"><span class="dot coin"></span> {{ $t("코인 시세") }} <em class="cnt">{{ COINS.length }}</em></div>
     <div class="marquee coinrow">
       <div class="track track-rev">
         <div v-for="(c, i) in coinItems" :key="c.key + '-' + i" class="rcard pcard coin">
@@ -41,17 +41,17 @@
     <p v-if="latest" class="asof num">기준일 {{ d(latest.date) }} · 통화 {{ FIAT.length }} · 코인 {{ COINS.length }}</p>
 
     <!-- 이력 : 법정통화 / 코인 분리 -->
-    <h3 class="sub"><span class="dot fiat"></span> 법정통화 이력</h3>
+    <h3 class="sub"><span class="dot fiat"></span> {{ $t("법정통화 이력") }}</h3>
     <div class="tablewrap">
       <table class="tbl">
         <thead>
           <tr>
-            <th class="num">일자</th>
+            <th class="num">{{ $t("일자") }}</th>
             <th v-for="c in FIAT" :key="c.key" class="r">{{ c.emoji }} {{ c.unit > 1 ? c.unit + c.symbol : c.symbol }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td :colspan="FIAT.length + 1"><EmptyState icon="💱" title="환율 이력이 없어요" desc="자동 수집을 기다리거나 새로고침 하세요." hint="매일 자동 수집" compact /></td></tr>
+          <tr v-if="!rows.length"><td :colspan="FIAT.length + 1"><EmptyState icon="💱" :title="$t('환율 이력이 없어요')" :desc="$t('자동 수집을 기다리거나 새로고침 하세요.')" :hint="$t('매일 자동 수집')" compact /></td></tr>
           <tr v-for="r in rows" :key="r.id">
             <td class="num dt">{{ d(r.date) }}</td>
             <td v-for="c in FIAT" :key="c.key" class="r num">{{ won(disp(r[c.key], c.unit)) }}</td>
@@ -60,17 +60,17 @@
       </table>
     </div>
 
-    <h3 class="sub"><span class="dot coin"></span> 코인 이력</h3>
+    <h3 class="sub"><span class="dot coin"></span> {{ $t("코인 이력") }}</h3>
     <div class="tablewrap">
       <table class="tbl">
         <thead>
           <tr>
-            <th class="num">일자</th>
+            <th class="num">{{ $t("일자") }}</th>
             <th v-for="c in COINS" :key="c.key" class="r">{{ c.emoji }} {{ c.symbol }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td :colspan="COINS.length + 1"><EmptyState icon="🪙" title="코인 이력이 없어요" desc="자동 수집을 기다리거나 새로고침 하세요." hint="매일 자동 수집" compact /></td></tr>
+          <tr v-if="!rows.length"><td :colspan="COINS.length + 1"><EmptyState icon="🪙" :title="$t('코인 이력이 없어요')" :desc="$t('자동 수집을 기다리거나 새로고침 하세요.')" :hint="$t('매일 자동 수집')" compact /></td></tr>
           <tr v-for="r in rows" :key="r.id">
             <td class="num dt">{{ d(r.date) }}</td>
             <td v-for="c in COINS" :key="c.key" class="r num">{{ won(disp(r[c.key], c.unit)) }}</td>
@@ -84,17 +84,17 @@
     <div v-if="calcOpen" class="drawer" @click.self="calcOpen = false">
       <div class="cmodal">
         <button class="vclose" @click="calcOpen = false"><i class="fa-solid fa-xmark"></i></button>
-        <h3 class="cttl"><i class="fa-solid fa-calculator"></i> 환율 계산기</h3>
-        <p class="csub">원화 기준 · 선택한 일자의 환율로 계산됩니다</p>
+        <h3 class="cttl"><i class="fa-solid fa-calculator"></i> {{ $t("환율 계산기") }}</h3>
+        <p class="csub">{{ $t("원화 기준 · 선택한 일자의 환율로 계산됩니다") }}</p>
 
         <div class="crow">
           <label class="cfld">
-            <span class="clbl">기준일</span>
-            <SearchSelect v-model="calc.dateId" :options="dateOptions" placeholder="일자 선택" search-placeholder="일자 검색…" />
+            <span class="clbl">{{ $t("기준일") }}</span>
+            <SearchSelect v-model="calc.dateId" :options="dateOptions" :placeholder="$t('일자 선택')" :search-placeholder="$t('일자 검색…')" />
           </label>
           <label class="cfld">
-            <span class="clbl">통화</span>
-            <SearchSelect v-model="calc.cur" :options="curOptions" placeholder="통화 선택" search-placeholder="통화 검색…" />
+            <span class="clbl">{{ $t("통화") }}</span>
+            <SearchSelect v-model="calc.cur" :options="curOptions" :placeholder="$t('통화 선택')" :search-placeholder="$t('통화 검색…')" />
           </label>
         </div>
 
@@ -112,7 +112,7 @@
 
         <!-- 결과 (하단, 크게) -->
         <div class="resultpanel">
-          <span class="rp-cap">변환 결과</span>
+          <span class="rp-cap">{{ $t("변환 결과") }}</span>
           <div class="rp-val num">{{ resultText }}</div>
           <div class="rp-eq num" v-if="result != null">{{ Number(calc.amount).toLocaleString('ko-KR') }} {{ calc.dir === 'toKrw' ? curSymbol : '원' }} = {{ resultText }}</div>
           <div class="rp-rate num" v-if="rate">💱 1 {{ curSymbol }} = {{ won(rate) }} · {{ dateLabel }} 기준</div>

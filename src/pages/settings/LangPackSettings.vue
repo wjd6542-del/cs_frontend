@@ -1,28 +1,28 @@
 <template>
   <div>
     <div class="head">
-      <h3 class="h">번역팩 <span class="c">{{ rows.length }}</span></h3>
+      <h3 class="h">{{ $t("번역팩") }} <span class="c">{{ rows.length }}</span></h3>
       <div class="tools">
-        <input v-model="q" class="field !w-48" placeholder="한국어 검색" />
-        <button class="btn" @click="addRow"><i class="fa-solid fa-plus"></i> 행 추가</button>
+        <input v-model="q" class="field !w-48" :placeholder="$t('한국어 검색')" />
+        <button class="btn" @click="addRow"><i class="fa-solid fa-plus"></i> {{ $t("행 추가") }}</button>
         <button class="btn btn-primary" :disabled="saving" @click="saveAll">{{ saving ? "저장 중…" : "전체 저장" }}</button>
       </div>
     </div>
 
-    <p class="hint">한국어(ko)를 <b>키</b>로 사용합니다. 화면의 <code>$t("한국어")</code> 가 현재 언어의 번역으로 치환돼요. 🌍 버튼으로 자동 번역(설정 시).</p>
+    <p class="hint">{{ $t("한국어(ko)를") }} <b>{{ $t("키") }}</b>{{ $t("로 사용합니다. 화면의") }} <code>$t("한국어")</code> {{ $t("가 현재 언어의 번역으로 치환돼요. 🌍 버튼으로 자동 번역(설정 시).") }}</p>
 
     <div class="tablewrap">
       <table class="tbl">
         <thead>
           <tr>
-            <th>🇰🇷 한국어(키)</th><th>🇺🇸 English</th><th>🇯🇵 日本語</th><th>🇨🇳 中文</th>
-            <th class="c w-act">번역</th><th class="c w-st">활성</th><th class="c w-del">삭제</th>
+            <th>{{ $t("🇰🇷 한국어(키)") }}</th><th>🇺🇸 English</th><th>🇯🇵 日本語</th><th>🇨🇳 中文</th>
+            <th class="c w-act">{{ $t("번역") }}</th><th class="c w-st">{{ $t("활성") }}</th><th class="c w-del">{{ $t("삭제") }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="!filtered.length"><td colspan="7"><EmptyState icon="🌐" title="번역팩이 없어요" desc="행을 추가해 다국어 문구를 등록해요." hint="＋ 행 추가" compact /></td></tr>
+          <tr v-if="!filtered.length"><td colspan="7"><EmptyState icon="🌐" :title="$t('번역팩이 없어요')" :desc="$t('행을 추가해 다국어 문구를 등록해요.')" :hint="$t('＋ 행 추가')" compact /></td></tr>
           <tr v-for="(r, i) in filtered" :key="r._k">
-            <td><input v-model="r.name.ko" class="cell" placeholder="한국어" /></td>
+            <td><input v-model="r.name.ko" class="cell" :placeholder="$t('한국어')" /></td>
             <td><input v-model="r.name.en" class="cell" placeholder="English" /></td>
             <td><input v-model="r.name.ja" class="cell" placeholder="日本語" /></td>
             <td><input v-model="r.name.zh" class="cell" placeholder="中文" /></td>
@@ -30,7 +30,7 @@
             <td class="c">
               <span class="sw" :class="{ on: r.is_active }" @click="r.is_active = !r.is_active"><span class="knob"></span></span>
             </td>
-            <td class="c"><button class="btn btn-xs btn-danger" @click="removeRow(r)">삭제</button></td>
+            <td class="c"><button class="btn btn-xs btn-danger" @click="removeRow(r)">{{ $t("삭제") }}</button></td>
           </tr>
         </tbody>
       </table>

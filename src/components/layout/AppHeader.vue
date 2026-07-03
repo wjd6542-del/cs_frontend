@@ -1,7 +1,7 @@
 <template>
   <header class="hdr">
     <div class="left">
-      <button class="ham" aria-label="메뉴" @click="emit('toggle')">
+      <button class="ham" :aria-label="$t('메뉴')" @click="emit('toggle')">
         <i class="fa-solid fa-bars"></i>
       </button>
       <h1 class="ttl">{{ title }}</h1>
@@ -10,18 +10,18 @@
     <div class="right">
       <!-- 알림 벨 -->
       <div ref="bellWrap" class="bell-wrap">
-        <button class="bell" :class="{ has: alerts.total > 0 }" title="알림" @click="toggleBell">
+        <button class="bell" :class="{ has: alerts.total > 0 }" :title="$t('알림')" @click="toggleBell">
           <i class="fa-solid fa-bell"></i>
           <span v-if="alerts.total > 0" class="badge">{{ alerts.total > 99 ? '99+' : alerts.total }}</span>
         </button>
 
         <div v-if="bellOpen" class="dropdown">
           <div class="dhead">
-            <span class="dt">알림 <b>{{ alerts.total }}</b></span>
-            <RouterLink to="/alerts" class="dall" @click="bellOpen = false">전체보기 ›</RouterLink>
+            <span class="dt">{{ $t("알림") }} <b>{{ alerts.total }}</b></span>
+            <RouterLink to="/alerts" class="dall" @click="bellOpen = false">{{ $t("전체보기 ›") }}</RouterLink>
           </div>
           <div class="dlist">
-            <div v-if="!alerts.rows.length" class="dnone">🔔 미해결 응대가 없어요!</div>
+            <div v-if="!alerts.rows.length" class="dnone">{{ $t("🔔 미해결 응대가 없어요!") }}</div>
             <button v-for="t in alerts.rows.slice(0, 8)" :key="t.id" class="drow" @click="openTicket(t)">
               <span class="dp" :class="t.party === 'VENDOR' ? 'v' : 'g'">{{ t.party === 'VENDOR' ? '업체' : '게임사' }}</span>
               <span class="dti">{{ t.title }}</span>
@@ -33,7 +33,7 @@
 
       <!-- 언어 스위처 -->
       <div ref="langWrap" class="lang-wrap">
-        <button class="lang-btn" :class="{ on: langOpen }" title="언어 / Language" @click="toggleLang">
+        <button class="lang-btn" :class="{ on: langOpen }" :title="$t('언어 / Language')" @click="toggleLang">
           <span class="lang-flag">{{ curLang.flag }}</span>
           <span class="lang-code">{{ curLang.value.toUpperCase() }}</span>
           <i class="fa-solid fa-chevron-down lang-chev" :class="{ up: langOpen }"></i>
@@ -65,8 +65,8 @@
               <div class="acc-id">@{{ auth.user?.username }} · {{ roleLabel }}</div>
             </div>
           </div>
-          <RouterLink to="/mypage" class="acc-item" @click="acctOpen = false"><i class="fa-solid fa-id-card"></i> 마이페이지</RouterLink>
-          <button class="acc-item danger" @click="onLogout"><i class="fa-solid fa-right-from-bracket"></i> 로그아웃</button>
+          <RouterLink to="/mypage" class="acc-item" @click="acctOpen = false"><i class="fa-solid fa-id-card"></i> {{ $t("마이페이지") }}</RouterLink>
+          <button class="acc-item danger" @click="onLogout"><i class="fa-solid fa-right-from-bracket"></i> {{ $t("로그아웃") }}</button>
         </div>
       </div>
     </div>

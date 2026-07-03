@@ -14,7 +14,7 @@
         >
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-location-dot text-blue-500"></i>
-            <h3 class="text-sm font-bold text-gray-800">우편번호 검색</h3>
+            <h3 class="text-sm font-bold text-gray-800">{{ $t("우편번호 검색") }}</h3>
           </div>
           <button
             type="button"
@@ -37,7 +37,7 @@
             <i
               class="fa-solid fa-spinner fa-spin text-2xl text-blue-500 mb-2"
             ></i>
-            <p class="text-xs text-gray-500">우편번호 검색 서비스를 불러오는 중</p>
+            <p class="text-xs text-gray-500">{{ $t("우편번호 검색 서비스를 불러오는 중") }}</p>
           </div>
 
           <!-- 에러 -->
@@ -49,8 +49,8 @@
               class="fa-solid fa-triangle-exclamation text-2xl text-red-400 mb-2"
             ></i>
             <p class="text-xs text-gray-600">
-              우편번호 서비스를 불러오지 못했습니다.<br />
-              잠시 후 다시 시도해주세요.
+              {{ $t("우편번호 서비스를 불러오지 못했습니다.") }}<br />
+              {{ $t("잠시 후 다시 시도해주세요.") }}
             </p>
           </div>
         </div>

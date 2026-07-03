@@ -2,14 +2,14 @@
   <div class="pdetail" v-if="post">
     <header class="phead">
       <router-link :to="`/board/${post.board?.slug}`" class="back"><i class="fa-solid fa-chevron-left"></i> {{ post.board?.name }}</router-link>
-      <h1 class="ttl"><span v-if="post.is_notice" class="pin">공지</span>{{ post.title }}</h1>
+      <h1 class="ttl"><span v-if="post.is_notice" class="pin">{{ $t("공지") }}</span>{{ post.title }}</h1>
       <div class="meta">
         <span class="au">{{ post.user?.name || post.user?.username || "-" }}</span>
         <span class="dot">·</span><span>{{ fmt(post.created_at) }}</span>
         <span class="dot">·</span><span>조회 {{ post.view_count }}</span>
         <div class="acts" v-if="canEdit">
-          <router-link :to="`/post/${post.id}/edit`" class="btn btn-xs">수정</router-link>
-          <button class="btn btn-xs btn-danger" @click="removePost">삭제</button>
+          <router-link :to="`/post/${post.id}/edit`" class="btn btn-xs">{{ $t("수정") }}</router-link>
+          <button class="btn btn-xs btn-danger" @click="removePost">{{ $t("삭제") }}</button>
         </div>
       </div>
     </header>
@@ -37,20 +37,20 @@
           <div class="cinfo">
             <span class="cau">{{ c.user?.name || c.user?.username || "-" }}</span>
             <span class="ctime">{{ fmt(c.created_at) }}</span>
-            <button v-if="canDeleteComment(c)" class="cdel" @click="removeComment(c.id)">삭제</button>
+            <button v-if="canDeleteComment(c)" class="cdel" @click="removeComment(c.id)">{{ $t("삭제") }}</button>
           </div>
           <p class="ctxt">{{ c.content }}</p>
         </li>
-        <li v-if="!post.comments.length" class="cempty">첫 댓글을 남겨보세요.</li>
+        <li v-if="!post.comments.length" class="cempty">{{ $t("첫 댓글을 남겨보세요.") }}</li>
       </ul>
       <div class="cwrite">
-        <textarea v-model="newComment" rows="2" placeholder="댓글을 입력하세요" @keydown.meta.enter="addComment"></textarea>
-        <button class="btn btn-primary csend" @click="addComment">등록</button>
+        <textarea v-model="newComment" rows="2" :placeholder="$t('댓글을 입력하세요')" @keydown.meta.enter="addComment"></textarea>
+        <button class="btn btn-primary csend" @click="addComment">{{ $t("등록") }}</button>
       </div>
     </section>
   </div>
   <div v-else-if="error" class="err">{{ error }}</div>
-  <div v-else class="loading">불러오는 중…</div>
+  <div v-else class="loading">{{ $t("불러오는 중…") }}</div>
 </template>
 
 <script setup lang="ts">

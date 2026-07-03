@@ -15,7 +15,7 @@
           type="button"
           @click="modal.closeModal()"
           class="absolute top-2.5 right-2.5 z-10 w-8 h-8 flex items-center justify-center rounded-[3px] border-2 border-[color:var(--line-hard)] bg-white text-[color:var(--ink)] shadow-[2px_2px_0_var(--line-hard)] hover:bg-[color:var(--surface-2)] transition"
-          aria-label="닫기"
+          :aria-label="$t('닫기')"
         >
           <i class="fa-solid fa-xmark text-base"></i>
         </button>

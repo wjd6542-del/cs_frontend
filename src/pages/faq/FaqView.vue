@@ -2,25 +2,25 @@
   <div class="page">
     <header class="phead">
       <div>
-        <h1 class="ttl">자주 하는 질문</h1>
+        <h1 class="ttl">{{ $t("자주 하는 질문") }}</h1>
       </div>
-      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">+ FAQ 추가</button>
+      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">{{ $t("+ FAQ 추가") }}</button>
     </header>
 
     <div class="faq-grid">
       <!-- 메인: 검색 + 목록 -->
       <div class="main">
         <div class="filterbar">
-          <input v-model="q" class="field !w-56" placeholder="질문·답변 검색" @keyup.enter="search" />
-          <div class="msbox"><MultiSelect v-model="cats" :options="catOptions" placeholder="분류(다중 선택)" search-placeholder="분류 검색…" @change="search" /></div>
-          <div class="msbox"><TagSelect v-model="ftags" placeholder="태그 필터" @change="search" /></div>
+          <input v-model="q" class="field !w-56" :placeholder="$t('질문·답변 검색')" @keyup.enter="search" />
+          <div class="msbox"><MultiSelect v-model="cats" :options="catOptions" :placeholder="$t('분류(다중 선택)')" :search-placeholder="$t('분류 검색…')" @change="search" /></div>
+          <div class="msbox"><TagSelect v-model="ftags" :placeholder="$t('태그 필터')" @change="search" /></div>
         </div>
 
         <div v-if="!rows.length" class="listcard"><EmptyState variant="faq" /></div>
         <ul v-else class="list">
           <li v-for="f in rows" :key="f.id" class="item" :class="{ pinned: f.is_pinned }">
             <div class="q" @click="toggle(f)">
-              <i v-if="f.is_pinned" class="fa-solid fa-thumbtack pin" title="상단 고정"></i>
+              <i v-if="f.is_pinned" class="fa-solid fa-thumbtack pin" :title="$t('상단 고정')"></i>
               <span class="cat" v-if="f.category">{{ f.category }}</span>
               <span class="qt">{{ f.question }}</span>
               <TagChips :tags="f.tags" />
@@ -29,16 +29,16 @@
             </div>
             <div v-if="open[f.id]" class="a">
               <div v-if="f.question_body" class="qbody">
-                <span class="blk">질문</span>
+                <span class="blk">{{ $t("질문") }}</span>
                 <div class="prose" v-html="f.question_body"></div>
               </div>
               <div class="ans">
-                <span class="blk ansblk">답변</span>
+                <span class="blk ansblk">{{ $t("답변") }}</span>
                 <div class="atext prose" v-html="f.answer"></div>
               </div>
               <div v-if="canEdit" class="itools">
-                <button class="btn btn-xs" @click="openEdit(f)">수정</button>
-                <button class="btn btn-xs btn-danger" @click="remove(f)">삭제</button>
+                <button class="btn btn-xs" @click="openEdit(f)">{{ $t("수정") }}</button>
+                <button class="btn btn-xs btn-danger" @click="remove(f)">{{ $t("삭제") }}</button>
               </div>
             </div>
           </li>
@@ -50,9 +50,9 @@
       <!-- 사이드: 인기 FAQ -->
       <aside class="aside">
         <div class="pcard pop">
-          <div class="pop-head"><i class="fa-solid fa-fire"></i> 많이 본 질문</div>
+          <div class="pop-head"><i class="fa-solid fa-fire"></i> {{ $t("많이 본 질문") }}</div>
           <ul class="pop-list">
-            <li v-if="!popular.length" class="pop-empty">아직 조회 이력이 없어요.</li>
+            <li v-if="!popular.length" class="pop-empty">{{ $t("아직 조회 이력이 없어요.") }}</li>
             <li v-for="(p, i) in popular" :key="p.id" class="pop-row" @click="openView(p.id)">
               <span class="rank" :class="'r' + (i + 1)">{{ i + 1 }}</span>
               <span class="pop-q">{{ p.question }}</span>
@@ -68,31 +68,31 @@
       <div class="panel">
         <h4 class="ph">{{ editing ? "FAQ 수정" : "FAQ 추가" }}</h4>
         <div class="fcol">
-          <BaseInput v-model="form.question" label="질문 제목" placeholder="한 줄 요약 제목" />
+          <BaseInput v-model="form.question" :label="$t('질문 제목')" :placeholder="$t('한 줄 요약 제목')" />
           <div class="frow">
             <div class="fld flex-1">
-              <span class="form-label">분류</span>
-              <SearchSelect v-model="form.category" :options="catOptions" placeholder="분류 선택 · 없으면 추가" search-placeholder="분류 검색 또는 새 분류명…" creatable @create="createCategory" />
+              <span class="form-label">{{ $t("분류") }}</span>
+              <SearchSelect v-model="form.category" :options="catOptions" :placeholder="$t('분류 선택 · 없으면 추가')" :search-placeholder="$t('분류 검색 또는 새 분류명…')" creatable @create="createCategory" />
             </div>
             <div class="fld toggle">
-              <span class="form-label">상단 고정</span>
+              <span class="form-label">{{ $t("상단 고정") }}</span>
               <span class="sw" :class="{ on: form.is_pinned }" @click="form.is_pinned = !form.is_pinned"><span class="knob"></span></span>
             </div>
           </div>
           <div class="fld">
-            <span class="form-label">태그</span>
+            <span class="form-label">{{ $t("태그") }}</span>
             <TagSelect v-model="form.tag_ids" />
           </div>
           <div class="fld">
-            <span class="form-label">답변</span>
-            <RichEditor v-model="form.answer" placeholder="답변 내용" />
+            <span class="form-label">{{ $t("답변") }}</span>
+            <RichEditor v-model="form.answer" :placeholder="$t('답변 내용')" />
           </div>
-          <BaseInput v-model="form.sort" label="정렬순서" type="number" />
+          <BaseInput v-model="form.sort" :label="$t('정렬순서')" type="number" />
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
-          <button class="btn" @click="showForm = false">취소</button>
+          <button class="btn" @click="showForm = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>
@@ -104,8 +104,8 @@
         <span class="cat" v-if="viewing.category">{{ viewing.category }}</span>
         <h3 class="vtitle">{{ viewing.question }}</h3>
         <TagChips :tags="viewing.tags" />
-        <div v-if="viewing.question_body" class="qbody"><span class="blk">질문</span><div class="prose" v-html="viewing.question_body"></div></div>
-        <div class="ans"><span class="blk ansblk">답변</span><div class="atext prose" v-html="viewing.answer"></div></div>
+        <div v-if="viewing.question_body" class="qbody"><span class="blk">{{ $t("질문") }}</span><div class="prose" v-html="viewing.question_body"></div></div>
+        <div class="ans"><span class="blk ansblk">{{ $t("답변") }}</span><div class="atext prose" v-html="viewing.answer"></div></div>
       </div>
     </div>
   </div>

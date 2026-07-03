@@ -26,7 +26,7 @@
           <input type="checkbox" :checked="isChecked(o[valueKey])" @change="toggleVal(o[valueKey])" />
           <span>{{ o[labelKey] }}</span>
         </label>
-        <div v-if="!filtered.length" class="none">결과 없음</div>
+        <div v-if="!filtered.length" class="none">{{ $t("결과 없음") }}</div>
       </div>
     </div>
   </div>

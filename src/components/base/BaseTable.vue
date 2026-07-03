@@ -65,7 +65,7 @@
               :colspan="columns.length + (selectable ? 1 : 0)"
               class="text-center py-8 text-[#9a9fbb]"
             >
-              데이터가 없습니다
+              {{ $t("데이터가 없습니다") }}
             </td>
           </tr>
 
@@ -136,7 +136,7 @@
               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <!-- page size -->
                 <div class="flex items-center gap-2 text-sm">
-                  <span class="whitespace-nowrap">페이지당</span>
+                  <span class="whitespace-nowrap">{{ $t("페이지당") }}</span>
                   <select
                     v-model.number="localPageSize"
                     @change="changePageSize"
@@ -160,28 +160,28 @@
                       :disabled="page === 1"
                       @click="changePage(1)"
                     >
-                      처음
+                      {{ $t("처음") }}
                     </button>
                     <button
                       class="px-2 py-1 border-r border-[#d9dbe9] bg-[#ffffff] hover:bg-[#d9dbe9] disabled:opacity-40"
                       :disabled="page === 1"
                       @click="changePage(page - 1)"
                     >
-                      이전
+                      {{ $t("이전") }}
                     </button>
                     <button
                       class="px-2 py-1 border-r border-[#d9dbe9] bg-[#ffffff] hover:bg-[#d9dbe9] disabled:opacity-40"
                       :disabled="page >= totalPages"
                       @click="changePage(page + 1)"
                     >
-                      다음
+                      {{ $t("다음") }}
                     </button>
                     <button
                       class="px-2 py-1 bg-[#ffffff] hover:bg-[#d9dbe9] disabled:opacity-40"
                       :disabled="page >= totalPages"
                       @click="changePage(totalPages)"
                     >
-                      마지막
+                      {{ $t("마지막") }}
                     </button>
                   </div>
 

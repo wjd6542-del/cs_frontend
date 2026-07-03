@@ -4,8 +4,8 @@
       <!-- 역할 목록 -->
       <div class="rolelist">
         <div class="rl-head">
-          <h3 class="h">역할</h3>
-          <button class="btn btn-primary btn-xs" @click="openNewRole"><i class="fa-solid fa-plus"></i> 역할</button>
+          <h3 class="h">{{ $t("역할") }}</h3>
+          <button class="btn btn-primary btn-xs" @click="openNewRole"><i class="fa-solid fa-plus"></i> {{ $t("역할") }}</button>
         </div>
         <ul class="rl">
           <li
@@ -16,7 +16,7 @@
             @click="select(r)"
           >
             <span class="rname">{{ r.name }}</span>
-            <span v-if="r.is_super" class="super">전체</span>
+            <span v-if="r.is_super" class="super">{{ $t("전체") }}</span>
           </li>
         </ul>
       </div>
@@ -26,13 +26,13 @@
         <template v-if="sel">
           <div class="p-head">
             <div>
-              <h3 class="h">{{ sel.name }} <span v-if="sel.is_super" class="super">슈퍼</span></h3>
+              <h3 class="h">{{ sel.name }} <span v-if="sel.is_super" class="super">{{ $t("슈퍼") }}</span></h3>
               <p class="pdesc">{{ sel.description || "권한을 선택해 저장하세요." }}</p>
             </div>
             <button v-if="!sel.is_super" class="btn btn-primary" :disabled="saving" @click="savePerms">{{ saving ? "저장 중…" : "권한 저장" }}</button>
           </div>
 
-          <p v-if="sel.is_super" class="supernote">슈퍼관리자는 모든 권한을 자동으로 가집니다.</p>
+          <p v-if="sel.is_super" class="supernote">{{ $t("슈퍼관리자는 모든 권한을 자동으로 가집니다.") }}</p>
           <div v-else class="groups">
             <div v-for="(perms, g) in grouped" :key="g" class="group">
               <div class="gtitle">{{ g }}</div>
@@ -44,20 +44,20 @@
             </div>
           </div>
         </template>
-        <div v-else class="empty">역할을 선택하세요.</div>
+        <div v-else class="empty">{{ $t("역할을 선택하세요.") }}</div>
       </div>
     </div>
 
     <!-- 새 역할 -->
     <div v-if="showRole" class="drawer" @click.self="showRole = false">
       <div class="panel">
-        <h4 class="ph">새 역할</h4>
-        <BaseInput v-model="newRole.name" label="역할 이름" placeholder="예: 편집위원" />
-        <div style="margin-top:0.8rem"><BaseInput v-model="newRole.description" label="설명" /></div>
+        <h4 class="ph">{{ $t("새 역할") }}</h4>
+        <BaseInput v-model="newRole.name" :label="$t('역할 이름')" :placeholder="$t('예: 편집위원')" />
+        <div style="margin-top:0.8rem"><BaseInput v-model="newRole.description" :label="$t('설명')" /></div>
         <p v-if="rmsg" class="msg err">{{ rmsg }}</p>
         <div class="acts">
-          <button class="btn btn-primary" @click="createRole">저장</button>
-          <button class="btn" @click="showRole = false">취소</button>
+          <button class="btn btn-primary" @click="createRole">{{ $t("저장") }}</button>
+          <button class="btn" @click="showRole = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>

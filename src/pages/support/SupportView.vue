@@ -31,15 +31,15 @@
               <span class="r-eye">{{ pmeta.label }}</span>
               <h3 class="r-name">
                 {{ selected ? selected.name : "전체 " + pmeta.label + " 응대" }}
-                <button v-if="selected" class="allbtn" @click="clearSelected"><i class="fa-solid fa-xmark"></i> 전체 보기</button>
+                <button v-if="selected" class="allbtn" @click="clearSelected"><i class="fa-solid fa-xmark"></i> {{ $t("전체 보기") }}</button>
               </h3>
             </div>
           </div>
           <div class="r-tools">
-            <div class="w-60 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" placeholder="등록일 기간" @change="onDateChange" /></div>
-            <div class="w-44"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
-            <div class="w-28 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" /></div>
-            <button v-if="canEdit && selected" class="btn btn-primary" @click="openNew">+ 등록</button>
+            <div class="w-60 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" :placeholder="$t('등록일 기간')" @change="onDateChange" /></div>
+            <div class="w-44"><TagSelect v-model="filterTags" :placeholder="$t('태그 필터')" @change="applyFilter" /></div>
+            <div class="w-28 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" :placeholder="$t('전체 상태')" @change="applyFilter" /></div>
+            <button v-if="canEdit && selected" class="btn btn-primary" @click="openNew">{{ $t("+ 등록") }}</button>
           </div>
         </div>
 
@@ -47,9 +47,9 @@
         <div v-if="canEdit && sel.length" class="bulkbar">
           <span class="bcount">✔ {{ sel.length }}건 선택</span>
           <span class="barrow">→</span>
-          <div class="w-28 shrink-0"><SearchSelect v-model="bulkVal" :options="STATUS_OPTS" placeholder="변경할 상태" /></div>
+          <div class="w-28 shrink-0"><SearchSelect v-model="bulkVal" :options="STATUS_OPTS" :placeholder="$t('변경할 상태')" /></div>
           <button class="btn btn-xs btn-primary" :disabled="!bulkVal || bulking" @click="applyBulk">{{ bulking ? "적용 중…" : "일괄 적용" }}</button>
-          <button class="btn btn-xs" @click="clearSel">선택 해제</button>
+          <button class="btn btn-xs" @click="clearSel">{{ $t("선택 해제") }}</button>
         </div>
 
         <div class="r-body">
@@ -57,9 +57,9 @@
             <thead>
               <tr>
                 <th v-if="canEdit" class="c cbx"><input type="checkbox" :checked="allChecked" @change="toggleAll" /></th>
-                <th class="c">상태</th><th>제목</th>
+                <th class="c">{{ $t("상태") }}</th><th>{{ $t("제목") }}</th>
                 <th v-if="!selected">{{ pmeta.label }}</th>
-                <th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th>
+                <th>{{ $t("분류") }}</th><th class="c">{{ $t("우선") }}</th><th class="c">{{ $t("댓글") }}</th><th class="muted">{{ $t("등록") }}</th>
               </tr>
             </thead>
             <tbody>
@@ -89,27 +89,27 @@
       <div class="panel">
         <h4 class="ph">응대 등록 · {{ selected?.name }}</h4>
         <div class="fcol">
-          <BaseInput v-model="form.title" label="제목" />
+          <BaseInput v-model="form.title" :label="$t('제목')" />
           <div class="frow">
-            <BaseInput class="flex-1" v-model="form.category" label="분류" placeholder="예: 정산문의, 오류신고" />
+            <BaseInput class="flex-1" v-model="form.category" :label="$t('분류')" :placeholder="$t('예: 정산문의, 오류신고')" />
             <div class="fld prio">
-              <span class="form-label">우선순위</span>
+              <span class="form-label">{{ $t("우선순위") }}</span>
               <SearchSelect v-model="form.priority" :options="PRIO_OPTS" />
             </div>
           </div>
           <div class="fld">
-            <span class="form-label">태그</span>
+            <span class="form-label">{{ $t("태그") }}</span>
             <TagSelect v-model="form.tag_ids" />
           </div>
           <div class="fld">
-            <span class="form-label">내용</span>
-            <RichEditor v-model="form.content" placeholder="최초 문의/응대 내용" />
+            <span class="form-label">{{ $t("내용") }}</span>
+            <RichEditor v-model="form.content" :placeholder="$t('최초 문의/응대 내용')" />
           </div>
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "등록" }}</button>
-          <button class="btn" @click="showForm = false">취소</button>
+          <button class="btn" @click="showForm = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>
@@ -127,32 +127,32 @@
         </div>
 
         <div class="dtags">
-          <span class="dtags-lbl">🏷️ 태그</span>
+          <span class="dtags-lbl">{{ $t("🏷️ 태그") }}</span>
           <div v-if="canEdit" class="dtags-sel"><TagSelect v-model="detailTags" @change="updateDetailTags" /></div>
           <TagChips v-else-if="detail.tags?.length" :tags="detail.tags" />
-          <span v-else class="dtags-none">태그 없음</span>
+          <span v-else class="dtags-none">{{ $t("태그 없음") }}</span>
         </div>
 
         <div class="thread">
-          <div v-if="!detail.messages.length"><EmptyState icon="✉️" title="아직 대화가 없어요" desc="첫 메시지를 남겨보세요." hint="아래에 입력!" compact /></div>
+          <div v-if="!detail.messages.length"><EmptyState icon="✉️" :title="$t('아직 대화가 없어요')" :desc="$t('첫 메시지를 남겨보세요.')" :hint="$t('아래에 입력!')" compact /></div>
           <div v-for="m in detail.messages" :key="m.id" class="msgrow" :class="{ internal: m.is_internal }">
-            <div class="mmeta"><span v-if="m.is_internal" class="ibadge">내부</span>{{ d(m.created_at, true) }}</div>
+            <div class="mmeta"><span v-if="m.is_internal" class="ibadge">{{ $t("내부") }}</span>{{ d(m.created_at, true) }}</div>
             <div class="mbody prose" v-html="m.content"></div>
           </div>
         </div>
 
         <div v-if="canEdit" class="reply">
-          <label class="chk"><input v-model="reply.is_internal" type="checkbox" /> 내부 메모</label>
-          <RichEditor v-model="reply.content" placeholder="답변/메모 입력" />
+          <label class="chk"><input v-model="reply.is_internal" type="checkbox" /> {{ $t("내부 메모") }}</label>
+          <RichEditor v-model="reply.content" :placeholder="$t('답변/메모 입력')" />
           <div class="acts">
-            <button class="btn btn-primary" :disabled="sending || !reply.content.trim()" @click="sendMessage">전송</button>
-            <button class="btn btn-danger" @click="removeTicket">삭제</button>
-            <button class="btn" @click="detail = null">닫기</button>
+            <button class="btn btn-primary" :disabled="sending || !reply.content.trim()" @click="sendMessage">{{ $t("전송") }}</button>
+            <button class="btn btn-danger" @click="removeTicket">{{ $t("삭제") }}</button>
+            <button class="btn" @click="detail = null">{{ $t("닫기") }}</button>
           </div>
         </div>
         <div v-else class="ro-foot">
-          <span class="ro-note"><i class="fa-solid fa-lock"></i> 조회 권한 · 읽기 전용</span>
-          <button class="btn" @click="detail = null">닫기</button>
+          <span class="ro-note"><i class="fa-solid fa-lock"></i> {{ $t("조회 권한 · 읽기 전용") }}</span>
+          <button class="btn" @click="detail = null">{{ $t("닫기") }}</button>
         </div>
       </div>
     </div>

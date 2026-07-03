@@ -12,7 +12,7 @@
     </div>
 
     <div v-if="open" class="panel">
-      <input ref="search" v-model="kw" class="tsearch" placeholder="태그 검색 또는 새 태그명…" @click.stop @keyup.enter="onEnter" />
+      <input ref="search" v-model="kw" class="tsearch" :placeholder="$t('태그 검색 또는 새 태그명…')" @click.stop @keyup.enter="onEnter" />
       <button v-if="tags.length" class="selall" @click.stop="toggleAll">
         <i class="fa-solid" :class="allSelected ? 'fa-square-check' : 'fa-square'"></i>
         {{ allSelected ? "전체 해제" : "전체 선택" }}
@@ -23,7 +23,7 @@
           <span class="dot" :style="{ background: t.color }"></span>
           <span class="onm">{{ t.name }}</span>
         </label>
-        <div v-if="!filtered.length && !canCreate" class="none">태그가 없어요</div>
+        <div v-if="!filtered.length && !canCreate" class="none">{{ $t("태그가 없어요") }}</div>
         <button v-if="canCreate" class="create" @click.stop="create">
           <i class="fa-solid fa-plus"></i> "<b>{{ kw.trim() }}</b>" 태그 만들기
         </button>

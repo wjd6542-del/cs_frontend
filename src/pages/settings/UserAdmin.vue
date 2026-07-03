@@ -1,23 +1,23 @@
 <template>
   <div class="uadmin">
     <div class="head">
-      <h3 class="h">계정 <span class="c">{{ users.length }}</span></h3>
-      <button class="btn btn-primary" @click="openNew"><i class="fa-solid fa-plus"></i> 계정 추가</button>
+      <h3 class="h">{{ $t("계정") }} <span class="c">{{ users.length }}</span></h3>
+      <button class="btn btn-primary" @click="openNew"><i class="fa-solid fa-plus"></i> {{ $t("계정 추가") }}</button>
     </div>
 
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>아이디</th><th>이름</th><th>역할</th><th class="c">상태</th><th class="c w-act">수정</th></tr>
+          <tr><th>{{ $t("아이디") }}</th><th>{{ $t("이름") }}</th><th>{{ $t("역할") }}</th><th class="c">{{ $t("상태") }}</th><th class="c w-act">{{ $t("수정") }}</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!users.length"><td colspan="5"><EmptyState icon="👤" title="계정이 없어요" desc="등록된 계정이 아직 없어요." hint="＋ 계정 추가로 시작해요" compact /></td></tr>
+          <tr v-if="!users.length"><td colspan="5"><EmptyState icon="👤" :title="$t('계정이 없어요')" :desc="$t('등록된 계정이 아직 없어요.')" :hint="$t('＋ 계정 추가로 시작해요')" compact /></td></tr>
           <tr v-for="u in users" :key="u.id">
             <td class="nm">{{ u.username }}</td>
             <td>{{ u.name }}</td>
             <td><span class="rolechip">{{ u.role_name || "-" }}</span></td>
             <td class="c"><span class="st" :class="u.is_active ? 'on' : 'off'">{{ u.is_active ? "활성" : "정지" }}</span></td>
-            <td class="c"><button class="btn btn-xs" @click="openEdit(u)">수정</button></td>
+            <td class="c"><button class="btn btn-xs" @click="openEdit(u)">{{ $t("수정") }}</button></td>
           </tr>
         </tbody>
       </table>
@@ -28,18 +28,18 @@
       <div class="panel">
         <h4 class="ph">{{ editing ? "계정 수정" : "계정 추가" }}</h4>
         <div class="grid">
-          <BaseInput v-model="form.username" label="아이디" :disabled="editing" placeholder="영문·숫자" />
-          <BaseInput v-model="form.name" label="이름" />
+          <BaseInput v-model="form.username" :label="$t('아이디')" :disabled="editing" :placeholder="$t('영문·숫자')" />
+          <BaseInput v-model="form.name" :label="$t('이름')" />
           <div class="fld">
-            <label class="lbl">역할</label>
-            <SearchSelect v-model="form.role_id" :options="roleOptions" placeholder="역할 선택" />
+            <label class="lbl">{{ $t("역할") }}</label>
+            <SearchSelect v-model="form.role_id" :options="roleOptions" :placeholder="$t('역할 선택')" />
           </div>
           <template v-if="!editing">
-            <BaseInput v-model="form.password" label="비밀번호" type="password" placeholder="영문+숫자 6자 이상" />
-            <BaseInput v-model="form.passwordConfirm" label="비밀번호 확인" type="password" />
+            <BaseInput v-model="form.password" :label="$t('비밀번호')" type="password" :placeholder="$t('영문+숫자 6자 이상')" />
+            <BaseInput v-model="form.passwordConfirm" :label="$t('비밀번호 확인')" type="password" />
           </template>
           <label class="fld toggle">
-            <span class="lbl">상태</span>
+            <span class="lbl">{{ $t("상태") }}</span>
             <span class="sw" :class="{ on: form.is_active }" @click="form.is_active = !form.is_active"><span class="knob"></span></span>
             <span class="sh">{{ form.is_active ? "활성" : "정지" }}</span>
           </label>
@@ -47,7 +47,7 @@
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
-          <button class="btn" @click="showForm = false">취소</button>
+          <button class="btn" @click="showForm = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>

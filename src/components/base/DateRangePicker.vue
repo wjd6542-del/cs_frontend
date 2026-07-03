@@ -18,7 +18,7 @@
           @click="setQuick('yesterday')"
         >
           <i class="fa-regular fa-clock text-gray-400 text-[10px]"></i>
-          어제
+          {{ $t("어제") }}
         </button>
 
         <button
@@ -26,7 +26,7 @@
           @click="setQuick('today')"
         >
           <i class="fa-regular fa-calendar-check text-blue-500 text-[10px]"></i>
-          오늘
+          {{ $t("오늘") }}
         </button>
 
         <button
@@ -34,7 +34,7 @@
           @click="setQuick('week')"
         >
           <i class="fa-solid fa-calendar-week text-green-500 text-[10px]"></i>
-          일주일
+          {{ $t("일주일") }}
         </button>
 
         <!-- ✅ 이번달 추가 -->
@@ -43,7 +43,7 @@
           @click="setQuick('month')"
         >
           <i class="fa-solid fa-calendar-days text-purple-500 text-[10px]"></i>
-          이번달
+          {{ $t("이번달") }}
         </button>
       </div>
     </div>

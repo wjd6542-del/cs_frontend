@@ -2,37 +2,37 @@
   <div class="page">
     <header class="phead">
       <div>
-        <h1 class="ttl">장부 관리</h1>
+        <h1 class="ttl">{{ $t("장부 관리") }}</h1>
       </div>
-      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">+ 거래 등록</button>
+      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">{{ $t("+ 거래 등록") }}</button>
     </header>
 
     <!-- 요약 -->
     <div class="cards">
       <div class="card pay">
-        <span class="lbl">지급 합계 (게임사)</span>
+        <span class="lbl">{{ $t("지급 합계 (게임사)") }}</span>
         <strong class="val">{{ won(totals.PAYMENT) }}</strong>
       </div>
       <div class="card col">
-        <span class="lbl">회수 합계 (업체)</span>
+        <span class="lbl">{{ $t("회수 합계 (업체)") }}</span>
         <strong class="val">{{ won(totals.COLLECTION) }}</strong>
       </div>
       <div class="card net">
-        <span class="lbl">차액 (회수 − 지급)</span>
+        <span class="lbl">{{ $t("차액 (회수 − 지급)") }}</span>
         <strong class="val" :class="net >= 0 ? 'pos' : 'neg'">{{ won(net) }}</strong>
       </div>
     </div>
 
     <!-- 필터 -->
     <div class="filterbar">
-      <div class="w-72 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" placeholder="거래 기간 선택" @change="onDateChange" /></div>
-      <div class="w-32 shrink-0"><SearchSelect v-model="filter.type" :options="TYPE_OPTS" placeholder="전체 구분" @change="search" /></div>
+      <div class="w-72 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" :placeholder="$t('거래 기간 선택')" @change="onDateChange" /></div>
+      <div class="w-32 shrink-0"><SearchSelect v-model="filter.type" :options="TYPE_OPTS" :placeholder="$t('전체 구분')" @change="search" /></div>
     </div>
 
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>일자</th><th class="c">구분</th><th>대상</th><th class="r">금액</th><th>메모</th><th class="c w-act">관리</th></tr>
+          <tr><th>{{ $t("일자") }}</th><th class="c">{{ $t("구분") }}</th><th>{{ $t("대상") }}</th><th class="r">{{ $t("금액") }}</th><th>{{ $t("메모") }}</th><th class="c w-act">{{ $t("관리") }}</th></tr>
         </thead>
         <tbody>
           <tr v-if="!rows.length"><td colspan="6"><EmptyState variant="ledger" compact /></td></tr>
@@ -44,10 +44,10 @@
             <td class="muted">{{ e.memo || "-" }}<span v-if="e.settlement_id" class="badge badge-indigo ml">정산#{{ e.settlement_id }}</span></td>
             <td class="c">
               <template v-if="canEdit && !e.settlement_id">
-                <button class="btn btn-xs" @click="openEdit(e)">수정</button>
-                <button class="btn btn-xs btn-danger" @click="remove(e)">삭제</button>
+                <button class="btn btn-xs" @click="openEdit(e)">{{ $t("수정") }}</button>
+                <button class="btn btn-xs btn-danger" @click="remove(e)">{{ $t("삭제") }}</button>
               </template>
-              <span v-else-if="e.settlement_id" class="muted xs">정산 파생</span>
+              <span v-else-if="e.settlement_id" class="muted xs">{{ $t("정산 파생") }}</span>
               <span v-else class="muted xs">—</span>
             </td>
           </tr>
@@ -62,24 +62,24 @@
         <h4 class="ph">{{ editing ? "거래 수정" : "거래 등록" }}</h4>
         <div class="grid">
           <label class="fld">
-            <span class="form-label">구분</span>
+            <span class="form-label">{{ $t("구분") }}</span>
             <SearchSelect v-model="form.type" :options="TYPE_FORM_OPTS" @change="onTypeChange" />
           </label>
           <label class="fld">
             <span class="form-label">{{ form.type === 'PAYMENT' ? '게임사' : '업체' }}</span>
-            <SearchSelect v-model="form.party_id" :options="partyOptions" label-key="name" value-key="id" placeholder="선택하세요" search-placeholder="이름 검색…" />
+            <SearchSelect v-model="form.party_id" :options="partyOptions" label-key="name" value-key="id" :placeholder="$t('선택하세요')" :search-placeholder="$t('이름 검색…')" />
           </label>
-          <BaseInput v-model="form.entry_date" label="일자" type="date" />
-          <BaseInput v-model="form.amount" label="금액(원)" type="number" />
+          <BaseInput v-model="form.entry_date" :label="$t('일자')" type="date" />
+          <BaseInput v-model="form.amount" :label="$t('금액(원)')" type="number" />
           <label class="fld col2">
-            <span class="form-label">메모</span>
+            <span class="form-label">{{ $t("메모") }}</span>
             <textarea v-model="form.memo" class="field-auto" rows="2"></textarea>
           </label>
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">
           <button class="btn btn-primary" :disabled="saving" @click="submit">{{ saving ? "저장 중…" : "저장" }}</button>
-          <button class="btn" @click="showForm = false">취소</button>
+          <button class="btn" @click="showForm = false">{{ $t("취소") }}</button>
         </div>
       </div>
     </div>

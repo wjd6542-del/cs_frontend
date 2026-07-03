@@ -2,25 +2,25 @@
   <div class="page">
     <header class="phead">
       <div>
-        <h1 class="ttl">미해결 응대 알림</h1>
-        <p class="desc">해결·종료되지 않은 응대(접수·처리중)를 모아 보여줍니다.</p>
+        <h1 class="ttl">{{ $t("미해결 응대 알림") }}</h1>
+        <p class="desc">{{ $t("해결·종료되지 않은 응대(접수·처리중)를 모아 보여줍니다.") }}</p>
       </div>
-      <button class="btn" @click="refresh"><i class="fa-solid fa-rotate-right"></i> 새로고침</button>
+      <button class="btn" @click="refresh"><i class="fa-solid fa-rotate-right"></i> {{ $t("새로고침") }}</button>
     </header>
 
     <!-- 요약 -->
     <div class="cards">
-      <div class="card"><span class="lbl">전체 미해결</span><strong class="val num">{{ store.total }}건</strong></div>
-      <router-link to="/support/vendor" class="card link"><span class="lbl">🏪 업체 응대</span><strong class="val num">{{ store.counts.VENDOR }}건</strong></router-link>
-      <router-link to="/support/gameco" class="card link"><span class="lbl">🎮 게임사 응대</span><strong class="val num">{{ store.counts.GAME_COMPANY }}건</strong></router-link>
-      <router-link to="/support/solution" class="card link"><span class="lbl">🧩 솔루션 응대</span><strong class="val num">{{ store.counts.SOLUTION }}건</strong></router-link>
+      <div class="card"><span class="lbl">{{ $t("전체 미해결") }}</span><strong class="val num">{{ store.total }}건</strong></div>
+      <router-link to="/support/vendor" class="card link"><span class="lbl">{{ $t("🏪 업체 응대") }}</span><strong class="val num">{{ store.counts.VENDOR }}건</strong></router-link>
+      <router-link to="/support/gameco" class="card link"><span class="lbl">{{ $t("🎮 게임사 응대") }}</span><strong class="val num">{{ store.counts.GAME_COMPANY }}건</strong></router-link>
+      <router-link to="/support/solution" class="card link"><span class="lbl">{{ $t("🧩 솔루션 응대") }}</span><strong class="val num">{{ store.counts.SOLUTION }}건</strong></router-link>
     </div>
 
-    <div v-if="!store.rows.length" class="listcard"><EmptyState icon="🔔" title="알림이 없어요!" desc="처리할 미해결 응대가 없어요." hint="모두 해결됨 ✨" /></div>
+    <div v-if="!store.rows.length" class="listcard"><EmptyState icon="🔔" :title="$t('알림이 없어요!')" :desc="$t('처리할 미해결 응대가 없어요.')" :hint="$t('모두 해결됨 ✨')" /></div>
     <div v-else class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th class="c">구분</th><th class="c">상태</th><th class="c">우선</th><th>대상</th><th>제목</th><th class="muted">등록</th><th class="c w-act">이동</th></tr>
+          <tr><th class="c">{{ $t("구분") }}</th><th class="c">{{ $t("상태") }}</th><th class="c">{{ $t("우선") }}</th><th>{{ $t("대상") }}</th><th>{{ $t("제목") }}</th><th class="muted">{{ $t("등록") }}</th><th class="c w-act">{{ $t("이동") }}</th></tr>
         </thead>
         <tbody>
           <tr v-for="t in store.rows" :key="t.id" class="row" @click="go(t)">
@@ -30,7 +30,7 @@
             <td class="nm">{{ t.vendor_name || t.game_company_name || t.solution_company_name || '-' }}</td>
             <td class="ti">{{ t.title }}<span v-if="t.message_count" class="cc">[{{ t.message_count }}]</span></td>
             <td class="muted xs num">{{ d(t.created_at) }}</td>
-            <td class="c"><button class="btn btn-xs btn-primary" @click.stop="go(t)">바로가기 ›</button></td>
+            <td class="c"><button class="btn btn-xs btn-primary" @click.stop="go(t)">{{ $t("바로가기 ›") }}</button></td>
           </tr>
         </tbody>
       </table>

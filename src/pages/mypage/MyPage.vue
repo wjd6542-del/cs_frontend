@@ -1,7 +1,7 @@
 <template>
   <div class="mypage">
     <header class="phead">
-      <h1 class="ttl">마이페이지</h1>
+      <h1 class="ttl">{{ $t("마이페이지") }}</h1>
     </header>
 
     <div class="grid">
@@ -17,34 +17,34 @@
             </div>
           </div>
           <dl class="pdl">
-            <dt>아이디</dt><dd>{{ auth.user?.username }}</dd>
-            <dt>이름</dt><dd>{{ auth.user?.name || "-" }}</dd>
-            <dt>이메일</dt><dd>{{ auth.user?.email || "-" }}</dd>
+            <dt>{{ $t("아이디") }}</dt><dd>{{ auth.user?.username }}</dd>
+            <dt>{{ $t("이름") }}</dt><dd>{{ auth.user?.name || "-" }}</dd>
+            <dt>{{ $t("이메일") }}</dt><dd>{{ auth.user?.email || "-" }}</dd>
           </dl>
         </section>
 
         <section class="pcard perms">
-          <h2 class="ch"><i class="fa-solid fa-user-shield"></i> 내 권한</h2>
-          <div v-if="auth.user?.is_super" class="superbadge">👑 전체 권한 (슈퍼관리자)</div>
+          <h2 class="ch"><i class="fa-solid fa-user-shield"></i> {{ $t("내 권한") }}</h2>
+          <div v-if="auth.user?.is_super" class="superbadge">{{ $t("👑 전체 권한 (슈퍼관리자)") }}</div>
           <div v-else-if="auth.user?.permissions?.length" class="chips">
             <span v-for="p in auth.user.permissions" :key="p" class="pchip">{{ p }}</span>
           </div>
-          <div v-else class="noperm">부여된 권한이 없어요. 관리자에게 문의하세요.</div>
+          <div v-else class="noperm">{{ $t("부여된 권한이 없어요. 관리자에게 문의하세요.") }}</div>
         </section>
       </div>
 
       <!-- 우: 비밀번호 변경 -->
       <section class="pcard">
-        <h2 class="ch"><i class="fa-solid fa-key"></i> 비밀번호 변경</h2>
+        <h2 class="ch"><i class="fa-solid fa-key"></i> {{ $t("비밀번호 변경") }}</h2>
         <form class="pwform" @submit.prevent="changePw">
-          <label class="fld"><span class="lbl">현재 비밀번호</span>
-            <input v-model="pw.old_password" type="password" autocomplete="current-password" placeholder="현재 비밀번호" />
+          <label class="fld"><span class="lbl">{{ $t("현재 비밀번호") }}</span>
+            <input v-model="pw.old_password" type="password" autocomplete="current-password" :placeholder="$t('현재 비밀번호')" />
           </label>
-          <label class="fld"><span class="lbl">새 비밀번호</span>
-            <input v-model="pw.new_password" type="password" autocomplete="new-password" placeholder="영문+숫자 6자 이상" />
+          <label class="fld"><span class="lbl">{{ $t("새 비밀번호") }}</span>
+            <input v-model="pw.new_password" type="password" autocomplete="new-password" :placeholder="$t('영문+숫자 6자 이상')" />
           </label>
-          <label class="fld"><span class="lbl">새 비밀번호 확인</span>
-            <input v-model="pw.new_confirm_password" type="password" autocomplete="new-password" placeholder="새 비밀번호 재입력" />
+          <label class="fld"><span class="lbl">{{ $t("새 비밀번호 확인") }}</span>
+            <input v-model="pw.new_confirm_password" type="password" autocomplete="new-password" :placeholder="$t('새 비밀번호 재입력')" />
           </label>
           <p v-if="msg" class="msg" :class="msgErr ? 'err' : 'ok'"><i class="fa-solid" :class="msgErr ? 'fa-circle-exclamation' : 'fa-circle-check'"></i> {{ msg }}</p>
           <button class="btn btn-primary save" type="submit" :disabled="saving">{{ saving ? "변경 중…" : "비밀번호 변경" }}</button>
