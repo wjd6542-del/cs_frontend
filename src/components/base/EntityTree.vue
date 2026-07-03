@@ -25,12 +25,19 @@
         v-for="row in flat"
         :key="row.node.id"
         class="vt-row"
-        :class="{ on: row.node.id === selectedId, dim: !row.node.is_active, dragover: dragOverId === row.node.id, dragging: dragId === row.node.id }"
+        :class="{
+          on: row.node.id === selectedId,
+          dim: !row.node.is_active,
+          dragging: dragId === row.node.id,
+          'dz-before': dragOverId === row.node.id && dropPos === 'before',
+          'dz-after': dragOverId === row.node.id && dropPos === 'after',
+          'dz-inside': dragOverId === row.node.id && dropPos === 'inside',
+        }"
         :style="{ paddingLeft: 0.4 + row.depth * 0.9 + 'rem' }"
         :draggable="editId !== row.node.id"
         @click="select(row.node)"
         @dragstart="onDragStart(row.node, $event)"
-        @dragover.prevent="onDragOver(row.node)"
+        @dragover.prevent="onDragOver(row.node, $event)"
         @dragleave="onDragLeave(row.node)"
         @drop.stop="onDrop(row.node)"
         @dragend="reset"
@@ -90,6 +97,7 @@ const editName = ref("");
 const dragId = ref(null);
 const dragOverId = ref(null);
 const dragOverRoot = ref(false);
+const dropPos = ref("inside"); // before | after | inside
 
 function isCollapsed(id) { return !!collapsed[id]; }
 function toggle(id) { collapsed[id] = !collapsed[id]; }
@@ -190,9 +198,25 @@ function onDragStart(node, e) {
   dragId.value = node.id;
   if (e?.dataTransfer) { e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", String(node.id)); } catch (_) {} }
 }
-function onDragOver(node) { if (dragId.value && dragId.value !== node.id) dragOverId.value = node.id; }
+function onDragOver(node, e) {
+  if (!dragId.value || dragId.value === node.id) return;
+  dragOverId.value = node.id;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const y = e.clientY - rect.top;
+  dropPos.value = y < rect.height * 0.28 ? "before" : y > rect.height * 0.72 ? "after" : "inside";
+}
 function onDragLeave(node) { if (dragOverId.value === node.id) dragOverId.value = null; }
 function reset() { dragId.value = null; dragOverId.value = null; dragOverRoot.value = false; }
+
+// 노드의 형제 목록·인덱스·부모 찾기
+function findContext(id, nodes = roots.value, parent = null) {
+  for (let i = 0; i < nodes.length; i++) {
+    if (nodes[i].id === id) return { siblings: nodes, index: i, parentId: parent?.id ?? null };
+    const r = findContext(id, nodes[i].children || [], nodes[i]);
+    if (r) return r;
+  }
+  return null;
+}
 
 async function move(id, parentId) {
   try {
@@ -203,11 +227,27 @@ async function move(id, parentId) {
   } catch (e) { toast.error(e?.message || "이동 실패"); }
   finally { reset(); }
 }
+async function reorderMove(id, parentId, beforeId) {
+  try {
+    await props.api.reorder({ id, parent_id: parentId, before_id: beforeId });
+    await reload();
+    emit("change");
+    toast.success("순서가 변경되었습니다.");
+  } catch (e) { toast.error(e?.message || "순서 변경 실패"); }
+  finally { reset(); }
+}
 function onDrop(target) {
   const id = dragId.value;
+  const pos = dropPos.value;
   if (!id || id === target.id) return reset();
   if (descendantsOf(id).has(target.id)) { toast.error("자기 하위로는 이동할 수 없습니다."); return reset(); }
-  move(id, target.id);
+  if (pos === "inside") return move(id, target.id); // 하위로 (부모 변경)
+  // 형제 순서 변경
+  const ctx = findContext(target.id);
+  const parentId = ctx?.parentId ?? null;
+  const beforeId = pos === "before" ? target.id : (ctx?.siblings[ctx.index + 1]?.id ?? null);
+  if (beforeId === id) return reset();
+  reorderMove(id, parentId, beforeId);
 }
 function dropRoot() {
   const id = dragId.value;
@@ -232,7 +272,9 @@ onMounted(reload);
 .vt-row.on { background: #ede9ff; box-shadow: inset 0 0 0 2px var(--seal); }
 .vt-row.dim .nm { color: var(--ink-faint); text-decoration: line-through; }
 .vt-row.dragging { opacity: 0.45; }
-.vt-row.dragover { background: #e0d9ff; box-shadow: inset 0 0 0 2px var(--seal); }
+.vt-row.dz-inside { background: #e0d9ff; box-shadow: inset 0 0 0 2px var(--seal); }
+.vt-row.dz-before { box-shadow: inset 0 3px 0 var(--seal); }
+.vt-row.dz-after { box-shadow: inset 0 -3px 0 var(--seal); }
 .rootdrop { margin: 0.2rem; padding: 0.5rem; text-align: center; font-family: var(--font-pixel); font-size: 0.66rem; color: var(--seal-deep); background: var(--surface-2); border: 2px dashed var(--seal); border-radius: 3px; }
 .rootdrop.over { background: #e0d9ff; }
 .cnt { flex-shrink: 0; min-width: 18px; height: 18px; padding: 0 4px; display: grid; place-items: center; font-family: var(--font-pixel); font-size: 0.6rem; color: #fff; border: 1px solid var(--line-hard); border-radius: 3px; cursor: help; }

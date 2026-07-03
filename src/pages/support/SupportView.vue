@@ -83,18 +83,20 @@
     <div v-if="showForm" class="drawer" @click.self="showForm = false">
       <div class="panel">
         <h4 class="ph">응대 등록 · {{ selected?.name }}</h4>
-        <div class="grid">
-          <BaseInput v-model="form.title" label="제목" class="col2" />
-          <BaseInput v-model="form.category" label="분류" placeholder="예: 정산문의, 오류신고" />
-          <div class="fld">
-            <span class="form-label">우선순위</span>
-            <SearchSelect v-model="form.priority" :options="PRIO_OPTS" />
+        <div class="fcol">
+          <BaseInput v-model="form.title" label="제목" />
+          <div class="frow">
+            <BaseInput class="flex-1" v-model="form.category" label="분류" placeholder="예: 정산문의, 오류신고" />
+            <div class="fld prio">
+              <span class="form-label">우선순위</span>
+              <SearchSelect v-model="form.priority" :options="PRIO_OPTS" />
+            </div>
           </div>
-          <div class="fld col2">
+          <div class="fld">
             <span class="form-label">태그</span>
             <TagSelect v-model="form.tag_ids" />
           </div>
-          <div class="fld col2">
+          <div class="fld">
             <span class="form-label">내용</span>
             <RichEditor v-model="form.content" placeholder="최초 문의/응대 내용" />
           </div>
@@ -395,8 +397,13 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .panel { width: 520px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
 .panel.lg { width: 640px; }
 .ph { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); }
+.fcol { display: flex; flex-direction: column; gap: 0.9rem; }
+.frow { display: flex; gap: 0.9rem; align-items: flex-start; }
+.frow .flex-1 { flex: 1; min-width: 0; }
+.prio { width: 150px; flex-shrink: 0; }
+.fld { display: block; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
-.fld { display: block; } .col2 { grid-column: 1 / -1; }
+.col2 { grid-column: 1 / -1; }
 .dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .dsub { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.2rem; }
 .dtags { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.9rem; }

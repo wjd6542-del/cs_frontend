@@ -263,9 +263,9 @@ onMounted(async () => { await Promise.all([reload(), loadCats(), loadPopular()])
 .panel { width: 600px; max-width: 100%; max-height: 88vh; overflow-y: auto; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.4rem; box-shadow: var(--shadow-lg); }
 .ph { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); margin-bottom: 1rem; }
 .fcol { display: flex; flex-direction: column; gap: 0.9rem; }
-.frow { display: flex; gap: 0.9rem; align-items: flex-end; }
-.fld { display: block; } .flex-1 { flex: 1; }
-.toggle { display: flex; flex-direction: column; gap: 0.4rem; }
+.frow { display: flex; gap: 0.9rem; align-items: flex-start; }
+.fld { display: block; } .flex-1 { flex: 1; min-width: 0; }
+.toggle { display: flex; flex-direction: column; gap: 0.4rem; flex-shrink: 0; }
 .sw { width: 44px; height: 24px; border-radius: 3px; background: #cbd5e1; position: relative; cursor: pointer; transition: background 0.18s; border: 2px solid var(--line-hard); }
 .sw.on { background: var(--seal); }
 .sw .knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 2px; background: #fff; transition: transform 0.18s; }

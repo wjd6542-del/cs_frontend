@@ -5,6 +5,7 @@ import api from "@/api/api";
 export const gameCompanyApi = {
   list: (body = {}) => api.post("/gameCompany/list", body).then((r) => r.data),
   tree: () => api.post("/gameCompany/tree", {}).then((r) => r.data),
+  reorder: (body) => api.post("/gameCompany/reorder", body).then((r) => r.data),
   options: () => api.post("/gameCompany/options", {}).then((r) => r.data),
   get: (id) => api.post("/gameCompany/get", { id }).then((r) => r.data),
   save: (body) => api.post("/gameCompany/save", body).then((r) => r.data),
@@ -15,6 +16,7 @@ export const gameCompanyApi = {
 export const vendorApi = {
   list: (body = {}) => api.post("/vendor/list", body).then((r) => r.data),
   tree: () => api.post("/vendor/tree", {}).then((r) => r.data),
+  reorder: (body) => api.post("/vendor/reorder", body).then((r) => r.data),
   options: () => api.post("/vendor/options", {}).then((r) => r.data),
   get: (id) => api.post("/vendor/get", { id }).then((r) => r.data),
   save: (body) => api.post("/vendor/save", body).then((r) => r.data),
