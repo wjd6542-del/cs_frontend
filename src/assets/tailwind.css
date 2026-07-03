@@ -53,14 +53,14 @@
     --ink-muted: #9096b8;
     --ink-faint: #6b7092;
 
-    --paper: #0e0f18;
-    --surface: #1a1c2b;
-    --surface-2: #23263a;
-    --hanji: #12131d;
-    --hanji-deep: #0d0e16;
-    --line: #2c3050;
-    --line-strong: #3a3f63;
-    --line-hard: #05060c;
+    --paper: #1b1e2b;
+    --surface: #262a3c;
+    --surface-2: #313650;
+    --hanji: #1e2130;
+    --hanji-deep: #171a26;
+    --line: #363b5c;
+    --line-strong: #454b70;
+    --line-hard: #0a0b12;
 
     --shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.5);
     --shadow-md: 4px 4px 0 rgba(0, 0, 0, 0.45);
