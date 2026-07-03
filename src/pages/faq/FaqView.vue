@@ -85,10 +85,6 @@
             <TagSelect v-model="form.tag_ids" />
           </div>
           <div class="fld">
-            <span class="form-label">내용</span>
-            <RichEditor v-model="form.question_body" placeholder="질문 상세 내용" />
-          </div>
-          <div class="fld">
             <span class="form-label">답변</span>
             <RichEditor v-model="form.answer" placeholder="답변 내용" />
           </div>
@@ -204,7 +200,7 @@ async function submit() {
   try {
     await faqApi.save({
       id: form.id || undefined, category: form.category || null,
-      question: form.question, question_body: form.question_body || null, answer: form.answer,
+      question: form.question, question_body: null, answer: form.answer,
       sort: Number(form.sort) || 0, is_pinned: form.is_pinned, is_active: true, tag_ids: form.tag_ids,
     });
     toast.success("저장되었습니다."); showForm.value = false; await Promise.all([reload(), loadCats()]);
