@@ -285,7 +285,7 @@ onMounted(async () => { await Promise.all([loadLatest(), reload()]); });
 .biginput::placeholder { color: var(--ink-faint); }
 
 /* 결과 패널 (하단 강조) */
-.resultpanel { margin-top: 1.2rem; background: #1b1d2e; border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: 4px 4px 0 var(--line-hard); padding: 1.2rem 1.3rem; text-align: center; position: relative; overflow: hidden; }
+.resultpanel { margin-top: 1.2rem; background: var(--line-hard); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: 4px 4px 0 var(--line-hard); padding: 1.2rem 1.3rem; text-align: center; position: relative; overflow: hidden; }
 .rp-cap { font-family: var(--font-pixel); font-size: 0.66rem; letter-spacing: 0.1em; color: #8b90b8; }
 .rp-val { font-family: var(--font-pixel); font-size: 2rem; color: #fff; margin-top: 0.4rem; word-break: break-all; line-height: 1.2; text-shadow: 2px 2px 0 rgba(0,0,0,0.35); }
 .rp-eq { font-size: 0.82rem; color: #c3b7ff; margin-top: 0.6rem; }

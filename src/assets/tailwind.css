@@ -46,6 +46,42 @@
     --ring: 0 0 0 3px rgba(122, 92, 255, 0.24);
   }
 
+  /* ── 다크 모드 : 토큰 오버라이드 ── */
+  html.dark {
+    --ink: #e6e8f4;
+    --ink-soft: #c4c8e0;
+    --ink-muted: #9096b8;
+    --ink-faint: #6b7092;
+
+    --paper: #0e0f18;
+    --surface: #1a1c2b;
+    --surface-2: #23263a;
+    --hanji: #12131d;
+    --hanji-deep: #0d0e16;
+    --line: #2c3050;
+    --line-strong: #3a3f63;
+    --line-hard: #05060c;
+
+    --shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 4px 4px 0 rgba(0, 0, 0, 0.45);
+    --shadow-lg: 6px 6px 0 rgba(0, 0, 0, 0.5);
+    --shadow-hard: 3px 3px 0 var(--line-hard);
+    color-scheme: dark;
+  }
+
+  /* @apply bg-white 로 굳어 있는 요소들의 다크 표면 보정 */
+  html.dark .btn,
+  html.dark .field,
+  html.dark .field-auto,
+  html.dark .select,
+  html.dark .pcard,
+  html.dark .filterbar {
+    background-color: var(--surface);
+    color: var(--ink);
+  }
+  html.dark .btn-primary { background: var(--seal); color: #fff; }
+  html.dark .btn-danger { background: var(--danger); color: #fff; }
+
   html,
   body {
     font-family: var(--font-body);
@@ -57,6 +93,9 @@
     /* 아주 옅은 픽셀 도트 격자 배경 */
     background-image: radial-gradient(rgba(27, 29, 46, 0.05) 1px, transparent 1px);
     background-size: 4px 4px;
+  }
+  html.dark body {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
   }
 
   /* 표시용 제목·라벨은 픽셀 폰트 */

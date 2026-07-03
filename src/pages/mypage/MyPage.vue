@@ -131,7 +131,7 @@ async function changePw() {
   background: var(--surface-2); border: 2px solid var(--line-strong); border-radius: 3px; outline: none;
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
-.fld input:focus { border-color: var(--seal); background: #fff; box-shadow: var(--ring); }
+.fld input:focus { border-color: var(--seal); background: var(--surface); box-shadow: var(--ring); }
 .msg { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; font-weight: 700; }
 .msg.ok { color: #047857; } .msg.err { color: var(--danger); }
 .save { margin-top: 0.2rem; height: 44px; font-size: 0.92rem; box-shadow: 3px 3px 0 var(--line-hard); }

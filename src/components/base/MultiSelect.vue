@@ -89,7 +89,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onOutside, true));
 .ms { position: relative; width: 100%; }
 .trigger {
   min-height: 34px; display: flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.5rem;
-  background: #fff; border: 2px solid var(--line-strong); border-radius: 3px; cursor: pointer;
+  background: var(--surface); border: 2px solid var(--line-strong); border-radius: 3px; cursor: pointer;
 }
 .ms.open .trigger { border-color: var(--seal); box-shadow: var(--ring); }
 .chips { display: flex; flex-wrap: wrap; gap: 0.25rem; flex: 1; }
@@ -104,7 +104,7 @@ onBeforeUnmount(() => document.removeEventListener("click", onOutside, true));
 .chev { font-size: 0.7rem; color: var(--ink-faint); transition: transform 0.2s; }
 .chev.up { transform: rotate(180deg); }
 
-.panel { position: absolute; left: 0; top: calc(100% + 4px); z-index: 50; width: 100%; min-width: 180px; background: #fff; border: 2px solid var(--line-hard); border-radius: 3px; box-shadow: 4px 4px 0 var(--line-hard); overflow: hidden; }
+.panel { position: absolute; left: 0; top: calc(100% + 4px); z-index: 50; width: 100%; min-width: 180px; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 3px; box-shadow: 4px 4px 0 var(--line-hard); overflow: hidden; }
 .msearch { width: 100%; height: 30px; padding: 0 0.6rem; font-size: 0.78rem; border: none; border-bottom: 2px solid var(--line); outline: none; background: var(--surface-2); }
 .selall { width: 100%; display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.6rem; font-family: var(--font-pixel); font-size: 0.68rem; color: var(--seal-deep); background: #f6f4ff; border-bottom: 2px solid var(--line); text-align: left; }
 .selall:hover { background: #ede9ff; }

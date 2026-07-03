@@ -53,7 +53,7 @@ function go(p) {
 .nav { display: flex; gap: 0.3rem; }
 .pbtn {
   min-width: 30px; height: 30px; padding: 0 0.4rem; display: grid; place-items: center;
-  font-size: 0.8rem; color: var(--ink); background: #fff;
+  font-size: 0.8rem; color: var(--ink); background: var(--surface);
   border: 2px solid var(--line-hard); border-radius: 3px; box-shadow: 2px 2px 0 var(--line-hard);
   transition: transform 0.07s, box-shadow 0.07s;
 }

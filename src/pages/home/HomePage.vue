@@ -313,7 +313,7 @@ onMounted(async () => {
 .home { max-width: 1000px; margin: 0 auto; }
 
 /* ── 히어로 콘솔 ── */
-.hero { position: relative; overflow: hidden; padding: 1.6rem 1.8rem; color: #e7e8f1; background: radial-gradient(60% 60% at 88% 0%, rgba(122,92,255,0.4), transparent 60%), #16182a; border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); }
+.hero { position: relative; overflow: hidden; padding: 1.6rem 1.8rem; color: var(--paper); background: radial-gradient(60% 60% at 88% 0%, rgba(122,92,255,0.4), transparent 60%), #16182a; border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); }
 .scan { position: absolute; inset: 0; pointer-events: none; opacity: 0.3; background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.16) 0 2px, transparent 2px 4px); }
 .hero-head { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; }
 .badge-you { font-family: var(--font-pixel); font-size: 0.6rem; letter-spacing: 0.14em; color: #2fe0c4; }
@@ -365,7 +365,7 @@ onMounted(async () => {
 .cbc-name { font-family: var(--font-pixel); font-size: 0.8rem; color: var(--ink); display: flex; align-items: center; gap: 0.4rem; }
 .cbc-name i { color: var(--ink-muted); font-size: 0.78rem; }
 .cbc-chips { display: flex; gap: 0.3rem; }
-.chip { font-family: var(--font-pixel); font-size: 0.6rem; padding: 0.12rem 0.4rem; border: 1.5px solid var(--line-hard); border-radius: 3px; color: var(--ink-soft); background: #fff; }
+.chip { font-family: var(--font-pixel); font-size: 0.6rem; padding: 0.12rem 0.4rem; border: 1.5px solid var(--line-hard); border-radius: 3px; color: var(--ink-soft); background: var(--surface); }
 .chip em { font-style: normal; font-weight: 700; }
 .chip.open { color: #9a5b00; background: #fff3e0; }
 .chip.prog { color: var(--seal-deep); background: #ede9ff; }

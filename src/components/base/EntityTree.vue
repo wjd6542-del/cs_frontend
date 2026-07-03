@@ -331,7 +331,7 @@ onBeforeUnmount(() => {
 .acts { display: none; gap: 0.1rem; flex-shrink: 0; }
 .vt-row:hover .acts { display: flex; }
 .ico { width: 24px; height: 22px; display: grid; place-items: center; border-radius: 3px; font-size: 0.72rem; color: var(--ink-muted); }
-.ico:hover { background: #fff; color: var(--seal); box-shadow: 1px 1px 0 var(--line-hard); }
+.ico:hover { background: var(--surface); color: var(--seal); box-shadow: 1px 1px 0 var(--line-hard); }
 .ico.del:hover { color: var(--danger); }
 .ico.ok { color: var(--flow-in); }
 </style>

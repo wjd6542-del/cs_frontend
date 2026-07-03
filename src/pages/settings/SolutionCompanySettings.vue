@@ -146,7 +146,7 @@ onMounted(reload);
 .toggle .form-label { margin-bottom: 0; }
 .sw { width: 44px; height: 24px; border-radius: 3px; background: #cbd5e1; position: relative; cursor: pointer; transition: background 0.18s; }
 .sw.on { background: #059669; }
-.sw .knob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.18s; }
+.sw .knob { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: transform 0.18s; }
 .sw.on .knob { transform: translateX(20px); }
 .sh { font-size: 0.78rem; color: var(--ink-muted); }
 .msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; }

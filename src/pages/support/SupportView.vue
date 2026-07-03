@@ -399,7 +399,7 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 
 .r-head { min-height: 58px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.5rem 0.85rem; border-bottom: 2px solid var(--line); flex-wrap: wrap; flex-shrink: 0; }
 .r-title { display: flex; flex-direction: row; align-items: center; gap: 0.5rem; line-height: 1.15; }
-.treetgl { flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); background: #fff; box-shadow: 2px 2px 0 var(--line-hard); transition: all 0.075s; }
+.treetgl { flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); background: var(--surface); box-shadow: 2px 2px 0 var(--line-hard); transition: all 0.075s; }
 .treetgl:hover { color: var(--seal); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }
 .treetgl:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line-hard); }
 .r-eye { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--seal-deep); }
@@ -459,7 +459,7 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .dtags-sel { flex: 1; }
 .thread { max-height: 44vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; padding: 0.5rem; background: var(--surface-2); border-radius: 3px; margin-bottom: 0.9rem; }
 .thread .empty { text-align: center; color: var(--ink-faint); padding: 1rem 0; font-size: 0.85rem; }
-.msgrow { background: #fff; border: 2px solid var(--line); border-radius: 3px; padding: 0.6rem 0.8rem; }
+.msgrow { background: var(--surface); border: 2px solid var(--line); border-radius: 3px; padding: 0.6rem 0.8rem; }
 .msgrow.internal { background: #fffbeb; border-color: #fde68a; }
 .mmeta { font-size: 0.7rem; color: var(--ink-faint); margin-bottom: 0.3rem; display: flex; gap: 0.4rem; align-items: center; }
 .ibadge { font-size: 0.62rem; font-weight: 700; color: #b45309; background: #fef3c7; padding: 0.05rem 0.35rem; border-radius: 3px; }

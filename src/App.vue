@@ -22,11 +22,13 @@ import { onBeforeMount, onMounted, onBeforeUnmount, watch, getCurrentInstance } 
 import { useAuthStore } from "@/stores/auth";
 import { useAlertsStore } from "@/stores/alerts";
 import { useI18nStore } from "@/stores/i18n";
+import { useThemeStore } from "@/stores/theme";
 
 const auth = useAuthStore();
 const alerts = useAlertsStore();
 const i18n = useI18nStore();
-onBeforeMount(() => auth.restore());
+const theme = useThemeStore();
+onBeforeMount(() => { auth.restore(); theme.init(); });
 
 // 전역 $t 등록 (한국어 키 → 현재 언어)
 const instance = getCurrentInstance();

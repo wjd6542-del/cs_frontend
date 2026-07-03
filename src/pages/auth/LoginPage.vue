@@ -112,7 +112,7 @@ async function onSubmit() {
   position: relative; overflow: hidden;
   display: flex; flex-direction: column; justify-content: space-between;
   padding: 3rem 3rem;
-  color: #e7e8f1;
+  color: var(--paper);
   background:
     radial-gradient(60% 45% at 82% 6%, rgba(122, 92, 255, 0.35), transparent 60%),
     radial-gradient(55% 45% at 6% 100%, rgba(14, 168, 143, 0.16), transparent 60%),
@@ -171,7 +171,7 @@ async function onSubmit() {
   transition: box-shadow 0.12s, background 0.12s;
 }
 .inputwrap input::placeholder { color: var(--ink-faint); }
-.inputwrap input:focus { background: #fff; box-shadow: var(--ring); border-color: var(--seal); }
+.inputwrap input:focus { background: var(--surface); box-shadow: var(--ring); border-color: var(--seal); }
 .eye { position: absolute; right: 0.5rem; width: 34px; height: 34px; color: var(--ink-faint); }
 .eye:hover { color: var(--ink-muted); }
 

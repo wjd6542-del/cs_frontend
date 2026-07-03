@@ -128,10 +128,10 @@ onMounted(load);
 .tbl td { padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--line); }
 .tbl tbody tr:last-child td { border-bottom: none; }
 .c { text-align: center; } .w-act { width: 60px; } .w-st { width: 60px; } .w-del { width: 72px; }
-.cell { width: 100%; height: 30px; padding: 0 0.5rem; font-size: 0.84rem; border: 2px solid var(--line); border-radius: 3px; outline: none; background: #fff; }
+.cell { width: 100%; height: 30px; padding: 0 0.5rem; font-size: 0.84rem; border: 2px solid var(--line); border-radius: 3px; outline: none; background: var(--surface); }
 .cell:focus { border-color: var(--seal); box-shadow: 0 0 0 2px rgba(122,92,255,0.15); }
 .sw { display: inline-block; width: 40px; height: 22px; border-radius: 3px; background: var(--surface-2); border: 2px solid var(--line-hard); position: relative; cursor: pointer; transition: background 0.18s; }
 .sw.on { background: #2e7d43; }
-.sw .knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 2px; background: #fff; border: 1px solid var(--line-hard); transition: transform 0.18s; }
+.sw .knob { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 2px; background: var(--surface); border: 1px solid var(--line-hard); transition: transform 0.18s; }
 .sw.on .knob { transform: translateX(18px); }
 </style>

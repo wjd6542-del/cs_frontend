@@ -31,6 +31,11 @@
         </div>
       </div>
 
+      <!-- 다크모드 토글 -->
+      <button class="tmode" :title="theme.dark ? $t('라이트 모드') : $t('다크 모드')" @click="theme.toggle()">
+        <i class="fa-solid" :class="theme.dark ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+
       <!-- 언어 스위처 -->
       <div ref="langWrap" class="lang-wrap">
         <button class="lang-btn" :class="{ on: langOpen }" :title="$t('언어 / Language')" @click="toggleLang">
@@ -80,6 +85,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useAlertsStore } from "@/stores/alerts";
 import { useI18nStore, LANGS } from "@/stores/i18n";
+import { useThemeStore } from "@/stores/theme";
 
 const emit = defineEmits(["toggle"]);
 const route = useRoute();
@@ -87,6 +93,7 @@ const router = useRouter();
 const auth = useAuthStore();
 const alerts = useAlertsStore();
 const i18n = useI18nStore();
+const theme = useThemeStore();
 
 const title = computed(() => i18n.t(route.meta?.title || "CS"));
 
@@ -144,6 +151,10 @@ function onLogout() {
 
 .right { display: flex; align-items: center; gap: 0.7rem; }
 
+/* 다크모드 토글 */
+.tmode { width: 40px; height: 40px; border: 2px solid var(--line-hard); border-radius: 3px; background: var(--surface); color: var(--ink); box-shadow: 2px 2px 0 var(--line-hard); transition: transform 0.08s, box-shadow 0.08s; }
+.tmode:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); color: var(--seal); }
+
 /* 언어 스위처 */
 .lang-wrap { position: relative; }
 .lang-btn { display: flex; align-items: center; gap: 0.3rem; height: 40px; padding: 0 0.6rem; border: 2px solid var(--line-hard); border-radius: 3px; background: var(--surface); color: var(--ink); box-shadow: 2px 2px 0 var(--line-hard); transition: transform 0.08s, box-shadow 0.08s; }
@@ -154,7 +165,7 @@ function onLogout() {
 .lang-chev { font-size: 0.6rem; color: var(--ink-faint); transition: transform 0.2s; }
 .lang-chev.up { transform: rotate(180deg); }
 .lang-dd { width: 160px; }
-.lang-item { width: 100%; display: flex; align-items: center; gap: 0.55rem; padding: 0.55rem 0.8rem; font-size: 0.86rem; font-weight: 600; color: var(--ink); background: #fff; border-bottom: 1px solid var(--line); }
+.lang-item { width: 100%; display: flex; align-items: center; gap: 0.55rem; padding: 0.55rem 0.8rem; font-size: 0.86rem; font-weight: 600; color: var(--ink); background: var(--surface); border-bottom: 1px solid var(--line); }
 .lang-item:last-child { border-bottom: none; }
 .lang-item:hover { background: var(--surface-2); }
 .lang-item.sel { color: var(--seal-deep); background: #f6f4ff; }
@@ -169,7 +180,7 @@ function onLogout() {
 .bell.has { color: var(--seal); }
 .bell .badge { position: absolute; top: -7px; right: -7px; min-width: 18px; height: 18px; padding: 0 3px; display: grid; place-items: center; font-family: var(--font-pixel); font-size: 0.58rem; color: #fff; background: var(--danger); border: 2px solid var(--line-hard); border-radius: 3px; }
 
-.dropdown { position: absolute; right: 0; top: calc(100% + 8px); width: 320px; max-width: 84vw; z-index: 80; background: #fff; border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: 4px 4px 0 var(--line-hard); overflow: hidden; }
+.dropdown { position: absolute; right: 0; top: calc(100% + 8px); width: 320px; max-width: 84vw; z-index: 80; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: 4px 4px 0 var(--line-hard); overflow: hidden; }
 .dhead { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.8rem; background: var(--surface-2); border-bottom: 2px solid var(--line); }
 .dt { font-family: var(--font-pixel); font-size: 0.78rem; color: var(--ink); }
 .dt b { color: var(--seal); }
@@ -177,7 +188,7 @@ function onLogout() {
 .dall:hover { color: var(--seal); }
 .dlist { max-height: 60vh; overflow-y: auto; }
 .dnone { padding: 1.4rem; text-align: center; color: var(--ink-faint); font-size: 0.85rem; }
-.drow { width: 100%; display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line); text-align: left; background: #fff; }
+.drow { width: 100%; display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line); text-align: left; background: var(--surface); }
 .drow:last-child { border-bottom: none; }
 .drow:hover { background: var(--surface-2); }
 .dp { flex-shrink: 0; font-family: var(--font-pixel); font-size: 0.6rem; padding: 0.1rem 0.35rem; border: 1px solid var(--line-hard); border-radius: 3px; }
@@ -210,7 +221,7 @@ function onLogout() {
 .acc-head { display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem; background: var(--surface-2); border-bottom: 2px solid var(--line); }
 .acc-name { font-family: var(--font-pixel); font-size: 0.85rem; color: var(--ink); }
 .acc-id { font-size: 0.72rem; color: var(--ink-muted); margin-top: 0.15rem; }
-.acc-item { width: 100%; display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.9rem; font-size: 0.88rem; font-weight: 600; color: var(--ink); text-decoration: none; background: #fff; border-bottom: 1px solid var(--line); }
+.acc-item { width: 100%; display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.9rem; font-size: 0.88rem; font-weight: 600; color: var(--ink); text-decoration: none; background: var(--surface); border-bottom: 1px solid var(--line); }
 .acc-item:last-child { border-bottom: none; }
 .acc-item i { width: 18px; text-align: center; color: var(--ink-muted); }
 .acc-item:hover { background: var(--surface-2); color: var(--seal); }

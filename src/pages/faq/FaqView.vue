@@ -275,7 +275,7 @@ onMounted(async () => { await Promise.all([reload(), loadCats(), loadPopular()])
 .toggle { display: flex; flex-direction: column; gap: 0.4rem; flex-shrink: 0; }
 .sw { width: 44px; height: 24px; border-radius: 3px; background: #cbd5e1; position: relative; cursor: pointer; transition: background 0.18s; border: 2px solid var(--line-hard); }
 .sw.on { background: var(--seal); }
-.sw .knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 2px; background: #fff; transition: transform 0.18s; }
+.sw .knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 2px; background: var(--surface); transition: transform 0.18s; }
 .sw.on .knob { transform: translateX(20px); }
 .msg { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 600; } .msg.err { color: var(--danger); }
 .acts { display: flex; gap: 0.6rem; margin-top: 1.2rem; }
