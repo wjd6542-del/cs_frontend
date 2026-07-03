@@ -113,11 +113,11 @@
     <div v-if="detail" class="drawer" @click.self="detail = null">
       <div class="panel lg">
         <div class="dhead">
-          <div>
+          <div class="dhead-main">
             <h4 class="ph">{{ detail.title }}</h4>
             <p class="dsub">{{ detail.vendor_name || detail.game_company_name }} · {{ detail.category || "분류없음" }}</p>
           </div>
-          <SearchSelect class="!w-32" v-model="detail.status" :options="STATUS_OPTS" @change="changeStatus" />
+          <div class="w-32 shrink-0"><SearchSelect v-model="detail.status" :options="STATUS_OPTS" @change="changeStatus" /></div>
         </div>
 
         <div class="dtags">
@@ -405,7 +405,9 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .col2 { grid-column: 1 / -1; }
 .dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
-.dsub { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.2rem; }
+.dhead-main { flex: 1; min-width: 0; }
+.ph { overflow-wrap: anywhere; }
+.dsub { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.2rem; overflow-wrap: anywhere; }
 .dtags { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.9rem; }
 .dtags-lbl { font-family: var(--font-pixel); font-size: 0.64rem; color: var(--ink-muted); flex-shrink: 0; }
 .dtags-sel { flex: 1; }
