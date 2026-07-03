@@ -51,6 +51,16 @@
       </router-link>
     </div>
 
+    <!-- 올해 월별 정산 처리 차트 -->
+    <section v-if="canSettlement" class="chartcard pcard">
+      <div class="ch-head">
+        <h2 class="ch-ttl"><i class="fa-solid fa-chart-column"></i> {{ chart.year }}년 정산 처리</h2>
+        <span class="ch-sub">1월~이번 달 · 회수(업체) vs 지급(게임사)</span>
+      </div>
+      <v-chart v-if="!chartEmpty" class="chart" :option="chartOption" autoresize />
+      <EmptyState v-else icon="📊" title="정산 처리 내역이 없어요" desc="정산을 처리하면 월별 그래프가 표시돼요." hint="정산 관리에서 처리" compact />
+    </section>
+
     <!-- CS 상황판 : 항목별 미해결(접수·처리중) 문의 최근 5건 -->
     <section v-if="canSupport" class="csboard pcard">
       <div class="cb-head">
@@ -82,16 +92,6 @@
           <router-link :to="p.to" class="cbc-more">{{ p.label }} 전체보기 ›</router-link>
         </div>
       </div>
-    </section>
-
-    <!-- 올해 월별 정산 처리 차트 -->
-    <section v-if="canSettlement" class="chartcard pcard">
-      <div class="ch-head">
-        <h2 class="ch-ttl"><i class="fa-solid fa-chart-column"></i> {{ chart.year }}년 정산 처리</h2>
-        <span class="ch-sub">1월~이번 달 · 회수(업체) vs 지급(게임사)</span>
-      </div>
-      <v-chart v-if="!chartEmpty" class="chart" :option="chartOption" autoresize />
-      <EmptyState v-else icon="📊" title="정산 처리 내역이 없어요" desc="정산을 처리하면 월별 그래프가 표시돼요." hint="정산 관리에서 처리" compact />
     </section>
 
     <!-- 공지 + 알림 게시판 -->
