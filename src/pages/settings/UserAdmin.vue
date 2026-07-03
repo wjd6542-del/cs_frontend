@@ -8,14 +8,13 @@
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>아이디</th><th>이름</th><th>이메일</th><th>역할</th><th class="c">상태</th><th class="c w-act">수정</th></tr>
+          <tr><th>아이디</th><th>이름</th><th>역할</th><th class="c">상태</th><th class="c w-act">수정</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!users.length"><td colspan="6"><EmptyState icon="👤" title="계정이 없어요" desc="등록된 계정이 아직 없어요." hint="＋ 계정 추가로 시작해요" compact /></td></tr>
+          <tr v-if="!users.length"><td colspan="5"><EmptyState icon="👤" title="계정이 없어요" desc="등록된 계정이 아직 없어요." hint="＋ 계정 추가로 시작해요" compact /></td></tr>
           <tr v-for="u in users" :key="u.id">
             <td class="nm">{{ u.username }}</td>
             <td>{{ u.name }}</td>
-            <td class="muted">{{ u.email || "-" }}</td>
             <td><span class="rolechip">{{ u.role_name || "-" }}</span></td>
             <td class="c"><span class="st" :class="u.is_active ? 'on' : 'off'">{{ u.is_active ? "활성" : "정지" }}</span></td>
             <td class="c"><button class="btn btn-xs" @click="openEdit(u)">수정</button></td>
@@ -31,7 +30,6 @@
         <div class="grid">
           <BaseInput v-model="form.username" label="아이디" :disabled="editing" placeholder="영문·숫자" />
           <BaseInput v-model="form.name" label="이름" />
-          <BaseInput v-model="form.email" label="이메일" />
           <div class="fld">
             <label class="lbl">역할</label>
             <SearchSelect v-model="form.role_id" :options="roleOptions" placeholder="역할 선택" />
@@ -74,7 +72,7 @@ const showForm = ref(false);
 const editing = ref(false);
 const saving = ref(false);
 const msg = ref("");
-const form = reactive({ id: null, username: "", name: "", email: "", role_id: null, is_active: true, password: "", passwordConfirm: "" });
+const form = reactive({ id: null, username: "", name: "", role_id: null, is_active: true, password: "", passwordConfirm: "" });
 
 async function load() {
   const [u, r] = await Promise.all([adminApi.userList({}), adminApi.roleAllList()]);
@@ -83,13 +81,13 @@ async function load() {
 }
 function openNew() {
   editing.value = false;
-  Object.assign(form, { id: null, username: "", name: "", email: "", role_id: roles.value[0]?.id ?? null, is_active: true, password: "", passwordConfirm: "" });
+  Object.assign(form, { id: null, username: "", name: "", role_id: roles.value[0]?.id ?? null, is_active: true, password: "", passwordConfirm: "" });
   msg.value = "";
   showForm.value = true;
 }
 function openEdit(u) {
   editing.value = true;
-  Object.assign(form, { id: u.id, username: u.username, name: u.name, email: u.email || "", role_id: u.role_id, is_active: !!u.is_active, password: "", passwordConfirm: "" });
+  Object.assign(form, { id: u.id, username: u.username, name: u.name, role_id: u.role_id, is_active: !!u.is_active, password: "", passwordConfirm: "" });
   msg.value = "";
   showForm.value = true;
 }
@@ -99,9 +97,9 @@ async function submit() {
   try {
     const role_id = Number(form.role_id);
     if (editing.value) {
-      await adminApi.userUpdate({ id: form.id, username: form.username, name: form.name, email: form.email, role_id, is_active: form.is_active });
+      await adminApi.userUpdate({ id: form.id, username: form.username, name: form.name, role_id, is_active: form.is_active });
     } else {
-      await adminApi.userCreate({ name: form.name, username: form.username, email: form.email, password: form.password, passwordConfirm: form.passwordConfirm, role_id, is_active: form.is_active });
+      await adminApi.userCreate({ name: form.name, username: form.username, password: form.password, passwordConfirm: form.passwordConfirm, role_id, is_active: form.is_active });
     }
     toast.success("저장되었습니다.");
     showForm.value = false;
