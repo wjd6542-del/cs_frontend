@@ -30,19 +30,21 @@
         <div class="grid">
           <BaseInput v-model="form.username" :label="$t('아이디')" :disabled="editing" :placeholder="$t('영문·숫자')" />
           <BaseInput v-model="form.name" :label="$t('이름')" />
+          <div v-if="!editing" class="col2 pwrow">
+            <BaseInput v-model="form.password" :label="$t('비밀번호')" type="password" :placeholder="$t('영문+숫자 6자 이상')" />
+            <BaseInput v-model="form.passwordConfirm" :label="$t('비밀번호 확인')" type="password" />
+          </div>
           <div class="fld">
             <label class="lbl">{{ $t("역할") }}</label>
             <SearchSelect v-model="form.role_id" :options="roleOptions" :placeholder="$t('역할 선택')" />
           </div>
-          <template v-if="!editing">
-            <BaseInput v-model="form.password" :label="$t('비밀번호')" type="password" :placeholder="$t('영문+숫자 6자 이상')" />
-            <BaseInput v-model="form.passwordConfirm" :label="$t('비밀번호 확인')" type="password" />
-          </template>
-          <label class="fld toggle">
-            <span class="lbl">{{ $t("상태") }}</span>
-            <BaseToggle v-model="form.is_active" />
-            <span class="sh">{{ form.is_active ? "활성" : "정지" }}</span>
-          </label>
+          <div class="fld">
+            <label class="lbl">{{ $t("상태") }}</label>
+            <div class="tgl-row">
+              <BaseToggle v-model="form.is_active" />
+              <span class="sh">{{ form.is_active ? "활성" : "정지" }}</span>
+            </div>
+          </div>
         </div>
 
         <p v-if="msg" class="msg err">{{ msg }}</p>
@@ -140,9 +142,10 @@ onMounted(load);
 .ph { font-family: "Galmuri11", monospace; font-size: 1.15rem; font-weight: 700; color: var(--ink); margin-bottom: 1rem; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .fld { display: block; }
+.col2 { grid-column: 1 / -1; }
+.pwrow { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .lbl { display: block; font-size: 0.72rem; font-weight: 700; color: var(--ink-soft); margin-bottom: 0.4rem; }
-.toggle { display: flex; align-items: center; gap: 0.6rem; }
-.toggle .lbl { margin-bottom: 0; }
+.tgl-row { display: flex; align-items: center; gap: 0.6rem; height: 34px; }
 .sw { width: 44px; height: 24px; border-radius: 3px; background: var(--surface-2); border: 2px solid var(--line-hard); position: relative; cursor: pointer; transition: background 0.18s; }
 .sw.on { background: #2e7d43; }
 .sw .knob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 2px; background: var(--surface); border: 1px solid var(--line-hard); transition: transform 0.18s; }
