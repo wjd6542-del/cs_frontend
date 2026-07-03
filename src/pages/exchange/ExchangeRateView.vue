@@ -12,19 +12,34 @@
       </div>
     </header>
 
-    <!-- 최신 환율/코인 카드 (가로 자동 스크롤 · 마우스 올리면 멈춤) -->
+    <!-- 최신 환율 (법정통화) — 가로 자동 스크롤 · 마우스 올리면 멈춤 -->
+    <div class="secttl"><span class="dot fiat"></span> 법정통화 <em class="cnt">{{ FIAT.length }}</em></div>
     <div class="marquee">
       <div class="track">
-        <div v-for="(c, i) in marqueeItems" :key="c.key + '-' + i" class="rcard pcard" :class="{ coin: c.coin }">
+        <div v-for="(c, i) in fiatItems" :key="c.key + '-' + i" class="rcard pcard">
           <div class="rc-top">
             <span class="flag">{{ c.emoji }}</span>
-            <div class="rc-meta"><div class="rc-name">{{ c.label }}</div><div class="rc-code">{{ c.coin ? '1 ' + c.symbol : (c.unit > 1 ? c.unit + c.symbol : c.symbol) }}</div></div>
+            <div class="rc-meta"><div class="rc-name">{{ c.label }}</div><div class="rc-code">{{ c.unit > 1 ? c.unit + c.symbol : c.symbol }}</div></div>
           </div>
           <div class="rc-val num">{{ latest ? won(disp(latest[c.key], c.unit)) : "—" }}</div>
         </div>
       </div>
     </div>
-    <p v-if="latest" class="asof num">기준일 {{ d(latest.date) }} · 총 {{ ALL.length }}개 통화·코인</p>
+
+    <!-- 코인 시세 (하단 분리) — 가로 자동 스크롤 · 마우스 올리면 멈춤 -->
+    <div class="secttl"><span class="dot coin"></span> 코인 시세 <em class="cnt">{{ COINS.length }}</em></div>
+    <div class="marquee coinrow">
+      <div class="track track-rev">
+        <div v-for="(c, i) in coinItems" :key="c.key + '-' + i" class="rcard pcard coin">
+          <div class="rc-top">
+            <span class="flag">{{ c.emoji }}</span>
+            <div class="rc-meta"><div class="rc-name">{{ c.label }}</div><div class="rc-code">1 {{ c.symbol }}</div></div>
+          </div>
+          <div class="rc-val num">{{ latest ? won(disp(latest[c.key], c.unit)) : "—" }}</div>
+        </div>
+      </div>
+    </div>
+    <p v-if="latest" class="asof num">기준일 {{ d(latest.date) }} · 통화 {{ FIAT.length }} · 코인 {{ COINS.length }}</p>
 
     <!-- 이력 -->
     <h3 class="sub">환율 이력</h3>
@@ -115,8 +130,9 @@ const COINS = [
   { key: "usdt", label: "테더", emoji: "🟢", symbol: "USDT", unit: 1, coin: true },
 ];
 const ALL = [...FIAT, ...COINS];
-// 마퀴 무한 루프용: 두 벌 이어붙임
-const marqueeItems = [...ALL, ...ALL];
+// 마퀴 무한 루프용: 각 목록을 두 벌 이어붙임
+const fiatItems = [...FIAT, ...FIAT];
+const coinItems = Array.from({ length: 6 }, () => COINS).flat();
 
 const toast = useToast();
 const latest = ref(null);
@@ -185,9 +201,18 @@ onMounted(async () => { await Promise.all([loadLatest(), reload()]); });
 .ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
 .desc { font-size: 0.84rem; color: var(--ink-muted); margin-top: 0.2rem; }
 
+/* 섹션 타이틀 */
+.secttl { display: flex; align-items: center; gap: 0.45rem; font-family: var(--font-pixel); font-size: 0.74rem; color: var(--ink-muted); margin: 0.2rem 0 0.55rem; }
+.secttl .dot { width: 10px; height: 10px; border-radius: 2px; border: 1px solid var(--line-hard); }
+.secttl .dot.fiat { background: var(--seal); }
+.secttl .dot.coin { background: var(--flow-out); }
+.secttl .cnt { font-style: normal; font-size: 0.6rem; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 0.02rem 0.4rem; color: var(--ink-soft); }
+
 /* 가로 자동 스크롤(마퀴) — 마우스 올리면 멈춤 */
-.marquee { overflow: hidden; position: relative; -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent); mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent); }
+.marquee { overflow: hidden; position: relative; padding: 0.25rem 0; -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent); mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent); }
+.marquee.coinrow { margin-top: 0.2rem; }
 .track { display: flex; gap: 0.7rem; width: max-content; animation: scroll-x 46s linear infinite; }
+.track-rev { animation: scroll-x 34s linear infinite reverse; }
 .marquee:hover .track { animation-play-state: paused; }
 @keyframes scroll-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .track { animation: none; } .marquee { overflow-x: auto; -webkit-mask-image: none; mask-image: none; } }
