@@ -43,6 +43,7 @@ export const supportApi = {
   get: (id) => api.post("/support/get", { id }).then((r) => r.data),
   save: (body) => api.post("/support/save", body).then((r) => r.data),
   setStatus: (id, status) => api.post("/support/status", { id, status }).then((r) => r.data),
+  bulkStatus: (ids, status) => api.post("/support/bulkStatus", { ids, status }).then((r) => r.data),
   addMessage: (body) => api.post("/support/message", body).then((r) => r.data),
   remove: (id) => api.post("/support/delete", { id }).then((r) => r.data),
 };

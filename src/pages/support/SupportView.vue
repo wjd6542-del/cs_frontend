@@ -25,7 +25,6 @@
               @click="onSelect({ id: g.id, name: g.name })"
             >
               <span class="nm">{{ g.name }}</span>
-              <span class="code num">{{ g.code }}</span>
             </div>
           </div>
         </div>
@@ -50,14 +49,27 @@
             </div>
           </div>
 
+          <!-- 일괄 상태 변경 바 -->
+          <div v-if="sel.length" class="bulkbar">
+            <span class="bcount">✔ {{ sel.length }}건 선택</span>
+            <span class="barrow">→</span>
+            <div class="w-28 shrink-0"><SearchSelect v-model="bulkVal" :options="STATUS_OPTS" placeholder="변경할 상태" /></div>
+            <button class="btn btn-xs btn-primary" :disabled="!bulkVal || bulking" @click="applyBulk">{{ bulking ? "적용 중…" : "일괄 적용" }}</button>
+            <button class="btn btn-xs" @click="clearSel">선택 해제</button>
+          </div>
+
           <div class="r-body">
             <table class="tbl">
               <thead>
-                <tr><th class="c">상태</th><th>제목</th><th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th></tr>
+                <tr>
+                  <th class="c cbx"><input type="checkbox" :checked="allChecked" @change="toggleAll" /></th>
+                  <th class="c">상태</th><th>제목</th><th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th>
+                </tr>
               </thead>
               <tbody>
-                <tr v-if="!tickets.length"><td colspan="6"><EmptyState variant="support" compact /></td></tr>
-                <tr v-for="t in tickets" :key="t.id" class="row" @click="openDetail(t.id)">
+                <tr v-if="!tickets.length"><td colspan="7"><EmptyState variant="support" compact /></td></tr>
+                <tr v-for="t in tickets" :key="t.id" class="row" :class="{ sel: sel.includes(t.id) }" @click="openDetail(t.id)">
+                  <td class="c cbx" @click.stop><input type="checkbox" :checked="sel.includes(t.id)" @change="toggleRow(t.id)" /></td>
                   <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
                   <td class="nm">{{ t.title }} <TagChips :tags="t.tags" /></td>
                   <td class="muted">{{ t.category || "-" }}</td>
@@ -181,6 +193,10 @@ const totalPages = ref(1);
 const filter = reactive({ status: "" });
 const filterTags = ref([]);
 const detailTags = ref([]);
+const sel = ref([]);
+const bulkVal = ref("");
+const bulking = ref(false);
+const allChecked = computed(() => tickets.value.length > 0 && tickets.value.every((t) => sel.value.includes(t.id)));
 
 const treeRef = ref(null);
 const gamecos = ref([]);
@@ -213,7 +229,23 @@ function onSelect(entity) {
 }
 function applyFilter() { page.value = 1; reloadTickets(); }
 
+function toggleAll() { sel.value = allChecked.value ? [] : tickets.value.map((t) => t.id); }
+function toggleRow(id) { sel.value = sel.value.includes(id) ? sel.value.filter((x) => x !== id) : [...sel.value, id]; }
+function clearSel() { sel.value = []; bulkVal.value = ""; }
+async function applyBulk() {
+  if (!bulkVal.value || !sel.value.length) return;
+  bulking.value = true;
+  try {
+    const r = await supportApi.bulkStatus(sel.value, bulkVal.value);
+    toast.success(`${r.count}건 상태를 변경했습니다.`);
+    clearSel();
+    await reloadTickets();
+  } catch (e) { toast.error(e?.message || "일괄 변경 실패"); }
+  finally { bulking.value = false; }
+}
+
 async function reloadTickets() {
+  sel.value = [];
   if (!selected.value) { tickets.value = []; total.value = 0; totalPages.value = 1; return; }
   const body = { party: props.party, page: page.value, limit: LIMIT };
   body[isVendor.value ? "vendor_id" : "game_company_id"] = selected.value.id;
@@ -347,6 +379,14 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .r-body { flex: 1; overflow-y: auto; }
 .r-foot { flex-shrink: 0; padding: 0.4rem 0.85rem; border-top: 2px solid var(--line); }
 .r-foot :deep(.pager) { margin-top: 0; }
+
+/* 일괄 상태 변경 바 */
+.bulkbar { flex-shrink: 0; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.85rem; background: #ede9ff; border-bottom: 2px solid var(--line); flex-wrap: wrap; }
+.bcount { font-family: var(--font-pixel); font-size: 0.7rem; color: var(--seal-deep); }
+.barrow { color: var(--ink-faint); }
+.cbx { width: 38px; }
+.cbx input { accent-color: var(--seal); width: 15px; height: 15px; cursor: pointer; }
+.row.sel { background: #f3f0ff; }
 
 .tbl { width: 100%; border-collapse: collapse; }
 .tbl thead th { position: sticky; top: 0; z-index: 1; }

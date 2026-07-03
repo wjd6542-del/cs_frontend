@@ -35,7 +35,6 @@
         </template>
         <template v-else>
           <span class="nm">{{ row.node.name }}</span>
-          <span class="code num">{{ row.node.code }}</span>
           <span class="acts">
             <button class="ico" title="하위 추가" @click.stop="startAdd(row.node)"><i class="fa-solid fa-plus"></i></button>
             <button class="ico" title="명칭 수정" @click.stop="startEdit(row.node)"><i class="fa-solid fa-pen"></i></button>
