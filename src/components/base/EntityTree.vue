@@ -9,7 +9,7 @@
     <!-- 추가 입력 바 -->
     <div v-if="adding" class="vt-edit">
       <span class="vt-under" v-if="adding.parent_name">↳ {{ adding.parent_name }} 하위</span>
-      <input ref="addInput" v-model="addName" class="field field-xs" :placeholder="`${label}명`" @keyup.enter="confirmAdd" @keyup.esc="adding = null" />
+      <input ref="addInput" v-model="addName" class="field field-xs" :placeholder="`${label}명`" @keyup.enter="onEnter($event, confirmAdd)" @keyup.esc="adding = null" />
       <button class="btn btn-xs btn-primary" @click="confirmAdd">{{ $t("저장") }}</button>
       <button class="btn btn-xs" @click="adding = null">{{ $t("취소") }}</button>
     </div>
@@ -45,7 +45,7 @@
         <span v-else class="caret ph"></span>
 
         <template v-if="editId === row.node.id">
-          <input v-model="editName" class="field field-xs !h-[24px] flex-1" @click.stop @keyup.enter="confirmEdit" @keyup.esc="editId = null" />
+          <input v-model="editName" class="field field-xs !h-[24px] flex-1" @click.stop @keyup.enter="onEnter($event, confirmEdit)" @keyup.esc="editId = null" />
           <button class="ico ok" @click.stop="confirmEdit"><i class="fa-solid fa-check"></i></button>
           <button class="ico" @click.stop="editId = null"><i class="fa-solid fa-xmark"></i></button>
         </template>
@@ -150,17 +150,24 @@ function startAdd(parent) {
   editId.value = null;
   nextTick(() => addInput.value?.focus());
 }
+let busy = false; // 재진입 가드 (IME 엔터 중복 방지)
+// IME 조합 중 엔터는 무시 (한글 입력 후 확정 엔터가 중복 실행되는 문제 방지)
+function onEnter(e, fn) { if (e.isComposing || e.keyCode === 229) return; fn(); }
+
 async function confirmAdd() {
   const name = addName.value.trim();
-  if (!name) return;
+  if (!name || busy || !adding.value) return;
+  busy = true;
+  const parentId = adding.value.parent_id;
   try {
-    await props.api.save({ name, parent_id: adding.value.parent_id });
-    if (adding.value.parent_id) collapsed[adding.value.parent_id] = false;
+    await props.api.save({ name, parent_id: parentId });
+    if (parentId) collapsed[parentId] = false;
     adding.value = null;
     await reload();
     emit("change");
     toast.success(`${props.label}가 등록되었습니다.`);
   } catch (e) { toast.error(e?.message || "등록 실패"); }
+  finally { busy = false; }
 }
 
 function startEdit(node) {
@@ -170,7 +177,8 @@ function startEdit(node) {
 }
 async function confirmEdit() {
   const name = editName.value.trim();
-  if (!name) return;
+  if (!name || busy || !editId.value) return;
+  busy = true;
   try {
     await props.api.save({ id: editId.value, name });
     editId.value = null;
@@ -178,6 +186,7 @@ async function confirmEdit() {
     emit("change");
     toast.success("명칭이 수정되었습니다.");
   } catch (e) { toast.error(e?.message || "수정 실패"); }
+  finally { busy = false; }
 }
 
 async function remove(node) {
