@@ -6,7 +6,7 @@
         <h1 class="ttl">{{ isVendor ? "업체 정산" : "게임사 정산" }}</h1>
         <p class="desc">{{ isVendor ? "업체별 사용대금 회수 정산을 관리합니다." : "게임사별 사용료 지급 정산을 관리합니다." }}</p>
       </div>
-      <button class="btn btn-primary" @click="openNew()">+ 정산 등록</button>
+      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">+ 정산 등록</button>
     </header>
 
     <div class="filterbar">
@@ -43,9 +43,12 @@
             <td class="r" :class="s.remaining > 0 ? 'neg' : 'muted'">{{ won(s.remaining) }}</td>
             <td class="c"><span class="tag" :class="s.status.toLowerCase()">{{ statusLabel(s.status) }}</span></td>
             <td class="c">
-              <button v-if="s.status !== 'DONE'" class="btn btn-xs btn-primary" @click="openSettle(s)">{{ isVendor ? "입금처리" : "지급처리" }}</button>
-              <button class="btn btn-xs" @click="openEdit(s)">수정</button>
-              <button class="btn btn-xs btn-danger" @click="remove(s)">삭제</button>
+              <template v-if="canEdit">
+                <button v-if="s.status !== 'DONE'" class="btn btn-xs btn-primary" @click="openSettle(s)">{{ isVendor ? "입금처리" : "지급처리" }}</button>
+                <button class="btn btn-xs" @click="openEdit(s)">수정</button>
+                <button class="btn btn-xs btn-danger" @click="remove(s)">삭제</button>
+              </template>
+              <span v-else class="muted xs">—</span>
             </td>
           </tr>
         </tbody>
@@ -114,6 +117,10 @@ import SearchSelect from "@/components/base/SearchSelect.vue";
 import DateRangePicker from "@/components/base/DateRangePicker.vue";
 import { settlementApi, gameCompanyApi, vendorApi } from "@/api/cs";
 import { formatDateOnly } from "@/utils/date";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
+const canEdit = computed(() => auth.hasPermission("settlement.edit"));
 
 const props = defineProps({ type: { type: String, default: "VENDOR" } });
 const isVendor = computed(() => props.type === "VENDOR");

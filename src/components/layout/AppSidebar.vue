@@ -10,7 +10,7 @@
     </div>
 
     <nav class="menu">
-      <template v-for="m in menus" :key="m.label">
+      <template v-for="m in visibleMenus" :key="m.label">
         <RouterLink
           v-if="m.to"
           :to="m.to"
@@ -55,11 +55,13 @@
 import { reactive, computed, onMounted, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import { boardApi } from "@/api/board";
+import { useAuthStore } from "@/stores/auth";
 
 defineProps({ open: { type: Boolean, default: true }, isMobile: { type: Boolean, default: false } });
 const emit = defineEmits(["close"]);
 
 const route = useRoute();
+const auth = useAuthStore();
 const boards = ref([]);
 const expanded = reactive({ "정산 관리": true, "CS 관리": true, 게시판: false });
 
@@ -69,25 +71,45 @@ const menus = computed(() => [
     label: "정산 관리",
     icon: "fa-money-bill-transfer",
     children: [
-      { label: "업체 정산", to: "/settlement/vendor" },
-      { label: "게임사 정산", to: "/settlement/gameco" },
-      { label: "장부 관리", to: "/ledger" },
+      { label: "업체 정산", to: "/settlement/vendor", perm: "settlement.view" },
+      { label: "게임사 정산", to: "/settlement/gameco", perm: "settlement.view" },
+      { label: "장부 관리", to: "/ledger", perm: "ledger.view" },
     ],
   },
   {
     label: "CS 관리",
     icon: "fa-headset",
     children: [
-      { label: "업체 응대", to: "/support/vendor" },
-      { label: "게임사 응대", to: "/support/gameco" },
-      { label: "솔루션 응대", to: "/support/solution" },
-      { label: "자주 하는 질문", to: "/faq" },
+      { label: "업체 응대", to: "/support/vendor", perm: "support.view" },
+      { label: "게임사 응대", to: "/support/gameco", perm: "support.view" },
+      { label: "솔루션 응대", to: "/support/solution", perm: "support.view" },
+      { label: "자주 하는 질문", to: "/faq", perm: "faq.view" },
     ],
   },
-  { label: "게시판", icon: "fa-clipboard-list", children: boards.value.map((b) => ({ label: b.name, to: `/board/${b.slug}` })) },
+  { label: "게시판", icon: "fa-clipboard-list", perm: "board.view", children: boards.value.map((b) => ({ label: b.name, to: `/board/${b.slug}` })) },
   { label: "환율 정보", to: "/exchange", icon: "fa-money-bill-trend-up" },
-  { label: "환경설정", to: "/settings", icon: "fa-gear" },
+  { label: "환경설정", to: "/settings", icon: "fa-gear", perm: ["gameCompany.view", "vendor.view", "usermanager.view", "permission.user.view", "permission.menu.view"] },
 ]);
+
+// 권한 필터: perm(문자열/배열) 중 하나라도 보유해야 노출 (super는 항상 통과, perm 없으면 공개)
+function allowed(perm) {
+  if (!perm) return true;
+  const codes = Array.isArray(perm) ? perm : [perm];
+  return codes.some((c) => auth.hasPermission(c));
+}
+const visibleMenus = computed(() =>
+  menus.value
+    .map((m) => {
+      if (m.children) {
+        if (m.perm && !allowed(m.perm)) return null;       // 그룹 자체 권한(게시판 등)
+        const kids = m.children.filter((c) => allowed(c.perm));
+        if (!kids.length && !m.perm) return null;           // 보이는 하위 없음
+        return { ...m, children: kids };
+      }
+      return allowed(m.perm) ? m : null;
+    })
+    .filter(Boolean),
+);
 
 function isActive(m) {
   if (m.exact) return route.path === m.to;

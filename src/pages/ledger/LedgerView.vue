@@ -5,7 +5,7 @@
         <p class="eyebrow">정산 관리</p>
         <h1 class="ttl">장부 관리</h1>
       </div>
-      <button class="btn btn-primary" @click="openNew()">+ 거래 등록</button>
+      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">+ 거래 등록</button>
     </header>
 
     <!-- 요약 -->
@@ -44,11 +44,12 @@
             <td class="r amt" :class="e.type === 'PAYMENT' ? 'neg' : 'pos'">{{ won(e.amount) }}</td>
             <td class="muted">{{ e.memo || "-" }}<span v-if="e.settlement_id" class="badge badge-indigo ml">정산#{{ e.settlement_id }}</span></td>
             <td class="c">
-              <template v-if="!e.settlement_id">
+              <template v-if="canEdit && !e.settlement_id">
                 <button class="btn btn-xs" @click="openEdit(e)">수정</button>
                 <button class="btn btn-xs btn-danger" @click="remove(e)">삭제</button>
               </template>
-              <span v-else class="muted xs">정산 파생</span>
+              <span v-else-if="e.settlement_id" class="muted xs">정산 파생</span>
+              <span v-else class="muted xs">—</span>
             </td>
           </tr>
         </tbody>
@@ -98,7 +99,10 @@ import DateRangePicker from "@/components/base/DateRangePicker.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import { formatDateOnly } from "@/utils/date";
 import { ledgerApi, gameCompanyApi, vendorApi } from "@/api/cs";
+import { useAuthStore } from "@/stores/auth";
 
+const auth = useAuthStore();
+const canEdit = computed(() => auth.hasPermission("ledger.edit"));
 const LIMIT = 15;
 const TYPE_OPTS = [{ value: "PAYMENT", label: "지급" }, { value: "COLLECTION", label: "회수" }];
 const TYPE_FORM_OPTS = [{ value: "PAYMENT", label: "지급 (게임사에 사용료)" }, { value: "COLLECTION", label: "회수 (업체에서 사용대금)" }];

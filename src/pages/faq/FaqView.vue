@@ -5,7 +5,7 @@
         <p class="eyebrow">CS 관리</p>
         <h1 class="ttl">자주 하는 질문</h1>
       </div>
-      <button class="btn btn-primary" @click="openNew()">+ FAQ 추가</button>
+      <button v-if="canEdit" class="btn btn-primary" @click="openNew()">+ FAQ 추가</button>
     </header>
 
     <div class="faq-grid">
@@ -37,7 +37,7 @@
                 <span class="blk ansblk">답변</span>
                 <div class="atext prose" v-html="f.answer"></div>
               </div>
-              <div class="itools">
+              <div v-if="canEdit" class="itools">
                 <button class="btn btn-xs" @click="openEdit(f)">수정</button>
                 <button class="btn btn-xs btn-danger" @click="remove(f)">삭제</button>
               </div>
@@ -126,6 +126,10 @@ import TagSelect from "@/components/base/TagSelect.vue";
 import TagChips from "@/components/base/TagChips.vue";
 import RichEditor from "@/components/base/RichEditor.vue";
 import { faqApi, faqCategoryApi } from "@/api/cs";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
+const canEdit = computed(() => auth.hasPermission("faq.edit"));
 
 const LIMIT = 10;
 const toast = useToast();
