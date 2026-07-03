@@ -4,17 +4,17 @@
     <div v-if="showQuickButtons" class="relative">
       <button
         @click.stop="toggleQuick"
-        class="h-[34px] w-[34px] flex items-center justify-center border-2 border-[#b9bccf] rounded-[3px] hover:bg-[#f0f1f8] text-[#5b607d] text-xs"
+        class="h-[34px] w-[34px] flex items-center justify-center border-2 border-[color:var(--line-strong)] rounded-[3px] hover:bg-[color:var(--surface-2)] text-[color:var(--ink-muted)] text-xs"
       >
         <i class="fa-solid fa-ellipsis-vertical"></i>
       </button>
 
       <div
         v-show="openQuick"
-        class="absolute left-0 mt-1 w-32 bg-white border-2 border-[#1b1d2e] rounded-[3px] shadow-[3px_3px_0_#1b1d2e] z-50"
+        class="absolute left-0 mt-1 w-32 bg-white border-2 border-[color:var(--line-hard)] rounded-[3px] shadow-[3px_3px_0_var(--line-hard)] z-50"
       >
         <button
-          class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[#f0f1f8]"
+          class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[color:var(--surface-2)]"
           @click="setQuick('yesterday')"
         >
           <i class="fa-regular fa-clock text-gray-400 text-[10px]"></i>
@@ -22,7 +22,7 @@
         </button>
 
         <button
-          class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[#f0f1f8]"
+          class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[color:var(--surface-2)]"
           @click="setQuick('today')"
         >
           <i class="fa-regular fa-calendar-check text-blue-500 text-[10px]"></i>
@@ -30,7 +30,7 @@
         </button>
 
         <button
-          class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[#f0f1f8]"
+          class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[color:var(--surface-2)]"
           @click="setQuick('week')"
         >
           <i class="fa-solid fa-calendar-week text-green-500 text-[10px]"></i>
@@ -39,7 +39,7 @@
 
         <!-- ✅ 이번달 추가 -->
         <button
-          class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[#f0f1f8]"
+          class="flex items-center gap-2 w-full text-left px-2.5 py-1.5 text-xs hover:bg-[color:var(--surface-2)]"
           @click="setQuick('month')"
         >
           <i class="fa-solid fa-calendar-days text-purple-500 text-[10px]"></i>
@@ -50,7 +50,7 @@
 
     <!-- 날짜 입력 -->
     <div class="relative flex-1">
-      <div class="flex h-[34px] border-2 border-[#b9bccf] rounded-[3px] overflow-hidden bg-white">
+      <div class="flex h-[34px] border-2 border-[color:var(--line-strong)] rounded-[3px] overflow-hidden bg-white">
         <input
           :value="formattedRange"
           @click="toggleCalendar"
@@ -62,14 +62,14 @@
         <button
           v-if="innerValue.start || innerValue.end"
           @click.stop="clearRange"
-          class="px-2 h-[34px] border-l hover:bg-[#f0f1f8] text-red-500 text-xs"
+          class="px-2 h-[34px] border-l hover:bg-[color:var(--surface-2)] text-red-500 text-xs"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
 
         <button
           @click.stop="toggleCalendar"
-          class="px-2 h-[34px] border-l hover:bg-[#f0f1f8] text-[#5b607d] text-xs"
+          class="px-2 h-[34px] border-l hover:bg-[color:var(--surface-2)] text-[color:var(--ink-muted)] text-xs"
         >
           <i class="fa-regular fa-calendar"></i>
         </button>
@@ -80,7 +80,7 @@
         v-show="openCalendar"
         class="absolute left-0 mt-1 z-50 bg-white border rounded-[3px] shadow-lg"
       >
-        <DatePicker color="purple"
+        <DatePicker color="purple" :is-dark="isDark"
           v-model.range="innerValue"
           :mode="mode"
           :is24hr="true"
@@ -105,6 +105,7 @@ import {
   lastWeekRange,
   currentMonthRange,
 } from "@/utils/date";
+import { useThemeStore } from "@/stores/theme";
 
 export default {
   name: "DateRangePicker",
@@ -177,6 +178,7 @@ export default {
   },
 
   computed: {
+    isDark(): boolean { return useThemeStore().dark; },
     // 선택된 시작/종료 날짜를 표시용 문자열로 포맷팅한다
     formattedRange(): string {
       if (!this.innerValue?.start || !this.innerValue?.end) return "";

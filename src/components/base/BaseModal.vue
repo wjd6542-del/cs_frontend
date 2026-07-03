@@ -3,7 +3,7 @@
     <div
       v-for="(entry, index) in modal.stack"
       :key="index"
-      class="fixed inset-0 flex items-center justify-center bg-[#1b1d2e]/55"
+      class="fixed inset-0 flex items-center justify-center bg-[color:var(--line-hard)]/55"
       :style="{ zIndex: 200 + index * 10 }"
     >
       <div

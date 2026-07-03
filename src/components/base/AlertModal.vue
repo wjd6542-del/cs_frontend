@@ -2,7 +2,7 @@
   <teleport to="body">
     <div
       v-if="visible"
-      class="fixed inset-0 z-[300] flex items-center justify-center bg-[#1b1d2e]/55"
+      class="fixed inset-0 z-[300] flex items-center justify-center bg-[color:var(--line-hard)]/55"
       @click="onBackdropClick"
     >
       <div

@@ -1,14 +1,14 @@
 ﻿<template>
-  <div class="bg-[#ffffff] border border-[#d9dbe9] rounded-xl overflow-hidden">
+  <div class="bg-[color:var(--surface)] border border-[color:var(--line)] rounded-xl overflow-hidden">
     <div class="overflow-x-auto">
       <table class="w-full text-sm border-collapse">
         <!-- HEADER -->
 
-        <thead class="bg-[#f0f1f8] text-[#6b5f4b]">
+        <thead class="bg-[color:var(--surface-2)] text-[#6b5f4b]">
           <tr>
             <th
               v-if="selectable"
-              class="border border-[#d9dbe9] w-10 text-center"
+              class="border border-[color:var(--line)] w-10 text-center"
             >
               <input
                 type="checkbox"
@@ -21,7 +21,7 @@
             <th
               v-for="col in columns"
               :key="col.key"
-              class="border border-[#d9dbe9] px-3 py-2 font-semibold select-none"
+              class="border border-[color:var(--line)] px-3 py-2 font-semibold select-none"
               :class="[
                 col.thClass,
                 alignClass(col, 'center'),
@@ -41,7 +41,7 @@
                     {{ sortOrder === "asc" ? "▲" : "▼" }}
                   </span>
 
-                  <span v-else class="text-[#9a9fbb]"> ⇅ </span>
+                  <span v-else class="text-[color:var(--ink-faint)]"> ⇅ </span>
                 </span>
               </div>
             </th>
@@ -63,7 +63,7 @@
           <tr v-else-if="!displayRows.length">
             <td
               :colspan="columns.length + (selectable ? 1 : 0)"
-              class="text-center py-8 text-[#9a9fbb]"
+              class="text-center py-8 text-[color:var(--ink-faint)]"
             >
               {{ $t("데이터가 없습니다") }}
             </td>
@@ -72,12 +72,12 @@
           <tr
             v-for="row in displayRows"
             :key="row[rowKey]"
-            class="hover:bg-[#f0f1f8] transition-colors"
+            class="hover:bg-[color:var(--surface-2)] transition-colors"
             @click="rowClick(row)"
           >
             <td
               v-if="selectable"
-              class="border border-[#d9dbe9] text-center"
+              class="border border-[color:var(--line)] text-center"
               @click.stop
             >
               <input
@@ -90,7 +90,7 @@
             <td
               v-for="col in columns"
               :key="col.key"
-              class="border border-[#d9dbe9] px-3 py-2 text-[color:var(--ink-soft)]"
+              class="border border-[color:var(--line)] px-3 py-2 text-[color:var(--ink-soft)]"
               :class="[col.tdClass, alignClass(col)]"
               :style="{
                 width: col.width,
@@ -131,7 +131,7 @@
           <tr>
             <td
               :colspan="columns.length + (selectable ? 1 : 0)"
-              class="border-t border-[#d9dbe9] px-4 py-3 bg-[#f0f1f8] text-[#6b5f4b]"
+              class="border-t border-[color:var(--line)] px-4 py-3 bg-[color:var(--surface-2)] text-[#6b5f4b]"
             >
               <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                 <!-- page size -->
@@ -140,7 +140,7 @@
                   <select
                     v-model.number="localPageSize"
                     @change="changePageSize"
-                    class="border border-[#b9bccf] rounded px-2 py-1 bg-[#ffffff]"
+                    class="border border-[color:var(--line-strong)] rounded px-2 py-1 bg-[color:var(--surface)]"
                   >
                     <option
                       v-for="size in pageSizeOptions"
@@ -154,30 +154,30 @@
 
                 <!-- pagination -->
                 <div class="flex items-center gap-2 flex-wrap">
-                  <div class="flex border border-[#b9bccf] rounded overflow-hidden text-sm">
+                  <div class="flex border border-[color:var(--line-strong)] rounded overflow-hidden text-sm">
                     <button
-                      class="px-2 py-1 border-r border-[#d9dbe9] bg-[#ffffff] hover:bg-[#d9dbe9] disabled:opacity-40"
+                      class="px-2 py-1 border-r border-[color:var(--line)] bg-[color:var(--surface)] hover:bg-[color:var(--line)] disabled:opacity-40"
                       :disabled="page === 1"
                       @click="changePage(1)"
                     >
                       {{ $t("처음") }}
                     </button>
                     <button
-                      class="px-2 py-1 border-r border-[#d9dbe9] bg-[#ffffff] hover:bg-[#d9dbe9] disabled:opacity-40"
+                      class="px-2 py-1 border-r border-[color:var(--line)] bg-[color:var(--surface)] hover:bg-[color:var(--line)] disabled:opacity-40"
                       :disabled="page === 1"
                       @click="changePage(page - 1)"
                     >
                       {{ $t("이전") }}
                     </button>
                     <button
-                      class="px-2 py-1 border-r border-[#d9dbe9] bg-[#ffffff] hover:bg-[#d9dbe9] disabled:opacity-40"
+                      class="px-2 py-1 border-r border-[color:var(--line)] bg-[color:var(--surface)] hover:bg-[color:var(--line)] disabled:opacity-40"
                       :disabled="page >= totalPages"
                       @click="changePage(page + 1)"
                     >
                       {{ $t("다음") }}
                     </button>
                     <button
-                      class="px-2 py-1 bg-[#ffffff] hover:bg-[#d9dbe9] disabled:opacity-40"
+                      class="px-2 py-1 bg-[color:var(--surface)] hover:bg-[color:var(--line)] disabled:opacity-40"
                       :disabled="page >= totalPages"
                       @click="changePage(totalPages)"
                     >
@@ -189,13 +189,13 @@
                     <input
                       type="number"
                       v-model.number="inputPage"
-                      class="w-14 text-center border border-[#b9bccf] rounded px-2 py-1 bg-[#ffffff]"
+                      class="w-14 text-center border border-[color:var(--line-strong)] rounded px-2 py-1 bg-[color:var(--surface)]"
                       :min="1"
                       :max="totalPages"
                       @keyup.enter="applyPage"
                       @blur="applyPage"
                     />
-                    <span class="text-[#5b607d] whitespace-nowrap">
+                    <span class="text-[color:var(--ink-muted)] whitespace-nowrap">
                       / {{ totalPages }}
                     </span>
                   </div>

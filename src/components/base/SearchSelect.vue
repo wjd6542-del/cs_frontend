@@ -7,7 +7,7 @@
     <!-- 트리거 -->
     <div :class="triggerClasses" @click="toggle">
       <div class="flex-1 truncate leading-none flex items-center gap-2">
-        <span v-if="selectedItem && selectedItem[colorKey]" class="w-3 h-3 rounded-[2px] border border-[#1b1d2e] shrink-0" :style="{ backgroundColor: selectedItem[colorKey] }"></span>
+        <span v-if="selectedItem && selectedItem[colorKey]" class="w-3 h-3 rounded-[2px] border border-[color:var(--line-hard)] shrink-0" :style="{ backgroundColor: selectedItem[colorKey] }"></span>
         <span class="truncate">{{ selectedLabel || placeholder }}</span>
       </div>
 
@@ -15,7 +15,7 @@
         <button
           v-if="modelValue !== null && modelValue !== ''"
           @click.stop="clear"
-          class="text-[#9a9fbb] hover:text-[#7a5cff] transition-colors flex items-center justify-center text-[10px]"
+          class="text-[color:var(--ink-faint)] hover:text-[#7a5cff] transition-colors flex items-center justify-center text-[10px]"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -23,7 +23,7 @@
         <i
           class="fa-solid fa-chevron-down transition-transform duration-200 flex items-center justify-center"
           :class="[
-            open ? 'rotate-180 text-[#7a5cff]' : 'text-[#9a9fbb]',
+            open ? 'rotate-180 text-[#7a5cff]' : 'text-[color:var(--ink-faint)]',
             isLargeSize ? 'text-xl' : 'text-[9px]',
           ]"
         ></i>
@@ -36,15 +36,15 @@
         v-if="open"
         ref="dropdown"
         :style="dropdownStyle"
-        class="bg-[#ffffff] border-2 border-[#1b1d2e] rounded-[3px] shadow-[4px_4px_0_#1b1d2e] overflow-hidden"
+        class="bg-[color:var(--surface)] border-2 border-[color:var(--line-hard)] rounded-[3px] shadow-[4px_4px_0_var(--line-hard)] overflow-hidden"
       >
-        <div class="p-2 bg-[#f0f1f8] border-b-2 border-[#1b1d2e]">
+        <div class="p-2 bg-[color:var(--surface-2)] border-b-2 border-[color:var(--line-hard)]">
           <input
             ref="searchInput"
             v-model="keyword"
             type="text"
             :placeholder="searchPlaceholder"
-            class="w-full h-[30px] px-2 text-xs border-2 border-[#b9bccf] rounded-[3px] focus:outline-none focus:ring-2 focus:ring-[#7a5cff]/25 focus:border-[#7a5cff] bg-[#ffffff]"
+            class="w-full h-[30px] px-2 text-xs border-2 border-[color:var(--line-strong)] rounded-[3px] focus:outline-none focus:ring-2 focus:ring-[#7a5cff]/25 focus:border-[#7a5cff] bg-[color:var(--surface)]"
           />
         </div>
 
@@ -52,11 +52,11 @@
           <div
             v-for="item in filteredOptions"
             :key="item[valueKey]"
-            class="px-3 py-1.5 text-xs hover:bg-[#f0f1f8] cursor-pointer flex justify-between items-center group transition-colors"
+            class="px-3 py-1.5 text-xs hover:bg-[color:var(--surface-2)] cursor-pointer flex justify-between items-center group transition-colors"
             @click="select(item)"
           >
-            <span class="text-[#2c2f45] group-hover:text-[#7a5cff] font-medium flex items-center gap-2">
-              <span v-if="item[colorKey]" class="w-3 h-3 rounded-[2px] border border-[#1b1d2e] shrink-0" :style="{ backgroundColor: item[colorKey] }"></span>
+            <span class="text-[color:var(--ink-soft)] group-hover:text-[#7a5cff] font-medium flex items-center gap-2">
+              <span v-if="item[colorKey]" class="w-3 h-3 rounded-[2px] border border-[color:var(--line-hard)] shrink-0" :style="{ backgroundColor: item[colorKey] }"></span>
               {{ item[labelKey] }}
             </span>
             <i
@@ -67,14 +67,14 @@
           <button
             v-if="canCreate"
             type="button"
-            class="w-full px-3 py-2 text-xs text-left text-[#5f3fe0] bg-[#ede9ff] hover:bg-[#e0d9ff] border-t-2 border-[#1b1d2e] flex items-center gap-1.5"
+            class="w-full px-3 py-2 text-xs text-left text-[#5f3fe0] bg-[#ede9ff] hover:bg-[#e0d9ff] border-t-2 border-[color:var(--line-hard)] flex items-center gap-1.5"
             @click="createItem"
           >
             <i class="fa-solid fa-plus"></i> "<b class="font-[var(--font-pixel)]">{{ keyword.trim() }}</b>" 추가
           </button>
           <div
             v-if="filteredOptions.length === 0 && !canCreate"
-            class="px-3 py-5 text-[#9a9fbb] text-center text-xs"
+            class="px-3 py-5 text-[color:var(--ink-faint)] text-center text-xs"
           >
             {{ emptyText }}
           </div>
@@ -161,7 +161,7 @@ export default {
         // 기본값 세팅 (주입된 클래스가 없을 때만)
         !hasHeight && !hasPadding && "h-[34px] px-2.5",
         !hasPadding && hasHeight && "px-2.5",
-        !hasBorder && "border-2 border-[#b9bccf]",
+        !hasBorder && "border-2 border-[color:var(--line-strong)]",
         !hasRounded && "rounded-[3px]",
         !hasText && "text-xs",
         !hasPadding && !hasHeight && "bg-white",
