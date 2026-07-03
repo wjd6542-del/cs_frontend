@@ -11,14 +11,12 @@
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>솔루션사명</th><th>담당자</th><th>연락처</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
+          <tr><th>솔루션사명</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="5"><EmptyState icon="🧩" title="솔루션사가 없어요" desc="솔루션 응대 대상 솔루션사를 등록해요." hint="＋ 솔루션사 추가" compact /></td></tr>
+          <tr v-if="!rows.length"><td colspan="3"><EmptyState icon="🧩" title="솔루션사가 없어요" desc="솔루션 응대 대상 솔루션사를 등록해요." hint="＋ 솔루션사 추가" compact /></td></tr>
           <tr v-for="s in rows" :key="s.id">
             <td class="nm">{{ s.name }}</td>
-            <td class="muted">{{ s.contact_name || "-" }}</td>
-            <td class="muted">{{ s.contact_phone || "-" }}</td>
             <td class="c"><span class="st" :class="s.is_active ? 'on' : 'off'">{{ s.is_active ? "사용" : "중지" }}</span></td>
             <td class="c">
               <button class="btn btn-xs" @click="openEdit(s)">수정</button>
@@ -36,8 +34,6 @@
         <h4 class="ph">{{ editing ? "솔루션사 수정" : "솔루션사 추가" }}</h4>
         <div class="grid">
           <BaseInput v-model="form.name" label="솔루션사명" />
-          <BaseInput v-model="form.contact_name" label="담당자" />
-          <BaseInput v-model="form.contact_phone" label="연락처" />
           <BaseInput v-model="form.contact_email" label="이메일" />
           <label class="fld col2">
             <span class="form-label">메모</span>
@@ -106,7 +102,7 @@ async function submit() {
     await solutionCompanyApi.save({
       id: form.id || undefined,
       name: form.name, code: form.code || null,
-      contact_name: form.contact_name || null, contact_phone: form.contact_phone || null, contact_email: form.contact_email || null,
+      contact_email: form.contact_email || null,
       memo: form.memo || null, is_active: form.is_active,
     });
     toast.success("저장되었습니다."); showForm.value = false; await reload();
