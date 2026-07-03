@@ -32,15 +32,15 @@ function onClick() { if (!props.disabled) emit("update:modelValue", !props.model
 }
 .tgl:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); }
 .tgl:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--line-hard); }
-.tgl.md { width: 44px; height: 24px; }
-.tgl.sm { width: 38px; height: 22px; }
+.tgl.md { width: 48px; height: 28px; }
+.tgl.sm { width: 40px; height: 24px; }
 .tgl.on { background: #2e7d43; }
 .knob {
   position: absolute; top: 2px; left: 2px; border-radius: 2px;
   background: #fff; border: 1px solid var(--line-hard); transition: transform 0.18s;
 }
-.tgl.md .knob { width: 16px; height: 16px; }
-.tgl.sm .knob { width: 14px; height: 14px; }
+.tgl.md .knob { width: 20px; height: 20px; }
+.tgl.sm .knob { width: 16px; height: 16px; }
 .tgl.md.on .knob { transform: translateX(20px); }
 .tgl.sm.on .knob { transform: translateX(16px); }
 .tgl.dis { opacity: 0.5; cursor: not-allowed; }
