@@ -2,8 +2,8 @@
   <div class="vtree">
     <div class="vt-head">
       <input v-model="kw" class="field field-xs" :placeholder="`${label} 명칭 검색`" />
-      <button v-if="hasBranches" class="btn btn-xs" title="전체 펼치기" @click="expandAll"><i class="fa-solid fa-angles-down"></i></button>
-      <button v-if="hasBranches" class="btn btn-xs" title="전체 접기" @click="collapseAll"><i class="fa-solid fa-angles-up"></i></button>
+      <button class="btn btn-xs" title="전체 펼치기" :disabled="!hasBranches" @click="expandAll"><i class="fa-solid fa-angles-down"></i></button>
+      <button class="btn btn-xs" title="전체 접기" :disabled="!hasBranches" @click="collapseAll"><i class="fa-solid fa-angles-up"></i></button>
       <button class="btn btn-xs btn-primary" :title="`최상위 ${label} 추가`" @click="startAdd(null)">＋</button>
     </div>
 
@@ -301,8 +301,9 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .vtree { display: flex; flex-direction: column; height: 100%; }
-.vt-head { display: flex; gap: 0.35rem; padding: 0.6rem; border-bottom: 2px solid var(--line); }
-.vt-head .field { flex: 1; }
+.vt-head { display: flex; align-items: center; gap: 0.35rem; padding: 0.6rem; border-bottom: 2px solid var(--line); flex-wrap: wrap; }
+.vt-head .field { flex: 1; min-width: 120px; }
+.vt-head .btn:disabled { opacity: 0.4; }
 .vt-edit { display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 0.6rem; background: var(--surface-2); border-bottom: 2px solid var(--line); flex-wrap: wrap; }
 .vt-under { font-size: 0.68rem; color: var(--seal-deep); font-family: var(--font-pixel); width: 100%; }
 .vt-body { flex: 1; overflow-y: auto; padding: 0.3rem; }
