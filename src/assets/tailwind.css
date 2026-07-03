@@ -83,6 +83,16 @@
   html.dark .btn-danger { background: var(--danger); color: #fff; }
   /* Tailwind bg-white 유틸 전역 다크 보정 (공용 컴포넌트 컨테이너·모달·달력 등) */
   html.dark .bg-white { background-color: var(--surface); }
+  /* 입력 요소 글자색 (다크에서 기본 검정 → 밝게) */
+  html.dark input,
+  html.dark textarea,
+  html.dark select {
+    color: var(--ink);
+  }
+  html.dark input::placeholder,
+  html.dark textarea::placeholder {
+    color: var(--ink-faint);
+  }
   /* 메인 콘텐츠: 다크에서는 밝은 한지 텍스처 제거하고 평평한 다크 배경 */
   html.dark main.content {
     background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
