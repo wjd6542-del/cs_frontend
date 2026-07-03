@@ -11,13 +11,12 @@
     <div class="tablewrap">
       <table class="tbl">
         <thead>
-          <tr><th>게임사명</th><th>이메일</th><th class="r">요율</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
+          <tr><th>게임사명</th><th class="r">요율</th><th class="c">상태</th><th class="c w-act">관리</th></tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td colspan="5"><EmptyState variant="gameco" compact /></td></tr>
+          <tr v-if="!rows.length"><td colspan="4"><EmptyState variant="gameco" compact /></td></tr>
           <tr v-for="g in rows" :key="g.id">
             <td class="nm">{{ g.name }}</td>
-            <td class="muted">{{ g.contact_email || "-" }}</td>
             <td class="r">{{ g.fee_rate != null ? g.fee_rate + "%" : "-" }}</td>
             <td class="c"><span class="st" :class="g.is_active ? 'on' : 'off'">{{ g.is_active ? "사용" : "중지" }}</span></td>
             <td class="c">
@@ -36,7 +35,6 @@
         <h4 class="ph">{{ editing ? "게임사 수정" : "게임사 추가" }}</h4>
         <div class="grid">
           <BaseInput v-model="form.name" label="게임사명" />
-          <BaseInput v-model="form.contact_email" label="이메일" />
           <BaseInput v-model="form.fee_rate" label="요율(%)" type="number" placeholder="예: 15" />
           <label class="fld col2">
             <span class="form-label">메모</span>

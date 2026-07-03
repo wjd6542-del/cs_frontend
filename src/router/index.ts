@@ -18,6 +18,7 @@ import SettlementView from "@/pages/settlement/SettlementView.vue";
 import SupportView from "@/pages/support/SupportView.vue";
 import FaqView from "@/pages/faq/FaqView.vue";
 import AlertsView from "@/pages/alerts/AlertsView.vue";
+import ExchangeRateView from "@/pages/exchange/ExchangeRateView.vue";
 
 import MyPage from "@/pages/mypage/MyPage.vue";
 import SettingsView from "@/pages/settings/SettingsView.vue";
@@ -50,6 +51,7 @@ export const router = createRouter({
             { path: "support/gameco", component: SupportView, props: { party: "GAME_COMPANY" }, meta: { auth: true, title: "게임사 응대" } },
             { path: "faq", component: FaqView, meta: { auth: true, title: "자주 하는 질문" } },
             { path: "alerts", component: AlertsView, meta: { auth: true, title: "알림" } },
+            { path: "exchange", component: ExchangeRateView, meta: { auth: true, title: "환율 정보" } },
 
             // 게시판
             { path: "board/:slug", component: BoardView, meta: { auth: true, title: "게시판" } },

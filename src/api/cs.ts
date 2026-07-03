@@ -66,6 +66,13 @@ export const faqCategoryApi = {
   remove: (id) => api.post("/faqCategory/delete", { id }).then((r) => r.data),
 };
 
+// 환율
+export const exchangeRateApi = {
+  list: (body = {}) => api.post("/exchangeRate/list", body).then((r) => r.data),
+  latest: () => api.post("/exchangeRate/latest", {}).then((r) => r.data),
+  collect: () => api.post("/exchangeRate/collect", {}).then((r) => r.data),
+};
+
 // 태그 (CS 공통)
 export const tagApi = {
   list: (body = {}) => api.post("/tag/list", body).then((r) => r.data),
