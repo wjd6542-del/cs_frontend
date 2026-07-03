@@ -47,7 +47,8 @@
         </template>
         <template v-else>
           <span class="nm">{{ row.node.name }}</span>
-          <span v-if="row.node.open_count" class="cnt" title="미해결 응대(접수·처리중)">{{ row.node.open_count }}</span>
+          <span v-if="row.node.open_count" class="cnt open" :title="`접수 ${row.node.open_count}건`">{{ row.node.open_count }}</span>
+          <span v-if="row.node.progress_count" class="cnt prog" :title="`처리중 ${row.node.progress_count}건`">{{ row.node.progress_count }}</span>
           <span class="acts">
             <button class="ico" title="하위 추가" @click.stop="startAdd(row.node)"><i class="fa-solid fa-plus"></i></button>
             <button class="ico" title="명칭 수정" @click.stop="startEdit(row.node)"><i class="fa-solid fa-pen"></i></button>
@@ -234,7 +235,9 @@ onMounted(reload);
 .vt-row.dragover { background: #e0d9ff; box-shadow: inset 0 0 0 2px var(--seal); }
 .rootdrop { margin: 0.2rem; padding: 0.5rem; text-align: center; font-family: var(--font-pixel); font-size: 0.66rem; color: var(--seal-deep); background: var(--surface-2); border: 2px dashed var(--seal); border-radius: 3px; }
 .rootdrop.over { background: #e0d9ff; }
-.cnt { flex-shrink: 0; min-width: 18px; height: 18px; padding: 0 4px; display: grid; place-items: center; font-family: var(--font-pixel); font-size: 0.6rem; color: #fff; background: var(--danger); border: 1px solid var(--line-hard); border-radius: 3px; }
+.cnt { flex-shrink: 0; min-width: 18px; height: 18px; padding: 0 4px; display: grid; place-items: center; font-family: var(--font-pixel); font-size: 0.6rem; color: #fff; border: 1px solid var(--line-hard); border-radius: 3px; cursor: help; }
+.cnt.open { background: #f59e0b; } /* 접수 */
+.cnt.prog { background: #7a5cff; } /* 처리중 */
 .caret { width: 18px; height: 18px; flex-shrink: 0; display: grid; place-items: center; color: var(--ink-muted); font-size: 0.75rem; }
 .caret.ph { visibility: hidden; }
 .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: var(--ink); }
