@@ -63,20 +63,26 @@
           </label>
         </div>
 
-        <div class="conv">
-          <div class="cbox">
-            <span class="ccap">{{ calc.dir === 'toKrw' ? curLabel : '원 (KRW)' }}</span>
-            <input v-model="calc.amount" type="number" class="camt" placeholder="0" />
-          </div>
-          <button class="swap" @click="swapDir" title="방향 전환"><i class="fa-solid fa-right-left"></i></button>
-          <div class="cbox result">
-            <span class="ccap">{{ calc.dir === 'toKrw' ? '원 (KRW)' : curLabel }}</span>
-            <div class="cres num">{{ resultText }}</div>
-          </div>
+        <!-- 방향 -->
+        <div class="dirtoggle">
+          <button :class="{ on: calc.dir === 'toKrw' }" @click="calc.dir = 'toKrw'">{{ curSymbol }} → 원</button>
+          <button :class="{ on: calc.dir === 'toCur' }" @click="calc.dir = 'toCur'">원 → {{ curSymbol }}</button>
         </div>
 
-        <p v-if="rate" class="crate num">💱 1 {{ curSymbol }} = {{ won(rate) }} <span class="crated">({{ dateLabel }})</span></p>
-        <p v-else class="crate warn">선택한 일자의 {{ curSymbol }} 환율이 없습니다.</p>
+        <!-- 입력 -->
+        <div class="inpblock">
+          <span class="ccap">{{ fromLabel }} 금액 입력</span>
+          <input v-model="calc.amount" type="number" class="biginput" placeholder="0" />
+        </div>
+
+        <!-- 결과 (하단, 크게) -->
+        <div class="resultpanel">
+          <span class="rp-cap">변환 결과</span>
+          <div class="rp-val num">{{ resultText }}</div>
+          <div class="rp-eq num" v-if="result != null">{{ Number(calc.amount).toLocaleString('ko-KR') }} {{ calc.dir === 'toKrw' ? curSymbol : '원' }} = {{ resultText }}</div>
+          <div class="rp-rate num" v-if="rate">💱 1 {{ curSymbol }} = {{ won(rate) }} · {{ dateLabel }} 기준</div>
+          <div class="rp-rate warn" v-else>선택한 일자의 {{ curSymbol }} 환율이 없습니다.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -134,6 +140,7 @@ const rate = computed(() => (rateRow.value ? rateRow.value[calc.cur] : null));
 const curMeta = computed(() => CUR.find((c) => c.key === calc.cur) || CUR[0]);
 const curLabel = computed(() => `${curMeta.value.emoji} ${curMeta.value.symbol}`);
 const curSymbol = computed(() => curMeta.value.symbol);
+const fromLabel = computed(() => (calc.dir === "toKrw" ? curLabel.value : "원 (KRW)"));
 const dateLabel = computed(() => (rateRow.value ? d(rateRow.value.date) : "-"));
 const result = computed(() => {
   const amt = Number(calc.amount);
@@ -188,26 +195,33 @@ onMounted(async () => { await Promise.all([loadLatest(), reload()]); });
 
 /* 계산기 모달 */
 .drawer { position: fixed; inset: 0; z-index: 210; background: rgba(27, 29, 46, 0.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.cmodal { position: relative; width: 440px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-lg); padding: 1.5rem; }
-.vclose { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); box-shadow: 2px 2px 0 var(--line-hard); }
+.cmodal { position: relative; width: 560px; max-width: 100%; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-lg); padding: 1.8rem; }
+.vclose { position: absolute; top: 1.1rem; right: 1.1rem; width: 34px; height: 34px; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); box-shadow: 2px 2px 0 var(--line-hard); }
 .vclose:hover { background: var(--surface-2); }
-.cttl { font-family: var(--font-pixel); font-size: 1.1rem; color: var(--ink); display: flex; align-items: center; gap: 0.5rem; }
+.cttl { font-family: var(--font-pixel); font-size: 1.25rem; color: var(--ink); display: flex; align-items: center; gap: 0.5rem; }
 .cttl i { color: var(--seal); }
-.csub { font-size: 0.8rem; color: var(--ink-muted); margin-top: 0.3rem; margin-bottom: 1.1rem; }
-.crow { display: flex; gap: 0.7rem; margin-bottom: 1rem; }
+.csub { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.35rem; margin-bottom: 1.3rem; }
+.crow { display: flex; gap: 0.7rem; margin-bottom: 1.1rem; }
 .cfld { flex: 1; display: block; }
 .clbl { display: block; font-family: var(--font-pixel); font-size: 0.64rem; color: var(--ink-soft); margin-bottom: 0.35rem; }
 
-.conv { display: flex; align-items: stretch; gap: 0.6rem; }
-.cbox { flex: 1; min-width: 0; background: var(--surface-2); border: 2px solid var(--line-hard); border-radius: 3px; padding: 0.6rem 0.7rem; display: flex; flex-direction: column; gap: 0.3rem; }
-.cbox.result { background: #ede9ff; }
-.ccap { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--ink-muted); }
-.camt { width: 100%; background: transparent; border: none; outline: none; font-family: var(--font-pixel); font-size: 1.05rem; color: var(--ink); }
-.cres { font-family: var(--font-pixel); font-size: 1.05rem; color: var(--seal-deep); word-break: break-all; }
-.swap { flex-shrink: 0; width: 38px; align-self: center; height: 38px; border: 2px solid var(--line-hard); border-radius: 3px; background: var(--surface); color: var(--seal); box-shadow: 2px 2px 0 var(--line-hard); transition: transform 0.08s; }
-.swap:hover { transform: translateY(-1px); }
-.swap:active { transform: translateY(1px); }
-.crate { margin-top: 1.1rem; text-align: center; font-size: 0.85rem; color: var(--ink); }
-.crate .crated { color: var(--ink-faint); font-size: 0.76rem; }
-.crate.warn { color: var(--danger); }
+/* 방향 토글 */
+.dirtoggle { display: flex; gap: 0; border: 2px solid var(--line-hard); border-radius: 3px; overflow: hidden; margin-bottom: 1rem; }
+.dirtoggle button { flex: 1; padding: 0.55rem; font-family: var(--font-pixel); font-size: 0.72rem; color: var(--ink-muted); background: var(--surface); }
+.dirtoggle button:first-child { border-right: 2px solid var(--line-hard); }
+.dirtoggle button.on { background: var(--seal); color: #fff; }
+
+/* 입력 */
+.inpblock { background: var(--surface-2); border: 2px solid var(--line-hard); border-radius: 3px; padding: 0.8rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.ccap { font-family: var(--font-pixel); font-size: 0.64rem; color: var(--ink-muted); }
+.biginput { width: 100%; background: transparent; border: none; outline: none; font-family: var(--font-pixel); font-size: 1.7rem; color: var(--ink); }
+.biginput::placeholder { color: var(--ink-faint); }
+
+/* 결과 패널 (하단 강조) */
+.resultpanel { margin-top: 1.2rem; background: #1b1d2e; border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: 4px 4px 0 var(--line-hard); padding: 1.2rem 1.3rem; text-align: center; position: relative; overflow: hidden; }
+.rp-cap { font-family: var(--font-pixel); font-size: 0.66rem; letter-spacing: 0.1em; color: #8b90b8; }
+.rp-val { font-family: var(--font-pixel); font-size: 2rem; color: #fff; margin-top: 0.4rem; word-break: break-all; line-height: 1.2; text-shadow: 2px 2px 0 rgba(0,0,0,0.35); }
+.rp-eq { font-size: 0.82rem; color: #c3b7ff; margin-top: 0.6rem; }
+.rp-rate { font-size: 0.78rem; color: #8b90b8; margin-top: 0.5rem; }
+.rp-rate.warn { color: #ff8d8d; }
 </style>
