@@ -17,7 +17,7 @@
       <div v-if="!flat.length"><EmptyState :icon="emptyIcon" :title="`${label}가 없어요`" :desc="`${label}를 추가해 보세요.`" hint="＋ 로 추가!" compact /></div>
 
       <!-- 최상위로 이동 드롭존 (드래그 중에만) -->
-      <div v-if="dragId" class="rootdrop" :class="{ over: dragOverRoot }" @dragover.prevent="dragOverRoot = true" @dragleave="dragOverRoot = false" @drop.stop="dropRoot">
+      <div v-if="dragId" class="rootdrop" :class="{ over: dragOverRoot }">
         ⤒ 여기에 놓으면 최상위로 이동
       </div>
 
@@ -34,15 +34,10 @@
           'dz-inside': dragOverId === row.node.id && dropPos === 'inside',
         }"
         :style="{ paddingLeft: 0.4 + row.depth * 0.9 + 'rem' }"
-        :draggable="editId !== row.node.id"
+        :data-node-id="row.node.id"
         @click="select(row.node)"
-        @dragstart="onDragStart(row.node, $event)"
-        @dragover.prevent="onDragOver(row.node, $event)"
-        @dragleave="onDragLeave(row.node)"
-        @drop.stop="onDrop(row.node)"
-        @dragend="reset"
       >
-        <span class="grip" title="드래그하여 위치·순서 이동"><i class="fa-solid fa-grip-vertical"></i></span>
+        <span class="grip" title="드래그하여 위치·순서 이동" @mousedown.stop="onGripDown(row.node, $event)"><i class="fa-solid fa-grip-vertical"></i></span>
         <button v-if="row.hasChildren" class="caret" @click.stop="toggle(row.node.id)">
           <i class="fa-solid" :class="isCollapsed(row.node.id) ? 'fa-caret-right' : 'fa-caret-down'"></i>
         </button>
@@ -70,7 +65,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, reactive, computed, onMounted, nextTick } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { useToast } from "vue-toastification";
 import { confirmDelete } from "@/lib/ui";
 import EmptyState from "@/components/base/EmptyState.vue";
@@ -133,7 +128,7 @@ const flat = computed(() => {
 });
 
 async function reload() { roots.value = await props.api.tree(); }
-function select(node) { emit("select", { id: node.id, name: node.name, code: node.code }); }
+function select(node) { if (suppressClick) return; emit("select", { id: node.id, name: node.name, code: node.code }); }
 
 function startAdd(parent) {
   adding.value = { parent_id: parent?.id ?? null, parent_name: parent?.name ?? "" };
@@ -195,18 +190,57 @@ function descendantsOf(id) {
   find(roots.value);
   return set;
 }
-function onDragStart(node, e) {
-  dragId.value = node.id;
-  if (e?.dataTransfer) { e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", String(node.id)); } catch (_) {} }
+// 포인터(마우스) 기반 드래그 — 네이티브 HTML5 DnD 대신 사용(웹뷰 호환 안정)
+let pending = null;      // { id, x, y } — 임계값 넘기 전 대기 상태
+let dragging = false;    // 실제 드래그 진행 중
+let suppressClick = false; // 드래그 직후 click(select) 억제
+
+function onGripDown(node, e) {
+  if (e.button !== 0 || editId.value === node.id) return;
+  e.preventDefault();
+  pending = { id: node.id, x: e.clientX, y: e.clientY };
+  document.addEventListener("mousemove", onDocMove, true);
+  document.addEventListener("mouseup", onDocUp, true);
 }
-function onDragOver(node, e) {
-  if (!dragId.value || dragId.value === node.id) return;
-  dragOverId.value = node.id;
-  const rect = e.currentTarget.getBoundingClientRect();
+function onDocMove(e) {
+  if (!pending) return;
+  if (!dragging) {
+    if (Math.abs(e.clientX - pending.x) + Math.abs(e.clientY - pending.y) < 5) return;
+    dragging = true;
+    dragId.value = pending.id;
+    document.body.style.userSelect = "none";
+  }
+  e.preventDefault();
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  if (el && el.closest && el.closest(".rootdrop")) { dragOverRoot.value = true; dragOverId.value = null; return; }
+  dragOverRoot.value = false;
+  const rowEl = el && el.closest ? el.closest(".vt-row") : null;
+  const idAttr = rowEl && rowEl.getAttribute("data-node-id");
+  if (!idAttr) { dragOverId.value = null; return; }
+  const tid = Number(idAttr);
+  if (tid === dragId.value) { dragOverId.value = null; return; }
+  dragOverId.value = tid;
+  const rect = rowEl.getBoundingClientRect();
   const y = e.clientY - rect.top;
   dropPos.value = y < rect.height * 0.28 ? "before" : y > rect.height * 0.72 ? "after" : "inside";
 }
-function onDragLeave(node) { if (dragOverId.value === node.id) dragOverId.value = null; }
+function onDocUp() {
+  document.removeEventListener("mousemove", onDocMove, true);
+  document.removeEventListener("mouseup", onDocUp, true);
+  document.body.style.userSelect = "";
+  if (dragging) {
+    suppressClick = true;
+    setTimeout(() => { suppressClick = false; }, 0);
+    const id = dragId.value;
+    if (dragOverRoot.value) { reset(); if (id) move(id, null); }
+    else if (dragOverId.value) { performDrop(id, dragOverId.value, dropPos.value); }
+    else reset();
+  } else {
+    reset();
+  }
+  pending = null;
+  dragging = false;
+}
 function reset() { dragId.value = null; dragOverId.value = null; dragOverRoot.value = false; }
 
 // 노드의 형제 목록·인덱스·부모 찾기
@@ -237,27 +271,25 @@ async function reorderMove(id, parentId, beforeId) {
   } catch (e) { toast.error(e?.message || "순서 변경 실패"); }
   finally { reset(); }
 }
-function onDrop(target) {
-  const id = dragId.value;
-  const pos = dropPos.value;
-  if (!id || id === target.id) return reset();
-  if (descendantsOf(id).has(target.id)) { toast.error("자기 하위로는 이동할 수 없습니다."); return reset(); }
-  if (pos === "inside") return move(id, target.id); // 하위로 (부모 변경)
+function performDrop(id, targetId, pos) {
+  if (!id || id === targetId) return reset();
+  if (descendantsOf(id).has(targetId)) { toast.error("자기 하위로는 이동할 수 없습니다."); return reset(); }
+  if (pos === "inside") return move(id, targetId); // 하위로 (부모 변경)
   // 형제 순서 변경
-  const ctx = findContext(target.id);
+  const ctx = findContext(targetId);
   const parentId = ctx?.parentId ?? null;
-  const beforeId = pos === "before" ? target.id : (ctx?.siblings[ctx.index + 1]?.id ?? null);
+  const beforeId = pos === "before" ? targetId : (ctx?.siblings[ctx.index + 1]?.id ?? null);
   if (beforeId === id) return reset();
   reorderMove(id, parentId, beforeId);
-}
-function dropRoot() {
-  const id = dragId.value;
-  if (!id) return reset();
-  move(id, null);
 }
 
 defineExpose({ reload });
 onMounted(reload);
+onBeforeUnmount(() => {
+  document.removeEventListener("mousemove", onDocMove, true);
+  document.removeEventListener("mouseup", onDocUp, true);
+  document.body.style.userSelect = "";
+});
 </script>
 
 <style scoped>
