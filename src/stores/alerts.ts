@@ -7,7 +7,7 @@ export const useAlertsStore = defineStore("alerts", {
   state: () => ({
     rows: [],
     total: 0,
-    counts: { VENDOR: 0, GAME_COMPANY: 0 },
+    counts: { VENDOR: 0, GAME_COMPANY: 0, SOLUTION: 0 },
     loaded: false,
     _timer: null,
   }),

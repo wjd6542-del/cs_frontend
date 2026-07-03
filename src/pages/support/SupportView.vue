@@ -3,7 +3,7 @@
     <header class="phead">
       <div>
         <p class="eyebrow">CS 관리</p>
-        <h1 class="ttl">{{ isVendor ? "업체 응대" : "게임사 응대" }}</h1>
+        <h1 class="ttl">{{ pmeta.title }}</h1>
       </div>
     </header>
 
@@ -13,9 +13,9 @@
         <EntityTree
           :key="party"
           ref="treeRef"
-          :api="isVendor ? vendorApi : gameCompanyApi"
-          :label="isVendor ? '업체' : '게임사'"
-          :empty-icon="isVendor ? '🏪' : '🎮'"
+          :api="pmeta.api"
+          :label="pmeta.label"
+          :empty-icon="pmeta.icon"
           :selected-id="selected?.id"
           @select="onSelect"
         />
@@ -24,13 +24,13 @@
       <!-- 우측: 선택 대상 응대 -->
       <section class="pane pcard right">
         <div v-if="!selected" class="pane-empty">
-          <EmptyState variant="select" :desc="isVendor ? '좌측에서 업체를 선택하면 응대가 여기에 표시돼요.' : '좌측에서 게임사를 선택하면 응대가 여기에 표시돼요.'" />
+          <EmptyState variant="select" :desc="`좌측에서 ${pmeta.label}를 선택하면 응대가 여기에 표시돼요.`" />
         </div>
 
         <template v-else>
           <div class="r-head">
             <div class="r-title">
-              <span class="r-eye">{{ isVendor ? "업체" : "게임사" }}</span>
+              <span class="r-eye">{{ pmeta.label }}</span>
               <h3 class="r-name">{{ selected.name }}</h3>
             </div>
             <div class="r-tools">
@@ -168,7 +168,7 @@ import EntityTree from "@/components/base/EntityTree.vue";
 import RichEditor from "@/components/base/RichEditor.vue";
 import TagSelect from "@/components/base/TagSelect.vue";
 import TagChips from "@/components/base/TagChips.vue";
-import { supportApi, vendorApi, gameCompanyApi } from "@/api/cs";
+import { supportApi, vendorApi, gameCompanyApi, solutionCompanyApi } from "@/api/cs";
 import { useAuthStore } from "@/stores/auth";
 
 const route = useRoute();
@@ -188,7 +188,12 @@ const PRIO_OPTS = [
 ];
 
 const props = defineProps({ party: { type: String, default: "VENDOR" } });
-const isVendor = computed(() => props.party === "VENDOR");
+const PARTY_META = {
+  VENDOR: { label: "업체", title: "업체 응대", icon: "🏪", api: vendorApi, idField: "vendor_id", nameField: "vendor_name" },
+  GAME_COMPANY: { label: "게임사", title: "게임사 응대", icon: "🎮", api: gameCompanyApi, idField: "game_company_id", nameField: "game_company_name" },
+  SOLUTION: { label: "솔루션사", title: "솔루션 응대", icon: "🧩", api: solutionCompanyApi, idField: "solution_company_id", nameField: "solution_company_name" },
+};
+const pmeta = computed(() => PARTY_META[props.party] || PARTY_META.VENDOR);
 const toast = useToast();
 
 const LIMIT = 15;
@@ -249,7 +254,7 @@ async function reloadTickets() {
   if (treeRef.value?.reload) treeRef.value.reload(); // 트리 미해결 카운트 갱신
   if (!selected.value) { tickets.value = []; total.value = 0; totalPages.value = 1; return; }
   const body = { party: props.party, page: page.value, limit: LIMIT };
-  body[isVendor.value ? "vendor_id" : "game_company_id"] = selected.value.id;
+  body[pmeta.value.idField] = selected.value.id;
   if (filter.status) body.status = filter.status;
   if (filterTags.value.length) body.tag_ids = filterTags.value;
   const res = await supportApi.list(body);
@@ -272,8 +277,7 @@ async function submit() {
   try {
     const t = await supportApi.save({
       party: props.party,
-      vendor_id: isVendor.value ? selected.value.id : null,
-      game_company_id: isVendor.value ? null : selected.value.id,
+      [pmeta.value.idField]: selected.value.id,
       title: form.title, category: form.category || null, priority: form.priority, status: "OPEN",
       tag_ids: form.tag_ids,
     });
@@ -296,6 +300,7 @@ async function updateDetailTags(ids) {
       party: detail.value.party,
       vendor_id: detail.value.vendor_id,
       game_company_id: detail.value.game_company_id,
+      solution_company_id: detail.value.solution_company_id,
       title: detail.value.title,
       category: detail.value.category,
       status: detail.value.status,
@@ -332,9 +337,7 @@ async function handleOpenQuery() {
   try {
     const t = await supportApi.get(id);
     if (t.party !== props.party) return;
-    selected.value = isVendor.value
-      ? { id: t.vendor_id, name: t.vendor_name }
-      : { id: t.game_company_id, name: t.game_company_name };
+    selected.value = { id: t[pmeta.value.idField], name: t[pmeta.value.nameField] };
     await reloadTickets();
     detail.value = t;
     detailTags.value = (t.tags || []).map((x) => x.id);

@@ -137,13 +137,13 @@
     <div v-if="csDetail" class="pmodal" @click.self="csDetail = null">
       <div class="pbox pcard">
         <button class="pclose" @click="csDetail = null"><i class="fa-solid fa-xmark"></i></button>
-        <p class="peyebrow">{{ csDetail.party === 'VENDOR' ? '업체 응대' : '게임사 응대' }} · 읽기 전용</p>
+        <p class="peyebrow">{{ partyTitle(csDetail.party) }} · 읽기 전용</p>
         <h3 class="ptitle">
           <span class="ro-pill" :class="'st-' + csDetail.status.toLowerCase()">{{ statusLabel(csDetail.status) }}</span>
           {{ csDetail.title }}
         </h3>
         <div class="pmeta">
-          <span>{{ csDetail.vendor_name || csDetail.game_company_name || '미지정' }}</span>
+          <span>{{ csDetail.vendor_name || csDetail.game_company_name || csDetail.solution_company_name || '미지정' }}</span>
           <span class="dot">·</span><span>{{ csDetail.category || '분류없음' }}</span>
           <span class="dot">·</span><span class="num">{{ fmt(csDetail.created_at) }}</span>
         </div>
@@ -158,7 +158,7 @@
         </div>
 
         <div class="ro-foot">
-          <router-link v-if="canManageCs" :to="csDetail.party === 'VENDOR' ? '/support/vendor' : '/support/gameco'" class="btn btn-primary">응대 관리 페이지 ›</router-link>
+          <router-link v-if="canManageCs" :to="partyPath(csDetail.party)" class="btn btn-primary">응대 관리 페이지 ›</router-link>
           <span v-else class="ro-note"><i class="fa-solid fa-lock"></i> 조회 권한 · 읽기 전용</span>
           <button class="btn" @click="csDetail = null">닫기</button>
         </div>
@@ -194,11 +194,15 @@ const openTickets = ref(0);
 const CS_PARTIES = [
   { key: "VENDOR", label: "업체 응대", to: "/support/vendor", nameField: "vendor_name", icon: "fa-solid fa-store" },
   { key: "GAME_COMPANY", label: "게임사 응대", to: "/support/gameco", nameField: "game_company_name", icon: "fa-solid fa-gamepad" },
+  { key: "SOLUTION", label: "솔루션 응대", to: "/support/solution", nameField: "solution_company_name", icon: "fa-solid fa-puzzle-piece" },
 ];
 const progress = reactive({
   VENDOR: { open: 0, prog: 0, rows: [] },
   GAME_COMPANY: { open: 0, prog: 0, rows: [] },
+  SOLUTION: { open: 0, prog: 0, rows: [] },
 });
+function partyPath(party) { return party === "VENDOR" ? "/support/vendor" : party === "GAME_COMPANY" ? "/support/gameco" : "/support/solution"; }
+function partyTitle(party) { return party === "VENDOR" ? "업체 응대" : party === "GAME_COMPANY" ? "게임사 응대" : "솔루션 응대"; }
 function statusLabel(s) { return { OPEN: "접수", IN_PROGRESS: "처리중" }[s] || s; }
 
 const net = computed(() => totals.COLLECTION - totals.PAYMENT);
@@ -300,11 +304,11 @@ onMounted(async () => {
 .cb-ttl { font-family: var(--font-pixel); font-size: 0.98rem; color: var(--ink); display: flex; align-items: center; gap: 0.45rem; }
 .cb-ttl i { color: var(--seal); font-size: 0.9rem; }
 .cb-sub { font-size: 0.74rem; color: var(--ink-faint); }
-.cb-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
-@media (max-width: 720px) { .cb-cols { grid-template-columns: 1fr; } }
+.cb-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
+@media (max-width: 900px) { .cb-cols { grid-template-columns: 1fr; } }
 .cb-col { display: flex; flex-direction: column; }
 .cb-col + .cb-col { border-left: 2px dashed var(--line); padding-left: 1.1rem; }
-@media (max-width: 720px) { .cb-col + .cb-col { border-left: none; padding-left: 0; border-top: 2px dashed var(--line); padding-top: 0.9rem; } }
+@media (max-width: 900px) { .cb-col + .cb-col { border-left: none; padding-left: 0; border-top: 2px dashed var(--line); padding-top: 0.9rem; } }
 
 .cbc-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.55rem; }
 .cbc-name { font-family: var(--font-pixel); font-size: 0.8rem; color: var(--ink); display: flex; align-items: center; gap: 0.4rem; }

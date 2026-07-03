@@ -28,7 +28,7 @@
         </div>
       </div>
 
-      <p class="pfoot">© {{ year }} CS · SETTLEMENT DESK</p>
+      <p class="pfoot">© {{ year }} CS · Customer Service</p>
     </section>
 
     <!-- 우: 로그인 폼 -->

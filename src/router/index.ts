@@ -49,6 +49,7 @@ export const router = createRouter({
             // CS 관리
             { path: "support/vendor", component: SupportView, props: { party: "VENDOR" }, meta: { auth: true, title: "업체 응대" } },
             { path: "support/gameco", component: SupportView, props: { party: "GAME_COMPANY" }, meta: { auth: true, title: "게임사 응대" } },
+            { path: "support/solution", component: SupportView, props: { party: "SOLUTION" }, meta: { auth: true, title: "솔루션 응대" } },
             { path: "faq", component: FaqView, meta: { auth: true, title: "자주 하는 질문" } },
             { path: "alerts", component: AlertsView, meta: { auth: true, title: "알림" } },
             { path: "exchange", component: ExchangeRateView, meta: { auth: true, title: "환율 정보" } },

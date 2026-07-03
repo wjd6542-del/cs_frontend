@@ -14,6 +14,7 @@
       <div class="card"><span class="lbl">전체 미해결</span><strong class="val num">{{ store.total }}건</strong></div>
       <router-link to="/support/vendor" class="card link"><span class="lbl">🏪 업체 응대</span><strong class="val num">{{ store.counts.VENDOR }}건</strong></router-link>
       <router-link to="/support/gameco" class="card link"><span class="lbl">🎮 게임사 응대</span><strong class="val num">{{ store.counts.GAME_COMPANY }}건</strong></router-link>
+      <router-link to="/support/solution" class="card link"><span class="lbl">🧩 솔루션 응대</span><strong class="val num">{{ store.counts.SOLUTION }}건</strong></router-link>
     </div>
 
     <div v-if="!store.rows.length" class="listcard"><EmptyState icon="🔔" title="알림이 없어요!" desc="처리할 미해결 응대가 없어요." hint="모두 해결됨 ✨" /></div>
@@ -24,10 +25,10 @@
         </thead>
         <tbody>
           <tr v-for="t in store.rows" :key="t.id" class="row" @click="go(t)">
-            <td class="c"><span class="badge" :class="t.party === 'VENDOR' ? 'badge-in' : 'badge-info'">{{ t.party === 'VENDOR' ? '업체' : '게임사' }}</span></td>
+            <td class="c"><span class="badge" :class="partyClass(t.party)">{{ partyShort(t.party) }}</span></td>
             <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
             <td class="c"><span class="pri" :class="'p' + t.priority">{{ priLabel(t.priority) }}</span></td>
-            <td class="nm">{{ t.vendor_name || t.game_company_name || '-' }}</td>
+            <td class="nm">{{ t.vendor_name || t.game_company_name || t.solution_company_name || '-' }}</td>
             <td class="ti">{{ t.title }}<span v-if="t.message_count" class="cc">[{{ t.message_count }}]</span></td>
             <td class="muted xs num">{{ d(t.created_at) }}</td>
             <td class="c"><button class="btn btn-xs btn-primary" @click.stop="go(t)">바로가기 ›</button></td>
@@ -51,8 +52,10 @@ const store = useAlertsStore();
 function d(v) { return String(v).slice(0, 10); }
 function statusLabel(s) { return { OPEN: "접수", IN_PROGRESS: "처리중" }[s] || s; }
 function priLabel(p) { return ["보통", "높음", "긴급"][p] || "보통"; }
+function partyShort(p) { return p === "VENDOR" ? "업체" : p === "GAME_COMPANY" ? "게임사" : "솔루션"; }
+function partyClass(p) { return p === "VENDOR" ? "badge-in" : p === "GAME_COMPANY" ? "badge-info" : "badge-soln"; }
 function go(t) {
-  const path = t.party === "VENDOR" ? "/support/vendor" : "/support/gameco";
+  const path = t.party === "VENDOR" ? "/support/vendor" : t.party === "GAME_COMPANY" ? "/support/gameco" : "/support/solution";
   router.push({ path, query: { open: t.id } });
 }
 async function refresh() { await store.fetch(); }
@@ -66,7 +69,8 @@ onMounted(refresh);
 .ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
 .desc { font-size: 0.85rem; color: var(--ink-muted); margin-top: 0.2rem; }
 
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1rem; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 1rem; }
+@media (max-width: 820px) { .cards { grid-template-columns: repeat(2, 1fr); } }
 .card { background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); padding: 0.9rem 1.1rem; display: flex; flex-direction: column; gap: 0.3rem; text-decoration: none; }
 .card.link { transition: transform 0.08s, box-shadow 0.08s; }
 .card.link:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--line-hard); }
@@ -84,6 +88,7 @@ onMounted(refresh);
 .c { text-align: center; } .nm { font-weight: 600; } .ti { font-weight: 600; } .muted { color: var(--ink-muted); } .xs { font-size: 0.74rem; }
 .cc { color: var(--seal); font-weight: 700; margin-left: 0.3rem; font-size: 0.8rem; }
 .w-act { width: 100px; }
+.badge-soln { background: #e0f2f1; color: #0f766e; }
 .st-open { background: #fef3c7; color: #b45309; }
 .st-in_progress { background: #ede9ff; color: var(--seal-deep); }
 .pri { font-family: var(--font-pixel); font-size: 0.66rem; }

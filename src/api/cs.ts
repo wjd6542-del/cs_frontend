@@ -12,6 +12,17 @@ export const gameCompanyApi = {
   remove: (id) => api.post("/gameCompany/delete", { id }).then((r) => r.data),
 };
 
+// 솔루션사
+export const solutionCompanyApi = {
+  list: (body = {}) => api.post("/solutionCompany/list", body).then((r) => r.data),
+  tree: () => api.post("/solutionCompany/tree", {}).then((r) => r.data),
+  reorder: (body) => api.post("/solutionCompany/reorder", body).then((r) => r.data),
+  options: () => api.post("/solutionCompany/options", {}).then((r) => r.data),
+  get: (id) => api.post("/solutionCompany/get", { id }).then((r) => r.data),
+  save: (body) => api.post("/solutionCompany/save", body).then((r) => r.data),
+  remove: (id) => api.post("/solutionCompany/delete", { id }).then((r) => r.data),
+};
+
 // 업체
 export const vendorApi = {
   list: (body = {}) => api.post("/vendor/list", body).then((r) => r.data),

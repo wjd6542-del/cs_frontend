@@ -5,7 +5,7 @@
       <div class="mark" aria-hidden="true">CS</div>
       <div v-if="open" class="word">
         <span class="ko">CS</span>
-        <span class="sub">SETTLEMENT DESK</span>
+        <span class="sub">Customer Service</span>
       </div>
     </div>
 
@@ -80,6 +80,7 @@ const menus = computed(() => [
     children: [
       { label: "업체 응대", to: "/support/vendor" },
       { label: "게임사 응대", to: "/support/gameco" },
+      { label: "솔루션 응대", to: "/support/solution" },
       { label: "자주 하는 질문", to: "/faq" },
     ],
   },
