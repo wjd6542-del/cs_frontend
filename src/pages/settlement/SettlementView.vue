@@ -10,6 +10,7 @@
     </header>
 
     <div class="filterbar">
+      <div class="w-72 shrink-0"><DateRangePicker v-model="dateRange" mode="date" :show-quick-buttons="true" placeholder="정산 기간 선택" @change="onDateChange" /></div>
       <div class="w-36 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="search" /></div>
       <div class="w-52 shrink-0"><SearchSelect
         class="!w-52"
@@ -110,7 +111,9 @@ import BaseInput from "@/components/base/BaseInput.vue";
 import Pager from "@/components/base/Pager.vue";
 import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
+import DateRangePicker from "@/components/base/DateRangePicker.vue";
 import { settlementApi, gameCompanyApi, vendorApi } from "@/api/cs";
+import { formatDateOnly } from "@/utils/date";
 
 const props = defineProps({ type: { type: String, default: "VENDOR" } });
 const isVendor = computed(() => props.type === "VENDOR");
@@ -127,7 +130,8 @@ const page = ref(1);
 const total = ref(0);
 const totalPages = ref(1);
 const parties = ref([]);
-const filter = reactive({ status: "", party_id: "" });
+const filter = reactive({ status: "", party_id: "", date_from: "", date_to: "" });
+const dateRange = ref({ start: null, end: null });
 
 const showForm = ref(false);
 const editing = ref(false);
@@ -151,12 +155,19 @@ async function reload() {
   const body = { type: props.type, page: page.value, limit: LIMIT };
   if (filter.status) body.status = filter.status;
   if (filter.party_id) body[isVendor.value ? "vendor_id" : "game_company_id"] = filter.party_id;
+  if (filter.date_from) body.date_from = filter.date_from;
+  if (filter.date_to) body.date_to = filter.date_to;
   const res = await settlementApi.list(body);
   rows.value = res.rows || [];
   total.value = res.total || 0;
   totalPages.value = res.totalPages || 1;
 }
 function search() { page.value = 1; reload(); }
+function onDateChange(r) {
+  filter.date_from = r?.start ? formatDateOnly(r.start) : "";
+  filter.date_to = r?.end ? formatDateOnly(r.end) : "";
+  search();
+}
 async function loadParties() {
   parties.value = isVendor.value ? await vendorApi.options() : await gameCompanyApi.options();
 }
