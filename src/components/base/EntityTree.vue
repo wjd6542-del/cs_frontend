@@ -2,6 +2,8 @@
   <div class="vtree">
     <div class="vt-head">
       <input v-model="kw" class="field field-xs" :placeholder="`${label} 명칭 검색`" />
+      <button v-if="hasBranches" class="btn btn-xs" title="전체 펼치기" @click="expandAll"><i class="fa-solid fa-angles-down"></i></button>
+      <button v-if="hasBranches" class="btn btn-xs" title="전체 접기" @click="collapseAll"><i class="fa-solid fa-angles-up"></i></button>
       <button class="btn btn-xs btn-primary" :title="`최상위 ${label} 추가`" @click="startAdd(null)">＋</button>
     </div>
 
@@ -97,6 +99,17 @@ const dropPos = ref("inside"); // before | after | inside
 
 function isCollapsed(id) { return !!collapsed[id]; }
 function toggle(id) { collapsed[id] = !collapsed[id]; }
+
+// 자식을 가진 노드 id 목록 (전체 펼치기/접기 대상)
+function branchIds(nodes = roots.value, acc = []) {
+  for (const n of nodes) {
+    if ((n.children || []).length) { acc.push(n.id); branchIds(n.children, acc); }
+  }
+  return acc;
+}
+const hasBranches = computed(() => branchIds().length > 0);
+function expandAll() { for (const id of branchIds()) collapsed[id] = false; }
+function collapseAll() { for (const id of branchIds()) collapsed[id] = true; }
 
 function filterTree(nodes) {
   const k = kw.value.trim().toLowerCase();
@@ -232,7 +245,7 @@ function onDocUp() {
     suppressClick = true;
     setTimeout(() => { suppressClick = false; }, 0);
     const id = dragId.value;
-    if (dragOverRoot.value) { reset(); if (id) move(id, null); }
+    if (dragOverRoot.value) { if (id) reorderMove(id, null, null, "최상위로 이동되었습니다."); else reset(); }
     else if (dragOverId.value) { performDrop(id, dragOverId.value, dropPos.value); }
     else reset();
   } else {
@@ -253,28 +266,22 @@ function findContext(id, nodes = roots.value, parent = null) {
   return null;
 }
 
-async function move(id, parentId) {
-  try {
-    await props.api.save({ id, parent_id: parentId });
-    await reload();
-    emit("change");
-    toast.success("위치가 변경되었습니다.");
-  } catch (e) { toast.error(e?.message || "이동 실패"); }
-  finally { reset(); }
-}
-async function reorderMove(id, parentId, beforeId) {
+async function reorderMove(id, parentId, beforeId, msg = "순서가 변경되었습니다.") {
+  // 대상 부모를 펼쳐서 이동 결과가 보이도록
+  if (parentId != null) collapsed[parentId] = false;
   try {
     await props.api.reorder({ id, parent_id: parentId, before_id: beforeId });
     await reload();
     emit("change");
-    toast.success("순서가 변경되었습니다.");
+    toast.success(msg);
   } catch (e) { toast.error(e?.message || "순서 변경 실패"); }
   finally { reset(); }
 }
 function performDrop(id, targetId, pos) {
   if (!id || id === targetId) return reset();
   if (descendantsOf(id).has(targetId)) { toast.error("자기 하위로는 이동할 수 없습니다."); return reset(); }
-  if (pos === "inside") return move(id, targetId); // 하위로 (부모 변경)
+  // 안쪽 → 대상의 마지막 자식으로 (부모 변경 + 정렬 재부여)
+  if (pos === "inside") return reorderMove(id, targetId, null, "하위로 이동되었습니다.");
   // 형제 순서 변경
   const ctx = findContext(targetId);
   const parentId = ctx?.parentId ?? null;
