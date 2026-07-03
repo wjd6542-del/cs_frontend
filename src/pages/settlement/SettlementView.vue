@@ -66,6 +66,10 @@
             <span class="form-label">{{ isVendor ? "업체" : "게임사" }}</span>
             <SearchSelect v-model="form.party_id" :options="parties" label-key="name" value-key="id" placeholder="선택하세요" search-placeholder="이름 검색…" />
           </label>
+          <label class="fld col2">
+            <span class="form-label">정산 월 <span class="hint">· 선택하면 1일~말일 자동</span></span>
+            <input type="month" v-model="form.period_month" class="field" @change="applyMonth" />
+          </label>
           <BaseInput v-model="form.period_start" label="기간 시작" type="date" />
           <BaseInput v-model="form.period_end" label="기간 종료" type="date" />
           <BaseInput v-model="form.amount" label="정산 금액(원)" type="number" />
@@ -144,7 +148,7 @@ const showForm = ref(false);
 const editing = ref(false);
 const saving = ref(false);
 const msg = ref("");
-const form = reactive({ id: null, party_id: null, period_start: firstOfMonth(), period_end: today(), amount: "", memo: "" });
+const form = reactive({ id: null, party_id: null, period_month: currentMonth(), period_start: firstOfMonth(), period_end: lastOfMonth(), amount: "", memo: "" });
 
 const showSettle = ref(false);
 const settling = ref(false);
@@ -153,7 +157,20 @@ const settleTarget = ref(null);
 const settleForm = reactive({ amount: "", entry_date: today() });
 
 function today() { return new Date().toISOString().slice(0, 10); }
-function firstOfMonth() { const dt = new Date(); return new Date(dt.getFullYear(), dt.getMonth(), 1).toISOString().slice(0, 10); }
+function firstOfMonth() { const dt = new Date(); return new Date(dt.getFullYear(), dt.getMonth(), 1).toLocaleDateString("sv-SE"); }
+function lastOfMonth() { const dt = new Date(); return new Date(dt.getFullYear(), dt.getMonth() + 1, 0).toLocaleDateString("sv-SE"); }
+function currentMonth() { const dt = new Date(); return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`; }
+function monthRange(m) {
+  const [y, mo] = m.split("-").map(Number);
+  const last = new Date(y, mo, 0).getDate();
+  return { start: `${m}-01`, end: `${m}-${String(last).padStart(2, "0")}` };
+}
+function applyMonth() {
+  if (!form.period_month) return;
+  const { start, end } = monthRange(form.period_month);
+  form.period_start = start;
+  form.period_end = end;
+}
 function won(n) { return (Number(n) || 0).toLocaleString("ko-KR") + "원"; }
 function d(v) { return String(v).slice(0, 10); }
 function statusLabel(s) { return { PENDING: "대기", PARTIAL: "부분정산", DONE: "완료" }[s] || s; }
@@ -180,12 +197,14 @@ async function loadParties() {
 }
 function openNew() {
   editing.value = false;
-  Object.assign(form, { id: null, party_id: null, period_start: firstOfMonth(), period_end: today(), amount: "", memo: "" });
+  const m = currentMonth();
+  const { start, end } = monthRange(m);
+  Object.assign(form, { id: null, party_id: null, period_month: m, period_start: start, period_end: end, amount: "", memo: "" });
   msg.value = ""; showForm.value = true;
 }
 function openEdit(s) {
   editing.value = true;
-  Object.assign(form, { id: s.id, party_id: isVendor.value ? s.vendor_id : s.game_company_id, period_start: d(s.period_start), period_end: d(s.period_end), amount: s.amount, memo: s.memo || "" });
+  Object.assign(form, { id: s.id, party_id: isVendor.value ? s.vendor_id : s.game_company_id, period_month: d(s.period_start).slice(0, 7), period_start: d(s.period_start), period_end: d(s.period_end), amount: s.amount, memo: s.memo || "" });
   msg.value = ""; showForm.value = true;
 }
 async function submit() {
