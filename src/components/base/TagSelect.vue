@@ -114,10 +114,8 @@ defineExpose({ reload });
 
 .panel { position: absolute; left: 0; top: calc(100% + 4px); z-index: 50; width: 100%; min-width: 200px; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 3px; box-shadow: 4px 4px 0 var(--line-hard); overflow: hidden; }
 .tsearch { width: 100%; height: 32px; padding: 0 0.6rem; font-size: 0.8rem; border: none; border-bottom: 2px solid var(--line); outline: none; background: var(--surface-2); }
-.selall { width: 100%; display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.6rem; font-family: var(--font-pixel); font-size: 0.68rem; color: var(--seal-deep); background: #f6f4ff; border-bottom: 2px solid var(--line); text-align: left; }
-.selall:hover { background: #ede9ff; }
-:global(html.dark) .selall { background: rgba(122, 92, 255, 0.14); color: #c3b7ff; }
-:global(html.dark) .selall:hover { background: rgba(122, 92, 255, 0.24); }
+.selall { width: 100%; display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.6rem; font-family: var(--font-pixel); font-size: 0.68rem; color: var(--seal); background: rgba(122, 92, 255, 0.12); border-bottom: 2px solid var(--line); text-align: left; }
+.selall:hover { background: rgba(122, 92, 255, 0.22); }
 .list { max-height: 240px; overflow-y: auto; }
 .opt { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.82rem; color: var(--ink); cursor: pointer; }
 .opt:hover { background: var(--surface-2); }
@@ -125,9 +123,7 @@ defineExpose({ reload });
 .dot { width: 10px; height: 10px; border-radius: 2px; border: 1px solid var(--line-hard); flex-shrink: 0; }
 .onm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .none { padding: 0.8rem; text-align: center; color: var(--ink-faint); font-size: 0.8rem; }
-.create { width: 100%; display: flex; align-items: center; gap: 0.4rem; padding: 0.55rem 0.6rem; font-size: 0.82rem; color: var(--seal-deep); background: #ede9ff; border-top: 2px solid var(--line); text-align: left; }
-.create:hover { background: #e0d9ff; }
-:global(html.dark) .create { background: rgba(122, 92, 255, 0.16); color: #c3b7ff; }
-:global(html.dark) .create:hover { background: rgba(122, 92, 255, 0.26); }
+.create { width: 100%; display: flex; align-items: center; gap: 0.4rem; padding: 0.55rem 0.6rem; font-size: 0.82rem; color: var(--seal); background: rgba(122, 92, 255, 0.14); border-top: 2px solid var(--line); text-align: left; }
+.create:hover { background: rgba(122, 92, 255, 0.24); }
 .create b { font-family: var(--font-pixel); }
 </style>

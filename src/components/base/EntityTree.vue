@@ -314,17 +314,15 @@ onBeforeUnmount(() => {
 .grip { flex-shrink: 0; width: 12px; display: grid; place-items: center; color: var(--ink-faint); font-size: 0.72rem; cursor: grab; opacity: 0.35; }
 .vt-row:hover .grip { opacity: 0.9; }
 .grip:active { cursor: grabbing; }
-.vt-row.on { background: #ede9ff; box-shadow: inset 0 0 0 2px var(--seal); }
-:global(html.dark) .vt-row.on { background: rgba(122, 92, 255, 0.28); }
-:global(html.dark) .vt-row.dz-inside,
-:global(html.dark) .rootdrop.over { background: rgba(122, 92, 255, 0.3); }
+.vt-row.on { background: rgba(122, 92, 255, 0.16); box-shadow: inset 0 0 0 2px var(--seal); }
+.vt-row.on .nm { color: var(--ink); }
 .vt-row.dim .nm { color: var(--ink-faint); text-decoration: line-through; }
 .vt-row.dragging { opacity: 0.45; }
-.vt-row.dz-inside { background: #e0d9ff; box-shadow: inset 0 0 0 2px var(--seal); }
+.vt-row.dz-inside { background: rgba(122, 92, 255, 0.24); box-shadow: inset 0 0 0 2px var(--seal); }
 .vt-row.dz-before { box-shadow: inset 0 3px 0 var(--seal); }
 .vt-row.dz-after { box-shadow: inset 0 -3px 0 var(--seal); }
 .rootdrop { margin: 0.2rem; padding: 0.5rem; text-align: center; font-family: var(--font-pixel); font-size: 0.66rem; color: var(--seal-deep); background: var(--surface-2); border: 2px dashed var(--seal); border-radius: 3px; }
-.rootdrop.over { background: #e0d9ff; }
+.rootdrop.over { background: rgba(122, 92, 255, 0.24); }
 .cnt { flex-shrink: 0; min-width: 18px; height: 18px; padding: 0 4px; display: grid; place-items: center; font-family: var(--font-pixel); font-size: 0.6rem; color: #fff; border: 1px solid var(--line-hard); border-radius: 3px; cursor: help; }
 .cnt.open { background: #f59e0b; } /* 접수 */
 .cnt.prog { background: #7a5cff; } /* 처리중 */
