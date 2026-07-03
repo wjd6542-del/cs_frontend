@@ -10,40 +10,18 @@
     </div>
 
     <nav class="menu">
-      <template v-for="m in visibleMenus" :key="m.label">
-        <RouterLink
-          v-if="m.to"
-          :to="m.to"
-          class="item"
-          :class="{ on: isActive(m) }"
-          :title="m.label"
-          @click="isMobile && emit('close')"
-        >
-          <i class="fa-solid ic" :class="m.icon"></i>
-          <span v-if="open" class="lbl">{{ m.label }}</span>
-        </RouterLink>
-
-        <template v-else>
-          <div class="item group" :class="{ on: groupActive(m) }" :title="m.label" @click="toggle(m)">
-            <i class="fa-solid ic" :class="m.icon"></i>
-            <span v-if="open" class="lbl">{{ m.label }}</span>
-            <i v-if="open" class="fa-solid fa-chevron-down chev" :class="{ up: expanded[m.label] }"></i>
-          </div>
-          <div v-if="open && expanded[m.label]" class="children">
-            <RouterLink
-              v-for="c in m.children"
-              :key="c.to"
-              :to="c.to"
-              class="child"
-              :class="{ on: isActive(c) }"
-              @click="isMobile && emit('close')"
-            >
-              <span class="dot"></span>{{ c.label }}
-            </RouterLink>
-            <div v-if="!m.children.length" class="child empty">항목 없음</div>
-          </div>
-        </template>
-      </template>
+      <RouterLink
+        v-for="m in visibleMenus"
+        :key="m.to"
+        :to="m.to"
+        class="item"
+        :class="{ on: isActive(m) }"
+        :title="m.label"
+        @click="isMobile && emit('close')"
+      >
+        <i class="fa-solid ic" :class="m.icon"></i>
+        <span v-if="open" class="lbl">{{ m.label }}</span>
+      </RouterLink>
     </nav>
 
     <div v-if="open" class="foot">v0.1 · READY ▮</div>
@@ -52,7 +30,7 @@
 
 <script setup lang="ts">
 // @ts-nocheck
-import { reactive, computed, onMounted, watch, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { boardApi } from "@/api/board";
 import { useAuthStore } from "@/stores/auth";
@@ -63,30 +41,17 @@ const emit = defineEmits(["close"]);
 const route = useRoute();
 const auth = useAuthStore();
 const boards = ref([]);
-const expanded = reactive({ "정산 관리": true, "CS 관리": true, 게시판: false });
 
 const menus = computed(() => [
   { label: "대시보드", to: "/", icon: "fa-gauge-high", exact: true },
-  {
-    label: "정산 관리",
-    icon: "fa-money-bill-transfer",
-    children: [
-      { label: "업체 정산", to: "/settlement/vendor", perm: "settlement.view" },
-      { label: "게임사 정산", to: "/settlement/gameco", perm: "settlement.view" },
-      { label: "장부 관리", to: "/ledger", perm: "ledger.view" },
-    ],
-  },
-  {
-    label: "CS 관리",
-    icon: "fa-headset",
-    children: [
-      { label: "업체 응대", to: "/support/vendor", perm: "support.view" },
-      { label: "게임사 응대", to: "/support/gameco", perm: "support.view" },
-      { label: "솔루션 응대", to: "/support/solution", perm: "support.view" },
-      { label: "자주 하는 질문", to: "/faq", perm: "faq.view" },
-    ],
-  },
-  { label: "게시판", icon: "fa-clipboard-list", perm: "board.view", children: boards.value.map((b) => ({ label: b.name, to: `/board/${b.slug}` })) },
+  { label: "업체 정산", to: "/settlement/vendor", icon: "fa-store", perm: "settlement.view" },
+  { label: "게임사 정산", to: "/settlement/gameco", icon: "fa-gamepad", perm: "settlement.view" },
+  { label: "장부 관리", to: "/ledger", icon: "fa-book", perm: "ledger.view" },
+  { label: "업체 응대", to: "/support/vendor", icon: "fa-headset", perm: "support.view" },
+  { label: "게임사 응대", to: "/support/gameco", icon: "fa-comments", perm: "support.view" },
+  { label: "솔루션 응대", to: "/support/solution", icon: "fa-puzzle-piece", perm: "support.view" },
+  { label: "자주 하는 질문", to: "/faq", icon: "fa-circle-question", perm: "faq.view" },
+  ...boards.value.map((b) => ({ label: b.name, to: `/board/${b.slug}`, icon: "fa-clipboard-list", perm: "board.view" })),
   { label: "환율 정보", to: "/exchange", icon: "fa-money-bill-trend-up" },
   { label: "환경설정", to: "/settings", icon: "fa-gear", perm: ["gameCompany.view", "vendor.view", "usermanager.view", "permission.user.view", "permission.menu.view"] },
 ]);
@@ -97,32 +62,17 @@ function allowed(perm) {
   const codes = Array.isArray(perm) ? perm : [perm];
   return codes.some((c) => auth.hasPermission(c));
 }
-const visibleMenus = computed(() =>
-  menus.value
-    .map((m) => {
-      if (m.children) {
-        if (m.perm && !allowed(m.perm)) return null;       // 그룹 자체 권한(게시판 등)
-        const kids = m.children.filter((c) => allowed(c.perm));
-        if (!kids.length && !m.perm) return null;           // 보이는 하위 없음
-        return { ...m, children: kids };
-      }
-      return allowed(m.perm) ? m : null;
-    })
-    .filter(Boolean),
-);
+const visibleMenus = computed(() => menus.value.filter((m) => allowed(m.perm)));
 
 function isActive(m) {
   if (m.exact) return route.path === m.to;
   return route.path === m.to || route.path.startsWith(m.to + "/");
 }
-function groupActive(m) { return (m.children || []).some((c) => isActive(c)); }
-function toggle(m) { expanded[m.label] = !expanded[m.label]; }
 
 async function load() {
   try { boards.value = await boardApi.list(); } catch (e) { boards.value = []; }
 }
 onMounted(load);
-watch(() => route.path, (p) => { if (p.startsWith("/board") || p.startsWith("/post")) expanded.게시판 = true; }, { immediate: true });
 </script>
 
 <style scoped>
