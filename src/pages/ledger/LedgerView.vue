@@ -43,11 +43,10 @@
             <td class="r amt" :class="e.type === 'PAYMENT' ? 'neg' : 'pos'">{{ won(e.amount) }}</td>
             <td class="muted">{{ e.memo || "-" }}<span v-if="e.settlement_id" class="badge badge-indigo ml">정산#{{ e.settlement_id }}</span></td>
             <td class="c">
-              <template v-if="canEdit && !e.settlement_id">
-                <button class="btn btn-xs" @click="openEdit(e)">{{ $t("수정") }}</button>
+              <template v-if="canEdit">
+                <button v-if="!e.settlement_id" class="btn btn-xs" @click="openEdit(e)">{{ $t("수정") }}</button>
                 <button class="btn btn-xs btn-danger" @click="remove(e)">{{ $t("삭제") }}</button>
               </template>
-              <span v-else-if="e.settlement_id" class="muted xs">{{ $t("정산 파생") }}</span>
               <span v-else class="muted xs">—</span>
             </td>
           </tr>
@@ -176,7 +175,10 @@ async function submit() {
   finally { saving.value = false; }
 }
 async function remove(e) {
-  if (!await confirmDelete("이 거래를 삭제할까요?")) return;
+  const q = e.settlement_id
+    ? `정산 #${e.settlement_id}에서 생성된 거래입니다. 삭제하면 해당 정산의 처리액이 롤백됩니다. 삭제할까요?`
+    : "이 거래를 삭제할까요?";
+  if (!await confirmDelete(q)) return;
   try { await ledgerApi.remove(e.id); toast.success("삭제되었습니다."); await reload(); }
   catch (err) { toast.error(err?.message || "삭제 실패"); }
 }
