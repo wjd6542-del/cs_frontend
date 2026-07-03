@@ -120,6 +120,7 @@ watch(slug, loadBoard);
 .row:hover { background: var(--surface-2); }
 .row:hover .ti { color: var(--seal); }
 .row.notice { background: #f7f6ff; }
+:global(html.dark) .row.notice { background: rgba(122, 92, 255, 0.12); }
 .ti { font-weight: 600; }
 .cc { color: var(--seal); font-weight: 700; margin-left: 0.3rem; font-size: 0.8rem; }
 .muted { color: var(--ink-muted); }

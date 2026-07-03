@@ -108,6 +108,8 @@ onBeforeUnmount(() => document.removeEventListener("click", onOutside, true));
 .msearch { width: 100%; height: 30px; padding: 0 0.6rem; font-size: 0.78rem; border: none; border-bottom: 2px solid var(--line); outline: none; background: var(--surface-2); }
 .selall { width: 100%; display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.6rem; font-family: var(--font-pixel); font-size: 0.68rem; color: var(--seal-deep); background: #f6f4ff; border-bottom: 2px solid var(--line); text-align: left; }
 .selall:hover { background: #ede9ff; }
+:global(html.dark) .selall { background: rgba(122, 92, 255, 0.14); color: #c3b7ff; }
+:global(html.dark) .selall:hover { background: rgba(122, 92, 255, 0.24); }
 .list { max-height: 220px; overflow-y: auto; }
 .opt { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; font-size: 0.82rem; color: var(--ink); cursor: pointer; }
 .opt:hover { background: var(--surface-2); }

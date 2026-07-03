@@ -315,6 +315,9 @@ onBeforeUnmount(() => {
 .vt-row:hover .grip { opacity: 0.9; }
 .grip:active { cursor: grabbing; }
 .vt-row.on { background: #ede9ff; box-shadow: inset 0 0 0 2px var(--seal); }
+:global(html.dark) .vt-row.on { background: rgba(122, 92, 255, 0.28); }
+:global(html.dark) .vt-row.dz-inside,
+:global(html.dark) .rootdrop.over { background: rgba(122, 92, 255, 0.3); }
 .vt-row.dim .nm { color: var(--ink-faint); text-decoration: line-through; }
 .vt-row.dragging { opacity: 0.45; }
 .vt-row.dz-inside { background: #e0d9ff; box-shadow: inset 0 0 0 2px var(--seal); }

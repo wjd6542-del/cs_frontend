@@ -406,6 +406,8 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .r-name { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .allbtn { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--seal-deep); background: #ede9ff; border: 1.5px solid var(--line-hard); border-radius: 3px; padding: 0.12rem 0.4rem; }
 .allbtn:hover { background: #e0d9ff; }
+:global(html.dark) .allbtn { background: rgba(122, 92, 255, 0.18); color: #c3b7ff; }
+:global(html.dark) .allbtn:hover { background: rgba(122, 92, 255, 0.3); }
 .r-tools { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
 .r-body { flex: 1; overflow-y: auto; }
 .r-foot { flex-shrink: 0; padding: 0.4rem 0.85rem; border-top: 2px solid var(--line); }
@@ -418,6 +420,7 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .cbx { width: 38px; }
 .cbx input { accent-color: var(--seal); width: 15px; height: 15px; cursor: pointer; }
 .row.sel { background: #f3f0ff; }
+:global(html.dark) .row.sel { background: rgba(122, 92, 255, 0.2); }
 
 .tbl { width: 100%; border-collapse: collapse; }
 .tbl thead th { position: sticky; top: 0; z-index: 1; }
