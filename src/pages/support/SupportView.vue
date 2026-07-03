@@ -36,12 +36,12 @@
             <div class="r-tools">
               <div class="w-44"><TagSelect v-model="filterTags" placeholder="태그 필터" @change="applyFilter" /></div>
               <div class="w-28 shrink-0"><SearchSelect v-model="filter.status" :options="STATUS_OPTS" placeholder="전체 상태" @change="applyFilter" /></div>
-              <button class="btn btn-primary" @click="openNew">+ 등록</button>
+              <button v-if="canEdit" class="btn btn-primary" @click="openNew">+ 등록</button>
             </div>
           </div>
 
           <!-- 일괄 상태 변경 바 -->
-          <div v-if="sel.length" class="bulkbar">
+          <div v-if="canEdit && sel.length" class="bulkbar">
             <span class="bcount">✔ {{ sel.length }}건 선택</span>
             <span class="barrow">→</span>
             <div class="w-28 shrink-0"><SearchSelect v-model="bulkVal" :options="STATUS_OPTS" placeholder="변경할 상태" /></div>
@@ -53,14 +53,14 @@
             <table class="tbl">
               <thead>
                 <tr>
-                  <th class="c cbx"><input type="checkbox" :checked="allChecked" @change="toggleAll" /></th>
+                  <th v-if="canEdit" class="c cbx"><input type="checkbox" :checked="allChecked" @change="toggleAll" /></th>
                   <th class="c">상태</th><th>제목</th><th>분류</th><th class="c">우선</th><th class="c">댓글</th><th class="muted">등록</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="!tickets.length"><td colspan="7"><EmptyState variant="support" compact /></td></tr>
+                <tr v-if="!tickets.length"><td :colspan="canEdit ? 7 : 6"><EmptyState variant="support" compact /></td></tr>
                 <tr v-for="t in tickets" :key="t.id" class="row" :class="{ sel: sel.includes(t.id) }" @click="openDetail(t.id)">
-                  <td class="c cbx" @click.stop><input type="checkbox" :checked="sel.includes(t.id)" @change="toggleRow(t.id)" /></td>
+                  <td v-if="canEdit" class="c cbx" @click.stop><input type="checkbox" :checked="sel.includes(t.id)" @change="toggleRow(t.id)" /></td>
                   <td class="c"><span class="badge" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span></td>
                   <td class="nm">{{ t.title }} <TagChips :tags="t.tags" /></td>
                   <td class="muted">{{ t.category || "-" }}</td>
@@ -117,12 +117,15 @@
             <h4 class="ph">{{ detail.title }}</h4>
             <p class="dsub">{{ detail.vendor_name || detail.game_company_name }} · {{ detail.category || "분류없음" }}</p>
           </div>
-          <div class="w-32 shrink-0"><SearchSelect v-model="detail.status" :options="STATUS_OPTS" @change="changeStatus" /></div>
+          <div v-if="canEdit" class="w-32 shrink-0"><SearchSelect v-model="detail.status" :options="STATUS_OPTS" @change="changeStatus" /></div>
+          <span v-else class="ro-status badge" :class="'st-' + detail.status.toLowerCase()">{{ statusLabel(detail.status) }}</span>
         </div>
 
         <div class="dtags">
           <span class="dtags-lbl">🏷️ 태그</span>
-          <div class="dtags-sel"><TagSelect v-model="detailTags" @change="updateDetailTags" /></div>
+          <div v-if="canEdit" class="dtags-sel"><TagSelect v-model="detailTags" @change="updateDetailTags" /></div>
+          <TagChips v-else-if="detail.tags?.length" :tags="detail.tags" />
+          <span v-else class="dtags-none">태그 없음</span>
         </div>
 
         <div class="thread">
@@ -133,7 +136,7 @@
           </div>
         </div>
 
-        <div class="reply">
+        <div v-if="canEdit" class="reply">
           <label class="chk"><input v-model="reply.is_internal" type="checkbox" /> 내부 메모</label>
           <RichEditor v-model="reply.content" placeholder="답변/메모 입력" />
           <div class="acts">
@@ -141,6 +144,10 @@
             <button class="btn btn-danger" @click="removeTicket">삭제</button>
             <button class="btn" @click="detail = null">닫기</button>
           </div>
+        </div>
+        <div v-else class="ro-foot">
+          <span class="ro-note"><i class="fa-solid fa-lock"></i> 조회 권한 · 읽기 전용</span>
+          <button class="btn" @click="detail = null">닫기</button>
         </div>
       </div>
     </div>
@@ -162,8 +169,11 @@ import RichEditor from "@/components/base/RichEditor.vue";
 import TagSelect from "@/components/base/TagSelect.vue";
 import TagChips from "@/components/base/TagChips.vue";
 import { supportApi, vendorApi, gameCompanyApi } from "@/api/cs";
+import { useAuthStore } from "@/stores/auth";
 
 const route = useRoute();
+const auth = useAuthStore();
+const canEdit = computed(() => auth.hasPermission("support.edit"));
 
 const STATUS_OPTS = [
   { value: "OPEN", label: "접수", color: "#f59e0b" },
@@ -406,6 +416,11 @@ onMounted(async () => { await loadLeft(); await handleOpenQuery(); });
 .col2 { grid-column: 1 / -1; }
 .dhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
 .dhead-main { flex: 1; min-width: 0; }
+.ro-status { flex-shrink: 0; align-self: flex-start; }
+.dtags-none { font-size: 0.8rem; color: var(--ink-faint); }
+.ro-foot { display: flex; align-items: center; gap: 0.7rem; margin-top: 1rem; padding-top: 0.9rem; border-top: 2px solid var(--line); }
+.ro-note { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: var(--ink-muted); font-weight: 600; }
+.ro-note i { color: var(--ink-faint); }
 .ph { overflow-wrap: anywhere; }
 .dsub { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.2rem; overflow-wrap: anywhere; }
 .dtags { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.9rem; }

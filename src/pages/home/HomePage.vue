@@ -67,7 +67,7 @@
             </div>
           </div>
           <ul class="cbc-list">
-            <li v-for="t in progress[p.key].rows" :key="t.id" class="cbc-item" :class="'s-' + t.status.toLowerCase()" @click="$router.push(p.to)">
+            <li v-for="t in progress[p.key].rows" :key="t.id" class="cbc-item" :class="'s-' + t.status.toLowerCase()" @click="openCs(t.id)">
               <span class="st-pill" :class="'st-' + t.status.toLowerCase()">{{ statusLabel(t.status) }}</span>
               <div class="ci-main">
                 <span class="ci-title">{{ t.title }}</span>
@@ -132,12 +132,45 @@
         <router-link :to="`/post/${modalPost.id}`" class="pfull">게시판에서 열기 ›</router-link>
       </div>
     </div>
+
+    <!-- CS 문의 읽기 전용 모달 -->
+    <div v-if="csDetail" class="pmodal" @click.self="csDetail = null">
+      <div class="pbox pcard">
+        <button class="pclose" @click="csDetail = null"><i class="fa-solid fa-xmark"></i></button>
+        <p class="peyebrow">{{ csDetail.party === 'VENDOR' ? '업체 응대' : '게임사 응대' }} · 읽기 전용</p>
+        <h3 class="ptitle">
+          <span class="ro-pill" :class="'st-' + csDetail.status.toLowerCase()">{{ statusLabel(csDetail.status) }}</span>
+          {{ csDetail.title }}
+        </h3>
+        <div class="pmeta">
+          <span>{{ csDetail.vendor_name || csDetail.game_company_name || '미지정' }}</span>
+          <span class="dot">·</span><span>{{ csDetail.category || '분류없음' }}</span>
+          <span class="dot">·</span><span class="num">{{ fmt(csDetail.created_at) }}</span>
+        </div>
+        <TagChips v-if="csDetail.tags?.length" :tags="csDetail.tags" class="ro-tags" />
+
+        <div class="ro-thread">
+          <div v-if="!csDetail.messages?.length"><EmptyState icon="✉️" title="등록된 대화가 없어요" desc="아직 남긴 메시지가 없어요." compact /></div>
+          <div v-for="m in csDetail.messages" :key="m.id" class="ro-msg" :class="{ internal: m.is_internal }">
+            <div class="ro-mmeta"><span v-if="m.is_internal" class="ro-ib">내부</span>{{ fmt(m.created_at) }}</div>
+            <div class="ro-mbody prose" v-html="m.content"></div>
+          </div>
+        </div>
+
+        <div class="ro-foot">
+          <router-link v-if="canManageCs" :to="csDetail.party === 'VENDOR' ? '/support/vendor' : '/support/gameco'" class="btn btn-primary">응대 관리 페이지 ›</router-link>
+          <span v-else class="ro-note"><i class="fa-solid fa-lock"></i> 조회 권한 · 읽기 전용</span>
+          <button class="btn" @click="csDetail = null">닫기</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 // @ts-nocheck
 import EmptyState from "@/components/base/EmptyState.vue";
+import TagChips from "@/components/base/TagChips.vue";
 import { ref, reactive, computed, onMounted } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { boardApi } from "@/api/board";
@@ -145,6 +178,9 @@ import { ledgerApi, settlementApi, supportApi } from "@/api/cs";
 import { formatDateDot as fmt } from "@/utils/date";
 
 const auth = useAuthStore();
+const canManageCs = computed(() => auth.hasPermission("support.edit"));
+const csDetail = ref(null);
+async function openCs(id) { try { csDetail.value = await supportApi.get(id); } catch (e) { /* noop */ } }
 const noticeBoard = ref(null);
 const notices = ref([]);
 const alarmBoard = ref(null);
@@ -331,4 +367,20 @@ onMounted(async () => {
 .prose :deep(a) { color: var(--seal); text-decoration: underline; }
 .prose :deep(img) { max-width: 100%; margin: 0.4rem 0; }
 .pfull { display: inline-block; margin-top: 0.6rem; font-size: 0.84rem; font-weight: 700; color: var(--seal); text-decoration: none; }
+
+/* CS 읽기 전용 모달 */
+.ptitle .ro-pill { font-family: var(--font-pixel); font-size: 0.62rem; padding: 0.12rem 0.4rem; border-radius: 3px; border: 1px solid var(--line-hard); color: #fff; margin-right: 0.4rem; vertical-align: middle; }
+.ro-pill.st-open { background: var(--flow-out); }
+.ro-pill.st-in_progress { background: var(--seal); }
+.ro-tags { margin-top: 0.6rem; }
+.ro-thread { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid var(--line); display: flex; flex-direction: column; gap: 0.7rem; }
+.ro-msg { border: 1.5px solid var(--line); border-left: 4px solid var(--seal); border-radius: 3px; padding: 0.6rem 0.75rem; background: var(--surface); }
+.ro-msg.internal { border-left-color: var(--gold); background: #fffdf5; }
+.ro-mmeta { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; color: var(--ink-faint); margin-bottom: 0.35rem; }
+.ro-ib { font-family: var(--font-pixel); font-size: 0.56rem; color: #7a5b00; background: #fff0cc; border: 1px solid var(--line-hard); border-radius: 2px; padding: 0.04rem 0.3rem; }
+.ro-mbody { font-size: 0.9rem; line-height: 1.7; color: var(--ink-soft); }
+.ro-foot { display: flex; align-items: center; gap: 0.6rem; margin-top: 1.1rem; padding-top: 0.9rem; border-top: 2px solid var(--line); }
+.ro-foot .btn { text-decoration: none; }
+.ro-note { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.76rem; color: var(--ink-muted); font-weight: 600; }
+.ro-note i { color: var(--ink-faint); }
 </style>
