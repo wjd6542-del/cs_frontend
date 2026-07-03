@@ -86,18 +86,18 @@
         <div class="grid">
           <BaseInput v-model="form.title" label="제목" class="col2" />
           <BaseInput v-model="form.category" label="분류" placeholder="예: 정산문의, 오류신고" />
-          <label class="fld">
+          <div class="fld">
             <span class="form-label">우선순위</span>
             <SearchSelect v-model="form.priority" :options="PRIO_OPTS" />
-          </label>
-          <label class="fld col2">
+          </div>
+          <div class="fld col2">
             <span class="form-label">태그</span>
             <TagSelect v-model="form.tag_ids" />
-          </label>
-          <label class="fld col2">
+          </div>
+          <div class="fld col2">
             <span class="form-label">내용</span>
             <RichEditor v-model="form.content" placeholder="최초 문의/응대 내용" />
-          </label>
+          </div>
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
         <div class="acts">

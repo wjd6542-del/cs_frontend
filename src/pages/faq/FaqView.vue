@@ -70,28 +70,28 @@
         <h4 class="ph">{{ editing ? "FAQ 수정" : "FAQ 추가" }}</h4>
         <div class="fcol">
           <div class="frow">
-            <label class="fld flex-1">
+            <div class="fld flex-1">
               <span class="form-label">분류</span>
               <SearchSelect v-model="form.category" :options="catOptions" placeholder="분류 선택 (환경설정에서 관리)" search-placeholder="분류 검색…" />
-            </label>
-            <label class="fld toggle">
+            </div>
+            <div class="fld toggle">
               <span class="form-label">상단 고정</span>
               <span class="sw" :class="{ on: form.is_pinned }" @click="form.is_pinned = !form.is_pinned"><span class="knob"></span></span>
-            </label>
+            </div>
           </div>
-          <label class="fld">
+          <div class="fld">
             <span class="form-label">태그</span>
             <TagSelect v-model="form.tag_ids" />
-          </label>
+          </div>
           <BaseInput v-model="form.question" label="질문 제목" placeholder="한 줄 요약 제목" />
-          <label class="fld">
+          <div class="fld">
             <span class="form-label">질문 내용 (선택)</span>
             <RichEditor v-model="form.question_body" placeholder="질문 상세 내용" />
-          </label>
-          <label class="fld">
+          </div>
+          <div class="fld">
             <span class="form-label">답변</span>
             <RichEditor v-model="form.answer" placeholder="답변 내용" />
-          </label>
+          </div>
           <BaseInput v-model="form.sort" label="정렬순서" type="number" />
         </div>
         <p v-if="msg" class="msg err">{{ msg }}</p>
