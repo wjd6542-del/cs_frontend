@@ -101,11 +101,21 @@
         </ul>
       </section>
 
-      <section class="quick">
-        <router-link to="/settlement/vendor" class="qcard"><i class="fa-solid fa-money-bill-transfer"></i><span class="qt">정산</span></router-link>
-        <router-link to="/ledger" class="qcard"><i class="fa-solid fa-book"></i><span class="qt">장부</span></router-link>
-        <router-link to="/support/vendor" class="qcard"><i class="fa-solid fa-headset"></i><span class="qt">응대</span></router-link>
-        <router-link to="/faq" class="qcard"><i class="fa-solid fa-circle-question"></i><span class="qt">FAQ</span></router-link>
+      <section class="alertbox pcard">
+        <div class="nhead">
+          <h2 class="nt"><i class="fa-solid fa-bell"></i> 알림 <em v-if="alertTotal" class="acnt">{{ alertTotal }}</em></h2>
+          <router-link to="/alerts" class="more">전체보기 ›</router-link>
+        </div>
+        <ul class="alist">
+          <li v-for="a in alerts" :key="a.id" class="aitem" @click="$router.push(a.party === 'VENDOR' ? '/support/vendor' : '/support/gameco')">
+            <span class="apill" :class="'st-' + a.status.toLowerCase()">{{ statusLabel(a.status) }}</span>
+            <div class="amain">
+              <span class="atitle">{{ a.title }}</span>
+              <span class="ameta">{{ a.party === 'VENDOR' ? '🏪 업체' : '🎮 게임사' }} · {{ a.vendor_name || a.game_company_name || '미지정' }} · {{ fmt(a.created_at) }}</span>
+            </div>
+          </li>
+          <li v-if="!alerts.length"><EmptyState icon="🔔" title="알림이 없어요!" desc="처리할 미해결 응대가 없어요." hint="모두 해결됨 ✨" compact /></li>
+        </ul>
       </section>
     </div>
 
@@ -153,6 +163,8 @@ const progress = reactive({
   VENDOR: { open: 0, prog: 0, rows: [] },
   GAME_COMPANY: { open: 0, prog: 0, rows: [] },
 });
+const alerts = ref([]);
+const alertTotal = ref(0);
 function statusLabel(s) { return { OPEN: "접수", IN_PROGRESS: "처리중" }[s] || s; }
 
 const net = computed(() => totals.COLLECTION - totals.PAYMENT);
@@ -199,6 +211,11 @@ onMounted(async () => {
       const rows = [...(op.rows || []), ...(pr.rows || [])].sort((a, b) => b.id - a.id).slice(0, 5);
       progress[p.key] = { open: op.total || 0, prog: pr.total || 0, rows };
     }));
+  } catch (e) { /* skip */ }
+  try {
+    const res = await supportApi.alerts({ limit: 6 });
+    alerts.value = res.rows || [];
+    alertTotal.value = res.total || 0;
   } catch (e) { /* skip */ }
 });
 </script>
@@ -282,10 +299,10 @@ onMounted(async () => {
 .cbc-more { margin-top: 0.7rem; font-size: 0.74rem; font-weight: 700; color: var(--ink-muted); text-decoration: none; align-self: flex-start; }
 .cbc-more:hover { color: var(--seal); }
 
-/* ── 공지 + 바로가기 ── */
-.cols { margin-top: 1rem; display: grid; grid-template-columns: 1.6fr 1fr; gap: 1rem; }
+/* ── 공지 + 알림 ── */
+.cols { margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
 @media (max-width: 720px) { .cols { grid-template-columns: 1fr; } }
-.notice { padding: 1.1rem 1.2rem; }
+.notice, .alertbox { padding: 1.1rem 1.2rem; }
 .nhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
 .nt { font-family: var(--font-pixel); font-size: 0.95rem; color: var(--ink); display: flex; align-items: center; gap: 0.5rem; }
 .nt i { color: var(--seal); font-size: 0.85rem; }
@@ -300,11 +317,17 @@ onMounted(async () => {
 .ndate { color: var(--ink-faint); font-size: 0.72rem; }
 .nempty { color: var(--ink-faint); font-size: 0.86rem; padding: 0.8rem 0.1rem; }
 
-.quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; align-content: start; }
-.qcard { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; padding: 1rem; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; box-shadow: var(--shadow-hard); text-decoration: none; transition: transform 0.08s, box-shadow 0.08s; }
-.qcard:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--line-hard); }
-.qcard i { font-size: 1.1rem; color: var(--seal); }
-.qt { font-family: var(--font-pixel); font-size: 0.82rem; color: var(--ink); }
+/* 알림 패널 */
+.nt .acnt { font-style: normal; font-size: 0.62rem; color: #fff; background: var(--danger); border: 1px solid var(--line-hard); border-radius: 999px; padding: 0.02rem 0.42rem; margin-left: 0.1rem; }
+.alist { display: flex; flex-direction: column; gap: 0.4rem; }
+.aitem { display: flex; align-items: center; gap: 0.55rem; padding: 0.45rem 0.55rem; background: var(--surface); border: 1.5px solid var(--line); border-radius: 3px; cursor: pointer; transition: transform 0.07s, box-shadow 0.07s, background 0.07s; }
+.aitem:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--line-hard); background: var(--surface-2); }
+.apill { flex-shrink: 0; font-family: var(--font-pixel); font-size: 0.56rem; padding: 0.14rem 0.35rem; border-radius: 3px; border: 1px solid var(--line-hard); color: #fff; }
+.apill.st-open { background: var(--flow-out); }
+.apill.st-in_progress { background: var(--seal); }
+.amain { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.atitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.84rem; font-weight: 600; color: var(--ink); }
+.ameta { font-size: 0.68rem; color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── 모달 ── */
 .pmodal { position: fixed; inset: 0; z-index: 220; background: rgba(27,29,46,0.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
