@@ -69,6 +69,7 @@
       <div class="panel">
         <h4 class="ph">{{ editing ? "FAQ 수정" : "FAQ 추가" }}</h4>
         <div class="fcol">
+          <BaseInput v-model="form.question" label="질문 제목" placeholder="한 줄 요약 제목" />
           <div class="frow">
             <div class="fld flex-1">
               <span class="form-label">분류</span>
@@ -83,9 +84,8 @@
             <span class="form-label">태그</span>
             <TagSelect v-model="form.tag_ids" />
           </div>
-          <BaseInput v-model="form.question" label="질문 제목" placeholder="한 줄 요약 제목" />
           <div class="fld">
-            <span class="form-label">질문 내용 (선택)</span>
+            <span class="form-label">내용</span>
             <RichEditor v-model="form.question_body" placeholder="질문 상세 내용" />
           </div>
           <div class="fld">
