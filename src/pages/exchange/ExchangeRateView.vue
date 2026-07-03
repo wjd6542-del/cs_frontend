@@ -12,17 +12,19 @@
       </div>
     </header>
 
-    <!-- 최신 환율 카드 -->
-    <div class="cards">
-      <div v-for="c in CUR" :key="c.key" class="rcard pcard">
-        <div class="rc-top">
-          <span class="flag">{{ c.emoji }}</span>
-          <div class="rc-meta"><div class="rc-name">{{ c.label }}</div><div class="rc-code">{{ c.unit > 1 ? c.unit + c.symbol : c.symbol }}</div></div>
+    <!-- 최신 환율/코인 카드 (가로 자동 스크롤 · 마우스 올리면 멈춤) -->
+    <div class="marquee">
+      <div class="track">
+        <div v-for="(c, i) in marqueeItems" :key="c.key + '-' + i" class="rcard pcard" :class="{ coin: c.coin }">
+          <div class="rc-top">
+            <span class="flag">{{ c.emoji }}</span>
+            <div class="rc-meta"><div class="rc-name">{{ c.label }}</div><div class="rc-code">{{ c.coin ? '1 ' + c.symbol : (c.unit > 1 ? c.unit + c.symbol : c.symbol) }}</div></div>
+          </div>
+          <div class="rc-val num">{{ latest ? won(disp(latest[c.key], c.unit)) : "—" }}</div>
         </div>
-        <div class="rc-val num">{{ latest ? won(disp(latest[c.key], c.unit)) : "—" }}</div>
       </div>
     </div>
-    <p v-if="latest" class="asof num">기준일 {{ d(latest.date) }}</p>
+    <p v-if="latest" class="asof num">기준일 {{ d(latest.date) }} · 총 {{ ALL.length }}개 통화·코인</p>
 
     <!-- 이력 -->
     <h3 class="sub">환율 이력</h3>
@@ -31,14 +33,14 @@
         <thead>
           <tr>
             <th class="num">일자</th>
-            <th v-for="c in CUR" :key="c.key" class="r">{{ c.emoji }} {{ c.unit > 1 ? c.unit + c.symbol : c.symbol }}</th>
+            <th v-for="c in ALL" :key="c.key" class="r">{{ c.emoji }} {{ c.coin ? c.symbol : (c.unit > 1 ? c.unit + c.symbol : c.symbol) }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="!rows.length"><td :colspan="CUR.length + 1"><EmptyState icon="💱" title="환율 이력이 없어요" desc="자동 수집을 기다리거나 새로고침 하세요." hint="매일 자동 수집" compact /></td></tr>
+          <tr v-if="!rows.length"><td :colspan="ALL.length + 1"><EmptyState icon="💱" title="환율 이력이 없어요" desc="자동 수집을 기다리거나 새로고침 하세요." hint="매일 자동 수집" compact /></td></tr>
           <tr v-for="r in rows" :key="r.id">
             <td class="num dt">{{ d(r.date) }}</td>
-            <td v-for="c in CUR" :key="c.key" class="r num">{{ won(disp(r[c.key], c.unit)) }}</td>
+            <td v-for="c in ALL" :key="c.key" class="r num">{{ won(disp(r[c.key], c.unit)) }}</td>
           </tr>
         </tbody>
       </table>
@@ -97,14 +99,24 @@ import EmptyState from "@/components/base/EmptyState.vue";
 import SearchSelect from "@/components/base/SearchSelect.vue";
 import { exchangeRateApi } from "@/api/cs";
 
-const CUR = [
+const FIAT = [
   { key: "usd", label: "미국 달러", emoji: "🇺🇸", symbol: "USD", unit: 1 },
   { key: "jpy", label: "일본 엔", emoji: "🇯🇵", symbol: "JPY", unit: 100 },
   { key: "cny", label: "중국 위안", emoji: "🇨🇳", symbol: "CNY", unit: 1 },
   { key: "vnd", label: "베트남 동", emoji: "🇻🇳", symbol: "VND", unit: 100 },
   { key: "eur", label: "유로", emoji: "🇪🇺", symbol: "EUR", unit: 1 },
   { key: "gbp", label: "영국 파운드", emoji: "🇬🇧", symbol: "GBP", unit: 1 },
+  { key: "twd", label: "대만 달러", emoji: "🇹🇼", symbol: "TWD", unit: 1 },
+  { key: "php", label: "필리핀 페소", emoji: "🇵🇭", symbol: "PHP", unit: 1 },
 ];
+const COINS = [
+  { key: "btc", label: "비트코인", emoji: "🟠", symbol: "BTC", unit: 1, coin: true },
+  { key: "eth", label: "이더리움", emoji: "🔷", symbol: "ETH", unit: 1, coin: true },
+  { key: "usdt", label: "테더", emoji: "🟢", symbol: "USDT", unit: 1, coin: true },
+];
+const ALL = [...FIAT, ...COINS];
+// 마퀴 무한 루프용: 두 벌 이어붙임
+const marqueeItems = [...ALL, ...ALL];
 
 const toast = useToast();
 const latest = ref(null);
@@ -134,10 +146,10 @@ async function loadLatest() { latest.value = await exchangeRateApi.latest(); }
 const calcOpen = ref(false);
 const calc = reactive({ dateId: null, cur: "usd", amount: "", dir: "toKrw" });
 const dateOptions = computed(() => rows.value.map((r) => ({ value: r.id, label: d(r.date) })));
-const curOptions = computed(() => CUR.map((c) => ({ value: c.key, label: `${c.emoji} ${c.label} (${c.symbol})` })));
+const curOptions = computed(() => ALL.map((c) => ({ value: c.key, label: `${c.emoji} ${c.label} (${c.symbol})` })));
 const rateRow = computed(() => rows.value.find((r) => r.id === calc.dateId) || latest.value);
 const rate = computed(() => (rateRow.value ? rateRow.value[calc.cur] : null));
-const curMeta = computed(() => CUR.find((c) => c.key === calc.cur) || CUR[0]);
+const curMeta = computed(() => ALL.find((c) => c.key === calc.cur) || ALL[0]);
 const curLabel = computed(() => `${curMeta.value.emoji} ${curMeta.value.symbol}`);
 const curSymbol = computed(() => curMeta.value.symbol);
 const fromLabel = computed(() => (calc.dir === "toKrw" ? curLabel.value : "원 (KRW)"));
@@ -173,20 +185,25 @@ onMounted(async () => { await Promise.all([loadLatest(), reload()]); });
 .ttl { font-family: var(--font-pixel); font-size: 1.35rem; color: var(--ink); margin-top: 0.25rem; }
 .desc { font-size: 0.84rem; color: var(--ink-muted); margin-top: 0.2rem; }
 
-.cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.7rem; }
-@media (max-width: 900px) { .cards { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 520px) { .cards { grid-template-columns: repeat(2, 1fr); } }
-.rcard { padding: 0.8rem 0.9rem; display: flex; flex-direction: column; gap: 0.5rem; }
+/* 가로 자동 스크롤(마퀴) — 마우스 올리면 멈춤 */
+.marquee { overflow: hidden; position: relative; -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent); mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent); }
+.track { display: flex; gap: 0.7rem; width: max-content; animation: scroll-x 46s linear infinite; }
+.marquee:hover .track { animation-play-state: paused; }
+@keyframes scroll-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .track { animation: none; } .marquee { overflow-x: auto; -webkit-mask-image: none; mask-image: none; } }
+.rcard { flex: 0 0 auto; width: 160px; padding: 0.8rem 0.9rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.rcard.coin { border-color: var(--flow-out); box-shadow: 3px 3px 0 var(--flow-out); }
+.rcard.coin .rc-val { color: var(--flow-out); }
 .rc-top { display: flex; align-items: center; gap: 0.5rem; }
 .flag { font-size: 1.4rem; line-height: 1; }
-.rc-name { font-size: 0.78rem; font-weight: 700; color: var(--ink); }
+.rc-name { font-size: 0.78rem; font-weight: 700; color: var(--ink); white-space: nowrap; }
 .rc-code { font-family: var(--font-pixel); font-size: 0.58rem; color: var(--ink-faint); }
-.rc-val { font-size: 1.15rem; font-weight: 800; color: var(--seal-deep); }
+.rc-val { font-size: 1.05rem; font-weight: 800; color: var(--seal-deep); white-space: nowrap; }
 .asof { margin-top: 0.6rem; font-size: 0.74rem; color: var(--ink-faint); }
 
 .sub { font-family: var(--font-pixel); font-size: 0.9rem; color: var(--ink); margin: 1.4rem 0 0.7rem; }
 .tablewrap { border: 2px solid var(--line-hard); border-radius: 4px; overflow-x: auto; background: var(--surface); box-shadow: var(--shadow-hard); }
-.tbl { width: 100%; border-collapse: collapse; min-width: 640px; }
+.tbl { width: 100%; border-collapse: collapse; min-width: 1080px; }
 .tbl th { text-align: left; padding: 0.55rem 0.7rem; background: var(--surface-2); border-bottom: 2px solid var(--line-strong); font-family: var(--font-pixel); font-size: 0.66rem; color: var(--ink-muted); white-space: nowrap; }
 .tbl td { padding: 0.5rem 0.7rem; border-bottom: 1px solid var(--line); font-size: 0.85rem; color: var(--ink); }
 .tbl tbody tr:last-child td { border-bottom: none; }
