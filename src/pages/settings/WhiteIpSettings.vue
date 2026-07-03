@@ -8,97 +8,119 @@
       <button class="btn" @click="load"><i class="fa-solid fa-rotate-right"></i> {{ $t("새로고침") }}</button>
     </header>
 
-    <div class="tablewrap">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>{{ $t("아이디") }}</th><th>{{ $t("이름") }}</th><th>{{ $t("역할") }}</th>
-            <th class="c">{{ $t("IP 접근 제한") }}</th><th class="c">{{ $t("허용 IP") }}</th><th class="c w-act">{{ $t("관리") }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="!users.length"><td colspan="6"><EmptyState icon="🛡️" :title="$t('계정이 없어요')" :desc="$t('등록된 계정이 아직 없어요.')" compact /></td></tr>
-          <tr v-for="u in users" :key="u.id">
-            <td class="nm">{{ u.username }} <span v-if="u.is_super" class="superchip">{{ $t("슈퍼") }}</span></td>
-            <td>{{ u.name }}</td>
-            <td><span class="rolechip">{{ u.role_name || u.role?.name || "-" }}</span></td>
-            <td class="c"><span class="st" :class="u.ip_restrict ? 'on' : 'off'">{{ u.ip_restrict ? $t("사용") : $t("미사용") }}</span></td>
-            <td class="c muted">{{ u.ip_count ?? "-" }}</td>
-            <td class="c"><button class="btn btn-xs" :disabled="u.is_super" :title="u.is_super ? $t('슈퍼관리자는 IP 제한을 적용받지 않습니다.') : ''" @click="openEditor(u)">{{ $t("관리") }}</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- IP 관리 드로어 -->
-    <div v-if="target" class="drawer" @click.self="target = null">
-      <div class="panel">
-        <button class="vclose" @click="target = null"><i class="fa-solid fa-xmark"></i></button>
-        <p class="peyebrow">{{ $t("화이트 아이피") }}</p>
-        <h3 class="ph">{{ target.username }} · {{ target.name }}</h3>
-
-        <label class="iptoggle">
-          <span class="lbl"><i class="fa-solid fa-shield-halved"></i> {{ $t("IP 접근 제한") }}</span>
-          <span class="sw" :class="{ on: ipRestrict }" @click="ipRestrict = !ipRestrict"><span class="knob"></span></span>
-          <span class="sh">{{ ipRestrict ? $t("사용 · 허용 IP만 접근") : $t("미사용") }}</span>
-        </label>
-
-        <div v-if="ipRestrict" class="iplist">
-          <div class="iphead">
-            <span class="iplbl">{{ $t("허용 IP 목록") }} <b>{{ rows.length }}</b></span>
-            <button class="btn btn-xs" @click="addRow"><i class="fa-solid fa-plus"></i> {{ $t("IP 추가") }}</button>
-          </div>
-          <div v-if="!rows.length" class="ipnone">{{ $t("등록된 IP가 없어요. 추가하지 않으면 이 계정은 접근이 차단됩니다.") }}</div>
-          <div v-for="(r, i) in rows" :key="r._k" class="iprow">
-            <input v-model="r.ip" class="ipin" placeholder="203.0.113.5" />
-            <input v-model="r.memo" class="ipin memo" :placeholder="$t('메모(회사/재택 등)')" />
-            <span class="sw sm" :class="{ on: r.is_active }" @click="r.is_active = !r.is_active" :title="$t('활성')"><span class="knob"></span></span>
-            <button class="ipdel" @click="removeRow(i)"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-          <p class="iphint">{{ $t("저장 후 다음 로그인부터 적용됩니다.") }}</p>
+    <div class="split">
+      <!-- 좌측: 계정 선택 -->
+      <aside class="pane pcard left">
+        <div class="l-head">
+          <input v-model="kw" class="field field-xs" :placeholder="$t('아이디 또는 이름 검색')" />
         </div>
-
-        <div class="acts">
-          <button class="btn btn-primary" :disabled="saving" @click="save">{{ saving ? $t("저장 중…") : $t("저장") }}</button>
-          <button class="btn" @click="target = null">{{ $t("닫기") }}</button>
+        <div class="l-body">
+          <div v-if="!filtered.length" class="l-empty"><EmptyState icon="🛡️" :title="$t('계정이 없어요')" desc="" compact /></div>
+          <button
+            v-for="u in filtered" :key="u.id"
+            class="acct-row" :class="{ on: selected?.id === u.id, dim: u.is_super }"
+            @click="select(u)"
+          >
+            <div class="ar-main">
+              <span class="ar-nm">{{ u.username }}<span v-if="u.is_super" class="superchip">{{ $t("슈퍼") }}</span></span>
+              <span class="ar-sub">{{ u.name }} · {{ u.role_name || u.role?.name || "-" }}</span>
+            </div>
+            <span v-if="!u.is_super" class="ar-badge" :class="u.ip_restrict ? 'on' : 'off'">
+              {{ u.ip_restrict ? $t("사용") : $t("미사용") }}<em v-if="u.ip_restrict"> · {{ u.ip_count ?? 0 }}</em>
+            </span>
+          </button>
         </div>
-      </div>
+      </aside>
+
+      <!-- 우측: IP 등록/목록 -->
+      <section class="pane pcard right">
+        <div v-if="!selected" class="r-empty">
+          <EmptyState variant="select" :desc="$t('좌측에서 계정을 선택하면 허용 IP를 등록·확인할 수 있어요.')" />
+        </div>
+        <div v-else-if="selected.is_super" class="r-empty">
+          <EmptyState icon="👑" :title="$t('슈퍼관리자')" :desc="$t('슈퍼관리자는 IP 제한을 적용받지 않습니다.')" compact />
+        </div>
+        <template v-else>
+          <div class="r-head">
+            <div class="r-title">
+              <span class="r-eye">{{ $t("화이트 아이피") }}</span>
+              <h3 class="r-name">{{ selected.username }} · {{ selected.name }}</h3>
+            </div>
+            <button class="btn btn-primary" :disabled="saving" @click="save">{{ saving ? $t("저장 중…") : $t("저장") }}</button>
+          </div>
+
+          <div class="r-body">
+            <label class="iptoggle">
+              <span class="lbl"><i class="fa-solid fa-shield-halved"></i> {{ $t("IP 접근 제한") }}</span>
+              <span class="sw" :class="{ on: ipRestrict }" @click="ipRestrict = !ipRestrict"><span class="knob"></span></span>
+              <span class="sh">{{ ipRestrict ? $t("사용 · 허용 IP만 접근") : $t("미사용") }}</span>
+            </label>
+
+            <div class="iplist">
+              <div class="iphead">
+                <span class="iplbl">{{ $t("허용 IP 목록") }} <b>{{ rows.length }}</b></span>
+                <button class="btn btn-xs" @click="addRow"><i class="fa-solid fa-plus"></i> {{ $t("IP 추가") }}</button>
+              </div>
+              <div v-if="!rows.length" class="ipnone">{{ ipRestrict ? $t("등록된 IP가 없어요. 추가하지 않으면 이 계정은 접근이 차단됩니다.") : $t("IP 제한을 켜고 허용 IP를 추가하세요.") }}</div>
+              <div v-for="(r, i) in rows" :key="r._k" class="iprow">
+                <input v-model="r.ip" class="ipin" placeholder="203.0.113.5" />
+                <input v-model="r.memo" class="ipin memo" :placeholder="$t('메모(회사/재택 등)')" />
+                <span class="sw sm" :class="{ on: r.is_active }" @click="r.is_active = !r.is_active" :title="$t('활성')"><span class="knob"></span></span>
+                <button class="ipdel" @click="removeRow(i)"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <p class="iphint">{{ $t("저장 후 다음 로그인부터 적용됩니다.") }}</p>
+            </div>
+          </div>
+        </template>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 // @ts-nocheck
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import EmptyState from "@/components/base/EmptyState.vue";
 import { adminApi } from "@/api/admin";
 
 const toast = useToast();
 const users = ref([]);
-const target = ref(null);
+const kw = ref("");
+const selected = ref(null);
 const ipRestrict = ref(false);
 const rows = ref([]);
 const removedIds = ref([]);
 const saving = ref(false);
 let seq = 0;
 
+const filtered = computed(() => {
+  const k = kw.value.trim().toLowerCase();
+  if (!k) return users.value;
+  return users.value.filter((u) => (u.username || "").toLowerCase().includes(k) || (u.name || "").toLowerCase().includes(k));
+});
+
 async function load() {
   const list = await adminApi.userList({});
   users.value = list || [];
-  // 각 계정의 허용 IP 개수 (비-슈퍼만 조회)
   await Promise.all(
     users.value.filter((u) => !u.is_super).map(async (u) => {
       try { u.ip_count = (await adminApi.ipList(u.id))?.length ?? 0; } catch (e) { u.ip_count = 0; }
     }),
   );
+  // 선택 유지
+  if (selected.value) {
+    const again = users.value.find((x) => x.id === selected.value.id);
+    selected.value = again || null;
+  }
 }
 
-async function openEditor(u) {
+async function select(u) {
+  selected.value = u;
   if (u.is_super) return;
-  target.value = u;
   ipRestrict.value = !!u.ip_restrict;
   removedIds.value = [];
+  rows.value = [];
   try {
     const list = await adminApi.ipList(u.id);
     rows.value = (list || []).map((r) => ({ _k: `r${r.id}`, id: r.id, ip: r.ip, memo: r.memo || "", is_active: !!r.is_active }));
@@ -108,16 +130,15 @@ function addRow() { rows.value.push({ _k: `n${seq++}`, id: null, ip: "", memo: "
 function removeRow(i) { const r = rows.value[i]; if (r?.id) removedIds.value.push(r.id); rows.value.splice(i, 1); }
 
 async function save() {
-  if (!target.value) return;
+  if (!selected.value || selected.value.is_super) return;
   saving.value = true;
   try {
-    const uid = target.value.id;
+    const uid = selected.value.id;
     await adminApi.ipToggle(uid, ipRestrict.value);
     if (removedIds.value.length) await adminApi.ipBatchDelete(uid, removedIds.value.map((id) => ({ id })));
     const toSave = rows.value.filter((r) => r.ip.trim()).map((r) => ({ ...(r.id ? { id: r.id } : {}), ip: r.ip.trim(), memo: r.memo || null, is_active: r.is_active }));
     if (toSave.length) await adminApi.ipBatchSave(uid, toSave);
     toast.success("저장되었습니다.");
-    target.value = null;
     await load();
   } catch (e) { toast.error(e?.message || "저장 실패"); }
   finally { saving.value = false; }
@@ -127,32 +148,42 @@ onMounted(load);
 </script>
 
 <style scoped>
-.page { max-width: 960px; }
+.page { max-width: 1100px; }
 .phead { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1.1rem; }
 .ttl { font-family: var(--font-pixel); font-size: 1.3rem; color: var(--ink); }
-.desc { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.3rem; max-width: 640px; }
+.desc { font-size: 0.82rem; color: var(--ink-muted); margin-top: 0.3rem; max-width: 660px; }
 
-.tablewrap { border: 2px solid var(--line-hard); border-radius: 4px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow-hard); }
-.tbl { width: 100%; border-collapse: collapse; }
-.tbl th { text-align: left; padding: 0.6rem 0.8rem; background: var(--surface-2); border-bottom: 2px solid var(--line-strong); font-family: var(--font-pixel); font-size: 0.72rem; color: var(--ink-muted); }
-.tbl td { padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--line); font-size: 0.88rem; color: var(--ink); }
-.tbl tbody tr:last-child td { border-bottom: none; }
-.c { text-align: center; } .w-act { width: 80px; }
-.nm { font-weight: 700; }
-.muted { color: var(--ink-muted); }
-.superchip { font-size: 0.6rem; font-weight: 700; color: var(--gold); background: rgba(255,159,28,0.14); border: 1px solid var(--line-hard); border-radius: 3px; padding: 0.02rem 0.3rem; margin-left: 0.2rem; }
-.rolechip { font-size: 0.74rem; font-weight: 700; color: var(--seal); background: rgba(122,92,255,0.1); padding: 0.1rem 0.5rem; border-radius: 3px; }
-.st { font-size: 0.72rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 3px; font-family: var(--font-pixel); }
-.st.on { color: #fff; background: var(--flow-in); }
-.st.off { color: var(--ink-muted); background: var(--surface-2); border: 1px solid var(--line); }
+.split { display: grid; grid-template-columns: 320px 1fr; gap: 1rem; align-items: stretch; min-height: 460px; }
+@media (max-width: 820px) { .split { grid-template-columns: 1fr; } }
+.pane { display: flex; flex-direction: column; overflow: hidden; }
+.pane.left { padding: 0; }
+.pane.right { padding: 0; }
 
-.drawer { position: fixed; inset: 0; z-index: 210; background: rgba(20,16,13,0.5); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.panel { position: relative; width: 560px; max-width: 100%; max-height: 88vh; overflow-y: auto; background: var(--surface); border: 2px solid var(--line-hard); border-radius: 4px; padding: 1.5rem; box-shadow: var(--shadow-lg); }
-.vclose { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--ink); box-shadow: 2px 2px 0 var(--line-hard); }
-.peyebrow { font-family: var(--font-pixel); font-size: 0.62rem; letter-spacing: 0.12em; color: var(--seal-deep); }
-.ph { font-family: var(--font-pixel); font-size: 1.1rem; color: var(--ink); margin: 0.2rem 0 1rem; }
+.l-head { padding: 0.6rem; border-bottom: 2px solid var(--line); }
+.l-head .field { width: 100%; }
+.l-body { flex: 1; overflow-y: auto; padding: 0.4rem; display: flex; flex-direction: column; gap: 3px; }
+.l-empty { padding: 1rem; }
+.acct-row { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.5rem 0.6rem; border-radius: 3px; border: 2px solid transparent; text-align: left; background: transparent; transition: background 0.1s; }
+.acct-row:hover { background: var(--surface-2); }
+.acct-row.on { background: rgba(122,92,255,0.16); border-color: var(--seal); }
+.acct-row.dim { opacity: 0.6; }
+.ar-main { display: flex; flex-direction: column; min-width: 0; }
+.ar-nm { font-weight: 700; color: var(--ink); font-size: 0.88rem; display: flex; align-items: center; gap: 0.3rem; }
+.ar-sub { font-size: 0.72rem; color: var(--ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.superchip { font-size: 0.56rem; font-weight: 700; color: var(--gold); background: rgba(255,159,28,0.14); border: 1px solid var(--line-hard); border-radius: 3px; padding: 0.02rem 0.28rem; }
+.ar-badge { flex-shrink: 0; font-family: var(--font-pixel); font-size: 0.58rem; padding: 0.12rem 0.36rem; border-radius: 3px; border: 1px solid var(--line-hard); }
+.ar-badge em { font-style: normal; }
+.ar-badge.on { color: #fff; background: var(--flow-in); }
+.ar-badge.off { color: var(--ink-muted); background: var(--surface-2); }
 
-.iptoggle { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.8rem; background: var(--surface-2); border: 2px solid var(--line); border-radius: 3px; }
+.r-empty { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+.r-head { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; min-height: 58px; box-sizing: border-box; padding: 0.5rem 0.9rem; border-bottom: 2px solid var(--line); }
+.r-title { display: flex; flex-direction: column; line-height: 1.15; }
+.r-eye { font-family: var(--font-pixel); font-size: 0.6rem; color: var(--seal-deep); }
+.r-name { font-family: var(--font-pixel); font-size: 1rem; color: var(--ink); }
+.r-body { flex: 1; overflow-y: auto; padding: 1rem; }
+
+.iptoggle { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.8rem; background: var(--surface-2); border: 2px solid var(--line); border-radius: 3px; margin-bottom: 1rem; }
 .iptoggle .lbl { font-size: 0.82rem; font-weight: 700; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 0.4rem; }
 .iptoggle .lbl i { color: var(--seal); }
 .sh { font-size: 0.78rem; color: var(--ink-muted); margin-left: auto; }
@@ -164,7 +195,6 @@ onMounted(load);
 .sw.sm .knob { width: 14px; height: 14px; }
 .sw.sm.on .knob { transform: translateX(16px); }
 
-.iplist { margin-top: 1rem; }
 .iphead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
 .iplbl { font-family: var(--font-pixel); font-size: 0.74rem; color: var(--ink-soft); }
 .iplbl b { color: var(--seal); }
@@ -175,5 +205,4 @@ onMounted(load);
 .ipin:focus { border-color: var(--seal); box-shadow: 0 0 0 2px rgba(122,92,255,0.15); }
 .ipdel { width: 30px; height: 30px; flex-shrink: 0; border: 2px solid var(--line-hard); border-radius: 3px; color: var(--danger); background: var(--surface); box-shadow: 2px 2px 0 var(--line-hard); }
 .iphint { margin-top: 0.7rem; font-size: 0.74rem; color: var(--ink-faint); }
-.acts { display: flex; gap: 0.6rem; margin-top: 1.3rem; }
 </style>
