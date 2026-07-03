@@ -230,6 +230,7 @@ async function applyBulk() {
 
 async function reloadTickets() {
   sel.value = [];
+  if (treeRef.value?.reload) treeRef.value.reload(); // 트리 미해결 카운트 갱신
   if (!selected.value) { tickets.value = []; total.value = 0; totalPages.value = 1; return; }
   const body = { party: props.party, page: page.value, limit: LIMIT };
   body[isVendor.value ? "vendor_id" : "game_company_id"] = selected.value.id;

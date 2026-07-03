@@ -15,13 +15,25 @@
 
     <div class="vt-body">
       <div v-if="!flat.length"><EmptyState :icon="emptyIcon" :title="`${label}가 없어요`" :desc="`${label}를 추가해 보세요.`" hint="＋ 로 추가!" compact /></div>
+
+      <!-- 최상위로 이동 드롭존 (드래그 중에만) -->
+      <div v-if="dragId" class="rootdrop" :class="{ over: dragOverRoot }" @dragover.prevent="dragOverRoot = true" @dragleave="dragOverRoot = false" @drop.stop="dropRoot">
+        ⤒ 여기에 놓으면 최상위로 이동
+      </div>
+
       <div
         v-for="row in flat"
         :key="row.node.id"
         class="vt-row"
-        :class="{ on: row.node.id === selectedId, dim: !row.node.is_active }"
+        :class="{ on: row.node.id === selectedId, dim: !row.node.is_active, dragover: dragOverId === row.node.id, dragging: dragId === row.node.id }"
         :style="{ paddingLeft: 0.4 + row.depth * 0.9 + 'rem' }"
+        :draggable="editId !== row.node.id"
         @click="select(row.node)"
+        @dragstart="onDragStart(row.node, $event)"
+        @dragover.prevent="onDragOver(row.node)"
+        @dragleave="onDragLeave(row.node)"
+        @drop.stop="onDrop(row.node)"
+        @dragend="reset"
       >
         <button v-if="row.hasChildren" class="caret" @click.stop="toggle(row.node.id)">
           <i class="fa-solid" :class="isCollapsed(row.node.id) ? 'fa-caret-right' : 'fa-caret-down'"></i>
@@ -35,6 +47,7 @@
         </template>
         <template v-else>
           <span class="nm">{{ row.node.name }}</span>
+          <span v-if="row.node.open_count" class="cnt" title="미해결 응대(접수·처리중)">{{ row.node.open_count }}</span>
           <span class="acts">
             <button class="ico" title="하위 추가" @click.stop="startAdd(row.node)"><i class="fa-solid fa-plus"></i></button>
             <button class="ico" title="명칭 수정" @click.stop="startEdit(row.node)"><i class="fa-solid fa-pen"></i></button>
@@ -71,6 +84,11 @@ const addName = ref("");
 const addInput = ref(null);
 const editId = ref(null);
 const editName = ref("");
+
+// 드래그&드롭
+const dragId = ref(null);
+const dragOverId = ref(null);
+const dragOverRoot = ref(false);
 
 function isCollapsed(id) { return !!collapsed[id]; }
 function toggle(id) { collapsed[id] = !collapsed[id]; }
@@ -153,6 +171,49 @@ async function remove(node) {
   } catch (e) { toast.error(e?.message || "삭제 실패"); }
 }
 
+// 드래그된 노드의 후손 id 집합 (자기 하위로 이동 방지)
+function descendantsOf(id) {
+  const set = new Set();
+  const collect = (nodes) => { for (const n of nodes) { set.add(n.id); collect(n.children || []); } };
+  const find = (nodes) => {
+    for (const n of nodes) {
+      if (n.id === id) { collect(n.children || []); return true; }
+      if (find(n.children || [])) return true;
+    }
+    return false;
+  };
+  find(roots.value);
+  return set;
+}
+function onDragStart(node, e) {
+  dragId.value = node.id;
+  if (e?.dataTransfer) { e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", String(node.id)); } catch (_) {} }
+}
+function onDragOver(node) { if (dragId.value && dragId.value !== node.id) dragOverId.value = node.id; }
+function onDragLeave(node) { if (dragOverId.value === node.id) dragOverId.value = null; }
+function reset() { dragId.value = null; dragOverId.value = null; dragOverRoot.value = false; }
+
+async function move(id, parentId) {
+  try {
+    await props.api.save({ id, parent_id: parentId });
+    await reload();
+    emit("change");
+    toast.success("위치가 변경되었습니다.");
+  } catch (e) { toast.error(e?.message || "이동 실패"); }
+  finally { reset(); }
+}
+function onDrop(target) {
+  const id = dragId.value;
+  if (!id || id === target.id) return reset();
+  if (descendantsOf(id).has(target.id)) { toast.error("자기 하위로는 이동할 수 없습니다."); return reset(); }
+  move(id, target.id);
+}
+function dropRoot() {
+  const id = dragId.value;
+  if (!id) return reset();
+  move(id, null);
+}
+
 defineExpose({ reload });
 onMounted(reload);
 </script>
@@ -169,6 +230,11 @@ onMounted(reload);
 .vt-row:hover { background: var(--surface-2); }
 .vt-row.on { background: #ede9ff; box-shadow: inset 0 0 0 2px var(--seal); }
 .vt-row.dim .nm { color: var(--ink-faint); text-decoration: line-through; }
+.vt-row.dragging { opacity: 0.45; }
+.vt-row.dragover { background: #e0d9ff; box-shadow: inset 0 0 0 2px var(--seal); }
+.rootdrop { margin: 0.2rem; padding: 0.5rem; text-align: center; font-family: var(--font-pixel); font-size: 0.66rem; color: var(--seal-deep); background: var(--surface-2); border: 2px dashed var(--seal); border-radius: 3px; }
+.rootdrop.over { background: #e0d9ff; }
+.cnt { flex-shrink: 0; min-width: 18px; height: 18px; padding: 0 4px; display: grid; place-items: center; font-family: var(--font-pixel); font-size: 0.6rem; color: #fff; background: var(--danger); border: 1px solid var(--line-hard); border-radius: 3px; }
 .caret { width: 18px; height: 18px; flex-shrink: 0; display: grid; place-items: center; color: var(--ink-muted); font-size: 0.75rem; }
 .caret.ph { visibility: hidden; }
 .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; color: var(--ink); }

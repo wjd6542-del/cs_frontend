@@ -23,7 +23,8 @@
       contenteditable="true"
       :data-ph="placeholder"
       @input="onInput"
-      @blur="onInput"
+      @focus="focused = true"
+      @blur="onBlur"
     ></div>
   </div>
 </template>
@@ -45,14 +46,16 @@ const toast = useToast();
 const editable = ref(null);
 const fileInput = ref(null);
 const uploading = ref(false);
-let focused = false;
+const focused = ref(false);
 
 onMounted(() => { if (editable.value) editable.value.innerHTML = props.modelValue || ""; });
 watch(() => props.modelValue, (v) => {
-  if (editable.value && !focused && v !== editable.value.innerHTML) editable.value.innerHTML = v || "";
+  // 편집 중(포커스)에는 절대 innerHTML 을 덮어쓰지 않는다 (커서 튐 방지)
+  if (editable.value && !focused.value && v !== editable.value.innerHTML) editable.value.innerHTML = v || "";
 });
 
 function onInput() { emit("update:modelValue", editable.value?.innerHTML || ""); }
+function onBlur() { focused.value = false; onInput(); }
 function cmd(command, val = null) {
   editable.value?.focus();
   document.execCommand(command, false, val);

@@ -42,7 +42,7 @@ export const router = createRouter({
 
             // 지급/회수
             { path: "ledger", component: LedgerView, meta: { auth: true, title: "장부 관리" } },
-            { path: "settlement/vendor", component: SettlementView, props: { type: "VENDOR" }, meta: { auth: true, title: "정산 관리" } },
+            { path: "settlement/vendor", component: SettlementView, props: { type: "VENDOR" }, meta: { auth: true, title: "업체 정산" } },
             { path: "settlement/gameco", component: SettlementView, props: { type: "GAME_COMPANY" }, meta: { auth: true, title: "게임사 정산" } },
 
             // CS 관리

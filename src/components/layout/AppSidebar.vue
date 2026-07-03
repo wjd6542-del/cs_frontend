@@ -61,17 +61,17 @@ const emit = defineEmits(["close"]);
 
 const route = useRoute();
 const boards = ref([]);
-const expanded = reactive({ "지급/회수": true, "CS 관리": true, 게시판: false });
+const expanded = reactive({ "정산 관리": true, "CS 관리": true, 게시판: false });
 
 const menus = computed(() => [
   { label: "대시보드", to: "/", icon: "fa-gauge-high", exact: true },
   {
-    label: "지급/회수",
+    label: "정산 관리",
     icon: "fa-money-bill-transfer",
     children: [
-      { label: "정산 관리", to: "/settlement/vendor" },
-      { label: "장부 관리", to: "/ledger" },
+      { label: "업체 정산", to: "/settlement/vendor" },
       { label: "게임사 정산", to: "/settlement/gameco" },
+      { label: "장부 관리", to: "/ledger" },
     ],
   },
   {
