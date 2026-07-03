@@ -44,6 +44,7 @@ export const ledgerApi = {
 // 정산 (업체 정산 / 게임사 정산)
 export const settlementApi = {
   list: (body = {}) => api.post("/settlement/list", body).then((r) => r.data),
+  yearChart: (body = {}) => api.post("/settlement/yearChart", body).then((r) => r.data),
   get: (id) => api.post("/settlement/get", { id }).then((r) => r.data),
   save: (body) => api.post("/settlement/save", body).then((r) => r.data),
   settle: (body) => api.post("/settlement/settle", body).then((r) => r.data),

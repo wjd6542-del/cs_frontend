@@ -84,6 +84,16 @@
       </div>
     </section>
 
+    <!-- 올해 월별 정산 처리 차트 -->
+    <section v-if="canSettlement" class="chartcard pcard">
+      <div class="ch-head">
+        <h2 class="ch-ttl"><i class="fa-solid fa-chart-column"></i> {{ chart.year }}년 정산 처리</h2>
+        <span class="ch-sub">1월~이번 달 · 회수(업체) vs 지급(게임사)</span>
+      </div>
+      <v-chart v-if="!chartEmpty" class="chart" :option="chartOption" autoresize />
+      <EmptyState v-else icon="📊" title="정산 처리 내역이 없어요" desc="정산을 처리하면 월별 그래프가 표시돼요." hint="정산 관리에서 처리" compact />
+    </section>
+
     <!-- 공지 + 알림 게시판 -->
     <div v-if="canBoard" class="cols">
       <section class="notice pcard">
@@ -185,6 +195,36 @@ const canSupport = computed(() => auth.hasPermission("support.view"));
 const canBoard = computed(() => auth.hasPermission("board.view"));
 const canMoney = computed(() => canLedger.value || canSettlement.value);
 const showStats = computed(() => canLedger.value || canSettlement.value || canSupport.value);
+
+/* 올해 월별 정산 처리 차트 */
+const chart = reactive({ year: new Date().getFullYear(), months: [] });
+const chartOption = computed(() => ({
+  color: ["#0ea88f", "#e07d16"],
+  tooltip: {
+    trigger: "axis",
+    valueFormatter: (v) => (Number(v) || 0).toLocaleString("ko-KR") + "원",
+    textStyle: { fontSize: 12 },
+  },
+  legend: { data: ["회수", "지급"], bottom: 0, itemWidth: 12, itemHeight: 12, textStyle: { color: "#5b607d", fontSize: 11 } },
+  grid: { left: 6, right: 14, top: 16, bottom: 34, containLabel: true },
+  xAxis: {
+    type: "category",
+    data: chart.months.map((m) => m.label),
+    axisLine: { lineStyle: { color: "#b9bccf" } },
+    axisTick: { show: false },
+    axisLabel: { color: "#5b607d", fontFamily: "Galmuri11, monospace", fontSize: 11 },
+  },
+  yAxis: {
+    type: "value",
+    splitLine: { lineStyle: { color: "#eceef6" } },
+    axisLabel: { color: "#9a9fbb", fontSize: 10, formatter: (v) => (v >= 10000 ? Math.round(v / 10000) + "만" : v) },
+  },
+  series: [
+    { name: "회수", type: "bar", barMaxWidth: 22, data: chart.months.map((m) => m.collection), itemStyle: { borderColor: "#1b1d2e", borderWidth: 1.5, borderRadius: [3, 3, 0, 0] } },
+    { name: "지급", type: "bar", barMaxWidth: 22, data: chart.months.map((m) => m.payment), itemStyle: { borderColor: "#1b1d2e", borderWidth: 1.5, borderRadius: [3, 3, 0, 0] } },
+  ],
+}));
+const chartEmpty = computed(() => chart.months.every((m) => !m.collection && !m.payment));
 const csDetail = ref(null);
 async function openCs(id) { try { csDetail.value = await supportApi.get(id); } catch (e) { /* noop */ } }
 const noticeBoard = ref(null);
@@ -243,6 +283,11 @@ onMounted(async () => {
       settlementApi.list({ type: "GAME_COMPANY", status: "PENDING", limit: 1 }),
     ]);
     pendingCount.value = (v.total || 0) + (g.total || 0);
+  } catch (e) { /* skip */ }
+  if (canSettlement.value) try {
+    const res = await settlementApi.yearChart({});
+    chart.year = res.year;
+    chart.months = res.months || [];
   } catch (e) { /* skip */ }
   if (canSupport.value) try {
     const [o, ip] = await Promise.all([
@@ -342,6 +387,14 @@ onMounted(async () => {
 .cbc-empty { padding: 0.3rem 0; }
 .cbc-more { margin-top: 0.7rem; font-size: 0.74rem; font-weight: 700; color: var(--ink-muted); text-decoration: none; align-self: flex-start; }
 .cbc-more:hover { color: var(--seal); }
+
+/* ── 정산 처리 차트 ── */
+.chartcard { margin-top: 1rem; padding: 1.1rem 1.2rem; }
+.ch-head { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.6rem; }
+.ch-ttl { font-family: var(--font-pixel); font-size: 0.98rem; color: var(--ink); display: flex; align-items: center; gap: 0.45rem; }
+.ch-ttl i { color: var(--seal); font-size: 0.9rem; }
+.ch-sub { font-size: 0.74rem; color: var(--ink-faint); }
+.chart { height: 280px; width: 100%; }
 
 /* ── 공지 + 알림 ── */
 .cols { margin-top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
